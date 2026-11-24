@@ -143,6 +143,18 @@ body.locked #gate{display:grid;min-height:100svh;place-items:center;padding:24px
 .gcard{width:min(460px,100%);background:var(--bg);border-radius:18px;padding:clamp(20px,4vw,32px);border-top:8px solid var(--or);box-shadow:0 10px 30px rgba(60,30,90,.12)}
 .gtop{margin-bottom:16px}
 .gmark{display:inline-block;background:var(--pu);color:#fff;font:800 14px Montserrat,sans-serif;padding:4px 10px;border-radius:8px;margin-bottom:10px}
+.pill{display:inline-block;background:var(--pubg);color:var(--pu);border-radius:999px;padding:3px 12px;font-weight:700}
+.rutas{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,16em),1fr));gap:14px;margin-top:14px}
+.fase{background:var(--panel);border-radius:14px;padding:14px 16px}
+.fase h3{color:var(--pu);margin-bottom:8px}
+.fase ol{margin:0;padding-left:1.2em;display:grid;gap:6px;font-size:15px}
+.fase li.now{font-weight:700}
+.fase li.now::after{content:'actual';margin-left:8px;background:var(--or);color:#fff;border-radius:999px;padding:1px 8px;font-size:12px;font-weight:700}
+.est{display:inline-block;border-radius:999px;padding:2px 10px;font-size:13px;font-weight:700;white-space:nowrap}
+.est.Pendiente{background:light-dark(#fff4d6,#3a3010);color:light-dark(#8a5a00,#ffd479)}.est.Aprobado{background:var(--grbg);color:var(--gr)}.est.Rechazado{background:var(--rdbg);color:var(--rd)}
+.acts{display:flex;gap:6px;flex-wrap:wrap}
+.mini{border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:8px;padding:6px 10px;min-height:36px;font-weight:600;cursor:pointer}
+.mini.ok{color:var(--gr);border-color:var(--gr)}.mini.no{color:var(--rd);border-color:var(--rd)}
 .lnk{border:0;background:none;color:var(--pu);font:inherit;font-weight:600;padding:8px 0;min-height:40px;text-decoration:underline;cursor:pointer}
 .lmsg{min-height:1.4em;margin:10px 0 0;font-size:15px}.lmsg.err{color:var(--rd)}.lmsg.ok{color:var(--gr)}
 footer{border-top:6px solid var(--or);color:var(--soft);font-size:14px}
@@ -213,16 +225,22 @@ footer{border-top:6px solid var(--or);color:var(--soft);font-size:14px}
   </div>
 </div></header>
 <nav class="navbar" aria-label="Secciones"><div class="nav">
-  <a href="#como">Cómo estudiar</a><a href="#guia">Lecciones</a><a href="#roles">Roles</a><a href="#acceso">Shortcut o copia</a><a href="#cargas">Cargas de trabajo</a><a href="#quiz">Autoevaluación</a><a href="#lab">Laboratorio</a><a href="#insumos">Insumos</a>
+  <a href="#miruta">Mi ruta</a><a href="#como">Cómo estudiar</a><a href="#guia">Lecciones</a><a href="#roles">Roles</a><a href="#acceso">Shortcut o copia</a><a href="#cargas">Cargas de trabajo</a><a href="#quiz">Autoevaluación</a><a href="#lab">Laboratorio</a><a href="#insumos">Insumos</a><a href="#admin" id="navAdmin" hidden>Administración</a>
 </div></nav>
 
 <section class="band me" aria-label="Su avance"><div class="wrap mebox">
   <div class="mehead"><div><h3 id="meName">Su avance</h3><p class="note" id="meSync">Su avance se guarda en este navegador.</p></div>
-    <label class="perf" for="mePerfil">Perfil <select id="mePerfil"><option value="">Elegir…</option><option>Analista</option><option>Científico</option><option>Jefatura</option></select></label>
+    <span class="perf">Perfil: <b class="pill" id="mePerfilTxt">—</b><select id="mePerfil" hidden aria-hidden="true"><option value=""></option><option>Analista</option><option>Científico</option><option>Jefatura</option><option>Otro</option></select></span>
     <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" id="meReport">Reportar mi avance</button><button class="btn sec" id="meChange">Salir</button></div></div>
   <div class="meparts" id="meParts"></div>
   <div class="white" id="meCodeBox" hidden style="margin-top:10px"><b>Resumen de su avance</b><pre id="meCode" style="white-space:pre-wrap"></pre><p class="note" id="meCodeMsg"></p></div>
 
+</div></section>
+
+<section class="band" id="miruta"><div class="wrap">
+  <div class="qhead"><h2>Su ruta según su perfil</h2><span class="note" id="rutaPerfil"></span></div>
+  <p id="rutaIntro">Estos son los módulos que le corresponden en la ruta de conocimiento de la DACD. Este material cubre el módulo marcado como <b>actual</b>.</p>
+  <div class="rutas" id="rutaList"></div>
 </div></section>
 
 <section class="band" id="como"><div class="wrap">
@@ -379,6 +397,15 @@ footer{border-top:6px solid var(--or);color:var(--soft);font-size:14px}
 </div></section>
 
 
+
+<section class="band alt" id="admin" hidden><div class="wrap">
+  <div class="qhead"><h2>Administración del curso</h2><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn sec" id="aRefresh">Actualizar</button><button class="btn sec" id="aCsv">Descargar CSV</button></div></div>
+  <p class="note" id="aMode"></p>
+  <div class="kpis" id="aKpis"></div>
+  <div class="seg" role="group" aria-label="Filtro" id="aFilter" style="margin-top:14px"><button data-f="todos" aria-pressed="true">Todos</button><button data-f="Pendiente" aria-pressed="false">Pendientes</button><button data-f="Aprobado" aria-pressed="false">Aprobados</button><button data-f="Rechazado" aria-pressed="false">Rechazados</button></div>
+  <div class="white" style="margin-top:12px"><div class="scroll"><table class="stack"><thead><tr><th>Persona</th><th>Perfil</th><th>Estado</th><th>Lecciones</th><th>Simuladores</th><th>Autoevaluación</th><th>Laboratorio</th><th style="min-width:9em">Avance</th><th>Última actividad</th><th></th></tr></thead><tbody id="aBody"><tr><td colspan="10">Cargando…</td></tr></tbody></table></div></div>
+  <p class="note" id="aMsg"></p>
+</div></section>
 
 <footer class="band"><div class="wrap">DACD · Banco Popular · Ruta de conocimiento Microsoft Fabric, fase 1, módulo F1-01. Los contenidos resumen la documentación pública de Microsoft Learn; ante cualquier diferencia, manda la fuente oficial.</div></footer>
 
@@ -682,14 +709,16 @@ let gMode='reg';
 const setG=m=>{gMode=m;$('gReg').setAttribute('aria-pressed',m==='reg');$('gChk').setAttribute('aria-pressed',m==='chk');$('gRegFields').hidden=m!=='reg';$('gPass2W').hidden=m!=='reg';$('gHint').hidden=m!=='reg';$('gForgot').hidden=m!=='chk';
   $('gPass').autocomplete=m==='reg'?'new-password':'current-password';$('gBtn').textContent=m==='reg'?'Enviar solicitud':'Ingresar';gm('gMsg','')};
 $('gReg').onclick=()=>setG('reg');$('gChk').onclick=()=>setG('chk');setG('reg');
-function enter(){document.body.classList.remove('locked');const i=idf();$('meName').textContent='Avance de '+i.nombre;$('mePerfil').value=store.perfil||i.perfil||'';
-  sync(REGISTRO_URL?'Su avance se registra automáticamente en el curso.':'Su avance se guarda en este navegador. Use "Reportar mi avance" para enviarlo.');pushRemote()}
+function isAdmin(){return REGISTRO_URL?store.rol==='Administrador':((idf()||{}).perfil==='Jefatura')}
+function enter(){document.body.classList.remove('locked');const i=idf();$('meName').textContent='Avance de '+i.nombre;store.perfil=i.perfil||store.perfil||'';$('mePerfil').value=store.perfil;$('mePerfilTxt').textContent=store.perfil||'—';renderRuta(store.perfil);
+  sync(REGISTRO_URL?'Su avance se registra automáticamente en el curso.':'Su avance se guarda en este navegador. Use "Reportar mi avance" para enviarlo.');pushRemote();
+  const adm=isAdmin();$('admin').hidden=!adm;$('navAdmin').hidden=!adm;if(adm)loadAdmin()}
 /* trae el avance guardado de esta persona en este navegador */
 function loadMine(email){let saved=null;try{saved=JSON.parse(localStorage.getItem('f101:'+email)||'null')}catch(e){}if(saved){mergeIn(saved);if(saved.perfil&&!store.perfil)store.perfil=saved.perfil;restoreAll()}}
 function waiting(estado){$('gForm').hidden=true;$('gWait').hidden=false;$('gReg').parentElement.hidden=true;
   if(estado==='Rechazado'){$('gWaitT').textContent='Solicitud no aprobada';$('gWaitP').textContent='Su solicitud no fue aprobada. Si cree que es un error, comuníquese con la jefatura de la DACD.'}
   else{$('gWaitT').textContent='Solicitud pendiente';$('gWaitP').textContent='Su registro está pendiente de aprobación por la jefatura de la DACD. Cuando lo aprueben, vuelva a esta página y toque "Verificar de nuevo".'}}
-function login(r,email,clave,extra){const i=Object.assign({},extra||{});store.id={email,nombre:(r&&r.nombre)||i.nombre||email,perfil:(r&&r.perfil)||i.perfil||''};store.clave=clave;store.sesion=1;store.aprobado=1;
+function login(r,email,clave,extra){const i=Object.assign({},extra||{});store.id={email,nombre:(r&&r.nombre)||i.nombre||email,perfil:(r&&r.perfil)||i.perfil||''};store.clave=clave;store.sesion=1;store.aprobado=1;store.rol=(r&&r.rol)||'Participante';
   loadMine(email);if(!store.perfil)store.perfil=store.id.perfil;save();enter()}
 $('gForm').addEventListener('submit',async ev=>{ev.preventDefault();const em=$('gEmail').value.trim().toLowerCase(),pw=$('gPass').value;
   if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)){gm('gMsg','Escriba un correo válido.','err');return}
@@ -700,7 +729,7 @@ $('gForm').addEventListener('submit',async ev=>{ev.preventDefault();const em=$('
   try{const clave=await hashPw(em,pw);
     if(!REGISTRO_URL){/* modo abierto: la contraseña se valida en este navegador */
       const u=localUsers();
-      if(gMode==='reg'){if(u[em]){gm('gMsg','Ese correo ya está registrado en esta computadora. Use "Ingresar".','err');return}u[em]={clave,nombre:nm,perfil:pf};saveLocalUsers(u);login(null,em,clave,{nombre:nm,perfil:pf});return}
+      if(gMode==='reg'){if(u[em]&&u[em].clave!==clave){gm('gMsg','Ese correo ya está registrado en esta computadora con otra contraseña. Use "Ingresar".','err');return}u[em]={clave,nombre:nm,perfil:pf};saveLocalUsers(u);if(store.id&&store.id.email===em)store.id.perfil=pf;login(null,em,clave,{nombre:nm,perfil:pf});return}
       if(!u[em]){gm('gMsg','No encontramos ese correo en esta computadora. Use "Registrarme".','err');return}
       if(u[em].clave!==clave){gm('gMsg','Correo o contraseña incorrectos.','err');return}
       login(null,em,clave,u[em]);return}
@@ -721,6 +750,50 @@ $('gAgain').onclick=async()=>{const i=idf();if(!i||!store.clave)return;gm('gMsg2
   catch(e){gm('gMsg2','No hay conexión con el registro del curso.','err')}};
 /* Salir: guarda el avance de la persona en este navegador y cierra la sesión */
 function logout(){const i=idf();try{if(i&&i.email){const keep=JSON.parse(JSON.stringify(store));delete keep.clave;delete keep.sesion;localStorage.setItem('f101:'+i.email,JSON.stringify(keep))}localStorage.removeItem('f101')}catch(e){}location.reload()}
+/* ===== Ruta según perfil ===== */
+const RUTA=[
+ {f:'1. Fundamentos',p:['Analista','Científico','Jefatura','Otro'],m:[['F1-01','Introducción a la analítica de punta a punta con Fabric',1],['F1-02','Lakehouses en Fabric'],['F1-03','Data warehouses en Fabric'],['F1-04','Ciencia de datos en Fabric'],['F1-05','Modelos semánticos a escala'],['F1-06','Fundamentos de Fabric IQ'],['F1-07','Real-Time Intelligence (opcional)'],['F1-08','SQL Database en Fabric (opcional)']]},
+ {f:'2A. Analistas (ruta DP-600)',p:['Analista','Jefatura'],m:[['F2A-01','Ingesta con Dataflows Gen2 y pipelines'],['F2A-02','Arquitectura medallion en el lakehouse'],['F2A-03','Consultas T-SQL en el warehouse'],['F2A-04','Seguridad: permisos, RLS y etiquetas'],['F2A-05','Modelos semánticos: DAX y Direct Lake'],['F2A-06','Git y deployment pipelines']]},
+ {f:'2B. Científicos (data science y ML)',p:['Científico','Jefatura'],m:[['F2B-01','Exploración de datos con notebooks'],['F2B-02','Preprocesamiento con Data Wrangler'],['F2B-03','Entrenamiento y seguimiento con MLflow'],['F2B-04','Predicciones por lotes con un modelo desplegado']]},
+ {f:'3. Caso aplicado DACD',p:['Analista','Científico','Jefatura'],m:[['F3-01','Modelo semántico de Captación',0,'Analista'],['F3-02','Modelo de clasificación con MLflow sobre Crédito',0,'Científico'],['F3-03','Demo interna al equipo']]},
+ {f:'4. Certificación',p:['Analista','Jefatura'],m:[['F4-01','Repaso con la guía de estudio DP-600'],['F4-02','Examen DP-600']]}
+];
+function renderRuta(pf){pf=pf||'Otro';$('rutaPerfil').textContent='Perfil: '+pf;
+  const fs=RUTA.filter(x=>x.p.includes(pf));
+  $('rutaIntro').textContent=pf==='Jefatura'?'Como jefatura ve la ruta completa de ambos perfiles. Este material cubre el módulo marcado como actual.':'Estos son los módulos que le corresponden según su perfil. Este material cubre el módulo marcado como actual.';
+  $('rutaList').innerHTML=fs.map(x=>`<div class="fase"><h3>${esc(x.f)}</h3><ol>${x.m.filter(m=>!m[3]||pf==='Jefatura'||m[3]===pf).map(m=>`<li class="${m[2]?'now':''}">${esc(m[0])} · ${esc(m[1])}</li>`).join('')}</ol></div>`).join('')}
+/* ===== Administración ===== */
+let aRows=[],aF='todos';
+const fmtD=t=>{if(!t)return '—';const d=new Date(t);if(isNaN(d))return '—';return d.toLocaleDateString('es-CR',{day:'2-digit',month:'short'})+' '+d.toLocaleTimeString('es-CR',{hour:'2-digit',minute:'2-digit'})};
+const num=v=>{v=Number(v);return isFinite(v)?v:0};
+function localRows(){const u=localUsers(),out=[];const cur=idf();
+  const emails=new Set(Object.keys(u));if(cur&&cur.email)emails.add(cur.email);
+  emails.forEach(em=>{let d=null;if(cur&&cur.email===em)d=store;else{try{d=JSON.parse(localStorage.getItem('f101:'+em)||'null')}catch(e){}}
+    const s=summary(d||{}),info=u[em]||cur||{};
+    out.push({correo:em,nombre:info.nombre||em,perfil:info.perfil||'',estado:'Aprobado',lecciones:s.les,simuladores:s.sim,preguntas:s.qn,nota:s.qs,laboratorio:s.lb,avance:s.pct,ultima:null})});return out}
+async function loadAdmin(){
+  if(!REGISTRO_URL){$('aMode').textContent='Modo local: como el registro del curso todavía no está conectado (Power Automate), aquí solo aparecen las personas que se registraron en esta computadora. Al conectar el flujo verá a todo el equipo.';aRows=localRows();drawAdmin();return}
+  $('aMode').textContent='Datos del registro del curso en SharePoint. Use "Actualizar" para traer los cambios más recientes.';$('aMsg').textContent='Cargando…';
+  try{const r=await call({accion:'listar',email:idf().email,clave:store.clave});
+    if(!r||!Array.isArray(r.inscritos)){$('aMsg').textContent=r&&r.estado==='NoAutorizado'?'Su usuario no tiene rol de Administrador en la lista de inscritos.':'No se pudo leer el registro del curso.';return}
+    const av={};(r.avance||[]).forEach(a=>{if(a&&a.correo)av[String(a.correo).toLowerCase()]=a});
+    aRows=r.inscritos.map(p=>{const em=String(p.correo||'').toLowerCase(),a=av[em]||{};return{correo:em,nombre:p.nombre||em,perfil:p.perfil||'',estado:p.estado||'Pendiente',lecciones:num(a.lecciones),simuladores:num(a.simuladores),preguntas:num(a.preguntas),nota:num(a.nota),laboratorio:num(a.laboratorio),avance:num(a.avance),ultima:a.ultima||null}});
+    $('aMsg').textContent='';drawAdmin()}
+  catch(e){$('aMsg').textContent='No hay conexión con el registro del curso.'}}
+function drawAdmin(){
+  const ap=aRows.filter(x=>x.estado==='Aprobado'),n=ap.length,avg=n?Math.round(ap.reduce((a,x)=>a+x.avance,0)/n):0;
+  $('aKpis').innerHTML=[['Registrados',aRows.length],['Pendientes',aRows.filter(x=>x.estado==='Pendiente').length],['Aprobados',n],['Avance promedio',avg+'%'],['Completaron todo',ap.filter(x=>x.avance===100).length],['Aprobaron la autoevaluación',ap.filter(x=>x.preguntas===10&&x.nota>=8).length]].map(k=>`<div class="kpi"><small>${k[0]}</small><strong>${esc(k[1])}</strong></div>`).join('');
+  const list=aRows.filter(x=>aF==='todos'||x.estado===aF).sort((a,b)=>(a.estado==='Pendiente'?-1:0)-(b.estado==='Pendiente'?-1:0)||b.avance-a.avance||a.nombre.localeCompare(b.nombre));
+  $('aBody').innerHTML=list.length?list.map(x=>`<tr><td><b>${esc(x.nombre)}</b><br><span class="note" style="overflow-wrap:anywhere">${esc(x.correo)}</span></td><td>${esc(x.perfil||'—')}</td><td><span class="est ${esc(x.estado)}">${esc(x.estado)}</span></td><td class="num">${x.lecciones} / 8</td><td class="num">${x.simuladores} / 4</td><td class="num">${x.preguntas===10?x.nota+' / 10':x.preguntas+' de 10 resp.'}</td><td class="num">${x.laboratorio} / 12</td><td><div class="pbar">${pbar(x.avance,100)}<b>${x.avance}%</b></div></td><td class="num">${esc(fmtD(x.ultima))}</td><td>${REGISTRO_URL?`<div class="acts">${x.estado!=='Aprobado'?`<button class="mini ok" data-a="Aprobado" data-e="${esc(x.correo)}">Aprobar</button>`:''}${x.estado!=='Rechazado'?`<button class="mini no" data-a="Rechazado" data-e="${esc(x.correo)}">Rechazar</button>`:''}</div>`:''}</td></tr>`).join(''):'<tr><td colspan="10">No hay personas en esta vista.</td></tr>'}
+$('aFilter').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;aF=b.dataset.f;$('aFilter').querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x===b));drawAdmin()});
+$('aRefresh').onclick=()=>loadAdmin();
+$('aBody').addEventListener('click',async e=>{const b=e.target.closest('[data-a]');if(!b)return;b.disabled=true;$('aMsg').textContent='Guardando…';
+  try{const r=await call({accion:'aprobar',email:idf().email,clave:store.clave,objetivo:b.dataset.e,estado:b.dataset.a});
+    if(r&&r.ok){const x=aRows.find(y=>y.correo===b.dataset.e);if(x)x.estado=b.dataset.a;drawAdmin();$('aMsg').textContent=b.dataset.e+' quedó como '+b.dataset.a+'.'}else{$('aMsg').textContent='No se pudo cambiar el estado.';b.disabled=false}}
+  catch(err){$('aMsg').textContent='No hay conexión con el registro del curso.';b.disabled=false}});
+$('aCsv').onclick=()=>{const rows=[['Nombre','Correo','Perfil','Estado','Lecciones (8)','Simuladores (4)','Preguntas (10)','Nota (10)','Laboratorio (12)','Avance %','Última actividad']].concat(aRows.map(x=>[x.nombre,x.correo,x.perfil,x.estado,x.lecciones,x.simuladores,x.preguntas,x.nota,x.laboratorio,x.avance,fmtD(x.ultima)]));
+  const csv='﻿'+rows.map(r=>r.map(c=>{c=String(c);return /[",;\n]/.test(c)?'"'+c.replace(/"/g,'""')+'"':c}).join(',')).join('\r\n');
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download='avance-curso-fabric.csv';document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},500)};
 $('meChange').onclick=logout;$('gOther').onclick=logout;
 (async()=>{const i=idf();
   if(!i||!store.sesion){if(i&&i.email){$('gEmail').value=i.email;setG('chk')}

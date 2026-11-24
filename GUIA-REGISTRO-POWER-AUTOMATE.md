@@ -30,6 +30,7 @@ En el sitio de SharePoint de la DACD:
 | Area | Una línea de texto |
 | Estado | Elección: **Pendiente** (predeterminado), **Aprobado**, **Rechazado** |
 | Clave | Una línea de texto (guarda la contraseña cifrada; nunca la contraseña real) |
+| Rol | Elección: **Participante** (predeterminado), **Administrador** |
 | FechaSolicitud | Fecha y hora |
 
 **Lista AvanceCursoFabric**
@@ -88,7 +89,7 @@ Para no repetir expresiones, agregue antes del Switch una **Redactar** llamada `
 4. En otro caso → **Respuesta**:
 
 ```
-{"estado":"@{outputs('Inscrito')?['Estado']?['Value']}","nombre":"@{outputs('Inscrito')?['Nombre']}","perfil":"@{outputs('Inscrito')?['Perfil']}"}
+{"estado":"@{outputs('Inscrito')?['Estado']?['Value']}","nombre":"@{outputs('Inscrito')?['Nombre']}","perfil":"@{outputs('Inscrito')?['Perfil']}","rol":"@{outputs('Inscrito')?['Rol']?['Value']}"}
 ```
 
 **Caso `avance`**
@@ -98,6 +99,24 @@ Para no repetir expresiones, agregue antes del Switch una **Redactar** llamada `
    - **Sí → Crear elemento**; **No → Actualizar elemento** con Id `first(body('Obtener_elementos_2')?['value'])?['ID']`.
    - En ambos: Correo = `variables('correo')`; Nombre, Perfil, Lecciones, Simuladores, Preguntas, Nota, Laboratorio, Avance y Detalle del JSON; UltimaActividad = `utcNow()`.
 4. **Respuesta** `{"ok":true}`
+
+**Casos `listar` y `aprobar`** (panel de Administración de la página)
+
+Ambos empiezan con la misma condición: la persona existe, `outputs('Inscrito')?['Rol']?['Value']` es igual a `Administrador` y `outputs('Inscrito')?['Clave']` es igual a `body('Analizar_JSON')?['clave']`. Si no se cumple → **Respuesta** `{"estado":"NoAutorizado"}`.
+
+`listar`:
+1. **Obtener elementos** de InscritosCursoFabric (sin filtro, recuento superior 500).
+2. **Seleccionar** sobre ese resultado, con las asignaciones `correo` = `item()?['Title']`, `nombre` = `item()?['Nombre']`, `perfil` = `item()?['Perfil']` y `estado` = `item()?['Estado']?['Value']`.
+3. **Obtener elementos** de AvanceCursoFabric (sin filtro, recuento superior 500).
+4. **Seleccionar** sobre ese resultado: `correo` = `item()?['Title']`, `lecciones`, `simuladores`, `preguntas`, `nota`, `laboratorio`, `avance` (cada uno con `item()?['NombreDeLaColumna']`) y `ultima` = `item()?['UltimaActividad']`.
+5. **Respuesta** con cuerpo `{"inscritos": @{body('Seleccionar')}, "avance": @{body('Seleccionar_2')}}`.
+
+`aprobar`:
+1. **Obtener elementos** de InscritosCursoFabric con filtro `Title eq '@{toLower(body('Analizar_JSON')?['objetivo'])}'` y recuento superior 1.
+2. **Actualizar elemento** con ese Id: Estado = `body('Analizar_JSON')?['estado']` (Aprobado o Rechazado).
+3. **Respuesta** `{"ok":true}`.
+
+Para el esquema de **Analizar JSON**, agregue también las propiedades `objetivo` y `estado` (texto).
 
 **f) Configuración de cada acción Respuesta**
 - Código de estado: `200`
@@ -129,6 +148,10 @@ const REGISTRO_URL='';
 ```
 
 Suba el archivo al repositorio. GitHub Pages se actualiza en uno o dos minutos.
+
+## Su rol de administrador
+
+Después de registrarse en la página, abra la lista InscritosCursoFabric y en su fila cambie **Estado** a Aprobado y **Rol** a Administrador. Al volver a ingresar, verá la sección **Administración**: personas registradas, su estado, su avance y botones para aprobar o rechazar sin entrar a SharePoint. Solo las filas con Rol = Administrador ven ese panel; elegir el perfil "Jefatura" al registrarse no da acceso.
 
 ## Contraseñas
 
