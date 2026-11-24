@@ -29,6 +29,7 @@ En el sitio de SharePoint de la DACD:
 | Perfil | Una línea de texto |
 | Area | Una línea de texto |
 | Estado | Elección: **Pendiente** (predeterminado), **Aprobado**, **Rechazado** |
+| Clave | Una línea de texto (guarda la contraseña cifrada; nunca la contraseña real) |
 | FechaSolicitud | Fecha y hora |
 
 **Lista AvanceCursoFabric**
@@ -55,7 +56,7 @@ En https://make.powerautomate.com cree un **Flujo de nube instantáneo** con el 
 - Esquema: "Usar una carga de ejemplo" y pegue:
 
 ```json
-{"accion":"avance","email":"ana@ejemplo.com","nombre":"Ana Mora","perfil":"Analista","area":"DACD","curso":"Fabric F1-01","lecciones":3,"simuladores":1,"preguntas":10,"nota":8,"laboratorio":4,"avance":53,"detalle":"{}","fecha":"2026-11-24T16:00:00.000Z"}
+{"accion":"avance","clave":"9f2c...","email":"ana@ejemplo.com","nombre":"Ana Mora","perfil":"Analista","area":"DACD","curso":"Fabric F1-01","lecciones":3,"simuladores":1,"preguntas":10,"nota":8,"laboratorio":4,"avance":53,"detalle":"{}","fecha":"2026-11-24T16:00:00.000Z"}
 ```
 
 Después del esquema generado, quite `email` y `accion` de la lista **required** si aparecen otros campos como obligatorios: no todas las acciones envían todos los campos.
@@ -72,20 +73,26 @@ Después del esquema generado, quite `email` y `accion` de la lista **required**
 
 **e) Cambiar (Switch)** sobre `body('Analizar_JSON')?['accion']`
 
-**Caso `registro`**
-1. Condición: `length(body('Obtener_elementos')?['value'])` es igual a `0`
-   - **Sí → Crear elemento** en InscritosCursoFabric: Correo = `variables('correo')`, Nombre, Perfil, Area (del JSON), Estado = **Pendiente**, FechaSolicitud = `utcNow()`.
-2. **Respuesta** (paso **f**) con cuerpo:
-   - Si era nuevo: `{"estado":"Pendiente"}`
-   - Si ya existía: `{"estado":"@{first(body('Obtener_elementos')?['value'])?['Estado']?['Value']}","nombre":"@{first(body('Obtener_elementos')?['value'])?['Nombre']}","perfil":"@{first(body('Obtener_elementos')?['value'])?['Perfil']}"}`
+Para no repetir expresiones, agregue antes del Switch una **Redactar** llamada `Inscrito` con `first(body('Obtener_elementos')?['value'])`. La clave que envía la página está en `body('Analizar_JSON')?['clave']`.
 
-**Caso `estado`**
+**Caso `registro`**
 - Condición: `length(body('Obtener_elementos')?['value'])` es igual a `0`
-  - **Sí → Respuesta** `{"estado":"NoExiste"}`
-  - **No → Respuesta** con el mismo cuerpo de "ya existía" del caso registro.
+  - **Sí → Crear elemento** en InscritosCursoFabric: Correo = `variables('correo')`, Nombre, Perfil, Area (del JSON), Clave = `body('Analizar_JSON')?['clave']`, Estado = **Pendiente**, FechaSolicitud = `utcNow()`. Luego **Respuesta** `{"estado":"Pendiente"}`.
+  - **No → Respuesta** `{"estado":"YaExiste"}`. La persona debe usar "Ingresar".
+
+**Caso `estado`** (ingreso con contraseña)
+1. Condición: `length(body('Obtener_elementos')?['value'])` es igual a `0` → **Respuesta** `{"estado":"NoExiste"}`.
+2. Si existe, condición: `outputs('Inscrito')?['Clave']` está vacío (contraseña restablecida por usted)
+   - **Sí → Actualizar elemento**: Id = `outputs('Inscrito')?['ID']`, Clave = `body('Analizar_JSON')?['clave']`. La contraseña con la que ingresó queda como nueva.
+3. Condición: `outputs('Inscrito')?['Clave']` no está vacío **y** es distinto de `body('Analizar_JSON')?['clave']` → **Respuesta** `{"estado":"ClaveIncorrecta"}`.
+4. En otro caso → **Respuesta**:
+
+```
+{"estado":"@{outputs('Inscrito')?['Estado']?['Value']}","nombre":"@{outputs('Inscrito')?['Nombre']}","perfil":"@{outputs('Inscrito')?['Perfil']}"}
+```
 
 **Caso `avance`**
-1. Condición: la persona existe **y** `first(body('Obtener_elementos')?['value'])?['Estado']?['Value']` es igual a `Aprobado`. Si no, termine sin hacer nada.
+1. Condición: la persona existe, `outputs('Inscrito')?['Estado']?['Value']` es igual a `Aprobado` **y** `outputs('Inscrito')?['Clave']` es igual a `body('Analizar_JSON')?['clave']`. Si no se cumple, termine sin hacer nada.
 2. **Obtener elementos** en **AvanceCursoFabric** con filtro `Title eq '@{variables('correo')}'` y recuento superior 1.
 3. Condición: `length(...)` es igual a `0`
    - **Sí → Crear elemento**; **No → Actualizar elemento** con Id `first(body('Obtener_elementos_2')?['value'])?['ID']`.
@@ -123,10 +130,16 @@ const REGISTRO_URL='';
 
 Suba el archivo al repositorio. GitHub Pages se actualiza en uno o dos minutos.
 
+## Contraseñas
+
+- La página nunca envía la contraseña real: la cifra en el navegador (PBKDF2 con SHA-256) y envía solo el resultado. En la columna **Clave** se ve un texto largo; es normal.
+- **Si alguien olvida su contraseña:** borre el contenido de su columna **Clave** en InscritosCursoFabric. La próxima vez que ingrese, la contraseña que escriba quedará como nueva.
+- **Salir:** el botón Salir cierra la sesión en ese navegador. Si otra persona usa la misma computadora, tiene que ingresar con su propio correo y contraseña.
+
 ## 5. Probar
 
-1. Abra la página en una ventana de incógnito, regístrese con su correo y confirme que aparece en InscritosCursoFabric como Pendiente.
-2. Apruébese (desde el correo o en la lista) y toque **Verificar de nuevo**. Debe entrar al curso.
+1. Abra la página en una ventana de incógnito, regístrese con su correo y una contraseña, y confirme que aparece en InscritosCursoFabric como Pendiente, con la columna Clave llena.
+2. Apruébese (desde el correo o en la lista) y toque **Verificar de nuevo**. Debe entrar al curso. Pruebe también **Salir** e **Ingresar** con una contraseña equivocada: debe rechazarla.
 3. Marque una lección como leída y confirme que aparece su fila en AvanceCursoFabric.
 4. Revise el **historial de ejecuciones** del flujo si algo no ocurre.
 

@@ -16,7 +16,7 @@ Es un solo archivo, `index.html`, sin dependencias de servidor. Se publica con G
 
 Las personas se registran en la página y quedan pendientes hasta que la jefatura de la DACD las aprueba. Al aprobarlas entran al curso, y su avance se registra en SharePoint mediante Power Automate. Para activarlo, siga `GUIA-REGISTRO-POWER-AUTOMATE.md`.
 
-Mientras `REGISTRO_URL` esté vacío, la página funciona en modo abierto: cualquiera entra y el avance queda solo en su navegador.
+Cada persona entra con su correo y una contraseña, y puede cerrar la sesión con **Salir**. Mientras `REGISTRO_URL` esté vacío, la página funciona en modo abierto: no hay aprobación, la contraseña se valida solo en la computadora donde la persona se registró y el avance queda en ese navegador.
 
 ## Actualizar
 

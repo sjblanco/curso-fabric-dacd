@@ -143,6 +143,7 @@ body.locked #gate{display:grid;min-height:100svh;place-items:center;padding:24px
 .gcard{width:min(460px,100%);background:var(--bg);border-radius:18px;padding:clamp(20px,4vw,32px);border-top:8px solid var(--or);box-shadow:0 10px 30px rgba(60,30,90,.12)}
 .gtop{margin-bottom:16px}
 .gmark{display:inline-block;background:var(--pu);color:#fff;font:800 14px Montserrat,sans-serif;padding:4px 10px;border-radius:8px;margin-bottom:10px}
+.lnk{border:0;background:none;color:var(--pu);font:inherit;font-weight:600;padding:8px 0;min-height:40px;text-decoration:underline;cursor:pointer}
 .lmsg{min-height:1.4em;margin:10px 0 0;font-size:15px}.lmsg.err{color:var(--rd)}.lmsg.ok{color:var(--gr)}
 footer{border-top:6px solid var(--or);color:var(--soft);font-size:14px}
 @media(prefers-reduced-motion:reduce){.bar i{transition:none}.pulse{animation:none!important}}
@@ -154,16 +155,20 @@ footer{border-top:6px solid var(--or);color:var(--soft);font-size:14px}
 <div id="gate">
   <div class="gcard">
     <div class="gtop"><span class="gmark">DACD</span><h1 style="font-size:clamp(26px,4vw,36px)">Ruta de conocimiento Microsoft Fabric</h1><p class="note" style="margin:6px 0 0">Módulo F1-01 · Guía práctica para el equipo de analistas y científicos</p></div>
-    <div class="seg" role="tablist" aria-label="Acceso"><button id="gReg" aria-pressed="true">Registrarme</button><button id="gChk" aria-pressed="false">Ya me registré</button></div>
+    <div class="seg" role="tablist" aria-label="Acceso"><button id="gReg" aria-pressed="true">Registrarme</button><button id="gChk" aria-pressed="false">Ingresar</button></div>
     <form id="gForm" autocomplete="on">
       <div id="gRegFields">
         <label class="fl" for="gName">Nombre completo</label><input class="in" id="gName" autocomplete="name">
         <label class="fl" for="gPerfil">Perfil</label><select class="in" id="gPerfil"><option>Analista</option><option>Científico</option><option>Jefatura</option><option>Otro</option></select>
         <label class="fl" for="gArea">Área o división</label><input class="in" id="gArea" value="DACD">
       </div>
-      <label class="fl" for="gEmail">Correo institucional</label><input class="in" id="gEmail" type="email" autocomplete="email" required>
+      <label class="fl" for="gEmail">Correo institucional</label><input class="in" id="gEmail" type="email" autocomplete="username" required>
+      <label class="fl" for="gPass">Contraseña</label><input class="in" id="gPass" type="password" autocomplete="current-password" minlength="8" required>
+      <div id="gPass2W"><label class="fl" for="gPass2">Confirmar contraseña</label><input class="in" id="gPass2" type="password" autocomplete="new-password" minlength="8"></div>
+      <p class="note" id="gHint" style="margin:6px 0 0">Mínimo 8 caracteres. No use la misma contraseña de su correo del Banco.</p>
       <button class="btn" id="gBtn" style="margin-top:16px;width:100%">Enviar solicitud</button>
       <p class="lmsg" id="gMsg" role="status"></p>
+      <button type="button" class="lnk" id="gForgot">Olvidé mi contraseña</button>
     </form>
     <div id="gWait" hidden>
       <h3 id="gWaitT">Solicitud recibida</h3>
@@ -658,46 +663,74 @@ function payload(){const s=summary(store),i=idf()||{};return{curso:'Fabric F1-01
 let lastSent='';
 if(REGISTRO_URL){pushRemote=async()=>{const p=payload();if(!p.email||!store.aprobado)return;const key=JSON.stringify({...p,fecha:0});if(key===lastSent)return;
   sync('Registrando avance…');
-  try{await fetch(REGISTRO_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=UTF-8'},body:JSON.stringify({accion:'avance',...p})});lastSent=key;sync('Avance registrado en el curso ('+new Date().toLocaleTimeString('es-CR',{hour:'2-digit',minute:'2-digit'})+').')}
+  try{await fetch(REGISTRO_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=UTF-8'},body:JSON.stringify({accion:'avance',clave:store.clave||'',...p})});lastSent=key;sync('Avance registrado en el curso ('+new Date().toLocaleTimeString('es-CR',{hour:'2-digit',minute:'2-digit'})+').')}
   catch(e){sync('No se pudo registrar ahora; se intentará de nuevo con su próximo avance.')}}}
 function code(){const p=payload();return 'AVANCE F1-01 | '+p.nombre+' | '+p.email+' | '+p.perfil+' | Lecciones '+p.lecciones+'/8 | Simuladores '+p.simuladores+'/4 | Preguntas '+p.preguntas+'/10 | Nota '+p.nota+'/10 | Laboratorio '+p.laboratorio+'/12 | Avance '+p.avance+'% | '+new Date().toLocaleDateString('es-CR')}
 $('meReport').onclick=()=>{const c=code();$('meCode').textContent=c;$('meCodeBox').hidden=false;
   try{navigator.clipboard.writeText(c).then(()=>{$('meCodeMsg').textContent=FORMS_URL?'Resumen copiado. Péguelo en el formulario que se abrió.':'Resumen copiado. Envíelo a la jefatura de la DACD.'},()=>{$('meCodeMsg').textContent='Copie el texto manualmente.'})}catch(e){$('meCodeMsg').textContent='Copie el texto manualmente.'}
   if(FORMS_URL&&/^https:\/\//.test(FORMS_URL))window.open(FORMS_URL,'_blank','noopener')};
-/* ===== Registro y autorización ===== */
+/* ===== Registro, contraseña y sesión ===== */
 const call=async body=>{const r=await fetch(REGISTRO_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=UTF-8'},body:JSON.stringify(body)});const t=await r.text();try{return JSON.parse(t)}catch(e){return{}}};
 const gm=(id,t,k)=>{const m=$(id);m.textContent=t||'';m.className='lmsg'+(k?' '+k:'')};
+async function hashPw(email,pw){const enc=new TextEncoder(),key=await crypto.subtle.importKey('raw',enc.encode(pw),'PBKDF2',false,['deriveBits']);
+  const bits=await crypto.subtle.deriveBits({name:'PBKDF2',salt:enc.encode('curso-fabric-dacd:'+email),iterations:150000,hash:'SHA-256'},key,256);
+  return [...new Uint8Array(bits)].map(b=>b.toString(16).padStart(2,'0')).join('')}
+const LU='f101users';
+const localUsers=()=>{try{return JSON.parse(localStorage.getItem(LU)||'{}')}catch(e){return{}}};
+const saveLocalUsers=u=>{try{localStorage.setItem(LU,JSON.stringify(u))}catch(e){}};
 let gMode='reg';
-const setG=m=>{gMode=m;$('gReg').setAttribute('aria-pressed',m==='reg');$('gChk').setAttribute('aria-pressed',m==='chk');$('gRegFields').hidden=m!=='reg';$('gBtn').textContent=m==='reg'?'Enviar solicitud':'Verificar y entrar';gm('gMsg','')};
-$('gReg').onclick=()=>setG('reg');$('gChk').onclick=()=>setG('chk');
+const setG=m=>{gMode=m;$('gReg').setAttribute('aria-pressed',m==='reg');$('gChk').setAttribute('aria-pressed',m==='chk');$('gRegFields').hidden=m!=='reg';$('gPass2W').hidden=m!=='reg';$('gHint').hidden=m!=='reg';$('gForgot').hidden=m!=='chk';
+  $('gPass').autocomplete=m==='reg'?'new-password':'current-password';$('gBtn').textContent=m==='reg'?'Enviar solicitud':'Ingresar';gm('gMsg','')};
+$('gReg').onclick=()=>setG('reg');$('gChk').onclick=()=>setG('chk');setG('reg');
 function enter(){document.body.classList.remove('locked');const i=idf();$('meName').textContent='Avance de '+i.nombre;$('mePerfil').value=store.perfil||i.perfil||'';
   sync(REGISTRO_URL?'Su avance se registra automáticamente en el curso.':'Su avance se guarda en este navegador. Use "Reportar mi avance" para enviarlo.');pushRemote()}
+/* trae el avance guardado de esta persona en este navegador */
+function loadMine(email){let saved=null;try{saved=JSON.parse(localStorage.getItem('f101:'+email)||'null')}catch(e){}if(saved){mergeIn(saved);if(saved.perfil&&!store.perfil)store.perfil=saved.perfil;restoreAll()}}
 function waiting(estado){$('gForm').hidden=true;$('gWait').hidden=false;$('gReg').parentElement.hidden=true;
   if(estado==='Rechazado'){$('gWaitT').textContent='Solicitud no aprobada';$('gWaitP').textContent='Su solicitud no fue aprobada. Si cree que es un error, comuníquese con la jefatura de la DACD.'}
   else{$('gWaitT').textContent='Solicitud pendiente';$('gWaitP').textContent='Su registro está pendiente de aprobación por la jefatura de la DACD. Cuando lo aprueben, vuelva a esta página y toque "Verificar de nuevo".'}}
-function apply(r,email){const est=r&&r.estado;
-  if(est==='Aprobado'){const i=idf()||{};store.id={email,nombre:r.nombre||i.nombre||email,perfil:r.perfil||i.perfil||''};if(!store.perfil)store.perfil=store.id.perfil;store.aprobado=1;save();enter();return true}
-  if(est==='Pendiente'||est==='Rechazado'){store.id=Object.assign(idf()||{},{email});store.aprobado=0;save();waiting(est);return true}
-  return false}
-$('gForm').addEventListener('submit',async ev=>{ev.preventDefault();const em=$('gEmail').value.trim().toLowerCase();
+function login(r,email,clave,extra){const i=Object.assign({},extra||{});store.id={email,nombre:(r&&r.nombre)||i.nombre||email,perfil:(r&&r.perfil)||i.perfil||''};store.clave=clave;store.sesion=1;store.aprobado=1;
+  loadMine(email);if(!store.perfil)store.perfil=store.id.perfil;save();enter()}
+$('gForm').addEventListener('submit',async ev=>{ev.preventDefault();const em=$('gEmail').value.trim().toLowerCase(),pw=$('gPass').value;
   if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)){gm('gMsg','Escriba un correo válido.','err');return}
-  if(gMode==='reg'&&!$('gName').value.trim()){gm('gMsg','Escriba su nombre completo.','err');return}
-  if(!REGISTRO_URL){store.id={email:em,nombre:$('gName').value.trim()||em,perfil:$('gPerfil').value};store.perfil=store.id.perfil;save();enter();return}
+  if(pw.length<8){gm('gMsg','La contraseña debe tener al menos 8 caracteres.','err');return}
+  const nm=$('gName').value.trim(),pf=$('gPerfil').value,ar=$('gArea').value.trim();
+  if(gMode==='reg'){if(!nm){gm('gMsg','Escriba su nombre completo.','err');return}if(pw!==$('gPass2').value){gm('gMsg','Las contraseñas no coinciden.','err');return}}
   $('gBtn').disabled=true;gm('gMsg',gMode==='reg'?'Enviando su solicitud…':'Verificando…');
-  try{const r=gMode==='reg'?await call({accion:'registro',email:em,nombre:$('gName').value.trim(),perfil:$('gPerfil').value,area:$('gArea').value.trim()}):await call({accion:'estado',email:em});
-    if(gMode==='reg')store.id={email:em,nombre:$('gName').value.trim(),perfil:$('gPerfil').value};
-    if(!apply(r,em))gm('gMsg',gMode==='chk'?'No encontramos ese correo. Use "Registrarme" primero.':'No se pudo registrar. Intente de nuevo en unos minutos.','err')}
+  try{const clave=await hashPw(em,pw);
+    if(!REGISTRO_URL){/* modo abierto: la contraseña se valida en este navegador */
+      const u=localUsers();
+      if(gMode==='reg'){if(u[em]){gm('gMsg','Ese correo ya está registrado en esta computadora. Use "Ingresar".','err');return}u[em]={clave,nombre:nm,perfil:pf};saveLocalUsers(u);login(null,em,clave,{nombre:nm,perfil:pf});return}
+      if(!u[em]){gm('gMsg','No encontramos ese correo en esta computadora. Use "Registrarme".','err');return}
+      if(u[em].clave!==clave){gm('gMsg','Correo o contraseña incorrectos.','err');return}
+      login(null,em,clave,u[em]);return}
+    const r=gMode==='reg'?await call({accion:'registro',email:em,nombre:nm,perfil:pf,area:ar,clave}):await call({accion:'estado',email:em,clave});
+    const est=r&&r.estado;
+    if(est==='Aprobado'){login(r,em,clave,{nombre:nm,perfil:pf});return}
+    if(est==='Pendiente'||est==='Rechazado'){store.id={email:em,nombre:(r&&r.nombre)||nm||em,perfil:(r&&r.perfil)||pf};store.clave=clave;store.sesion=0;store.aprobado=0;save();waiting(est);return}
+    if(est==='ClaveIncorrecta'){gm('gMsg','Correo o contraseña incorrectos.','err');return}
+    if(est==='YaExiste'){gm('gMsg','Ese correo ya está registrado. Use "Ingresar" con su contraseña.','err');return}
+    if(est==='NoPermitido'){gm('gMsg','Use su correo institucional.','err');return}
+    gm('gMsg',gMode==='chk'?'No encontramos ese correo. Use "Registrarme" primero.':'No se pudo registrar. Intente de nuevo en unos minutos.','err')}
   catch(e){gm('gMsg','No hay conexión con el registro del curso. Intente de nuevo en unos minutos.','err')}
   finally{$('gBtn').disabled=false}});
-$('gAgain').onclick=async()=>{const i=idf();if(!i)return;gm('gMsg2','Verificando…');try{const r=await call({accion:'estado',email:i.email});if(!apply(r,i.email))gm('gMsg2','No encontramos su registro.','err');else if(r.estado!=='Aprobado')gm('gMsg2','Todavía está pendiente.')}catch(e){gm('gMsg2','No hay conexión con el registro del curso.','err')}};
-$('gOther').onclick=()=>{delete store.id;store.aprobado=0;save();$('gForm').hidden=false;$('gWait').hidden=true;$('gReg').parentElement.hidden=false;setG('reg')};
-$('meChange').onclick=()=>{try{localStorage.removeItem('f101')}catch(e){}location.reload()};
+$('gForgot').onclick=()=>gm('gMsg',REGISTRO_URL?'Pida a la jefatura de la DACD que restablezca su contraseña. Después, ingrese con una contraseña nueva: quedará guardada.':'Pida a la jefatura de la DACD que le ayude, o regístrese de nuevo en otra computadora.');
+$('gAgain').onclick=async()=>{const i=idf();if(!i||!store.clave)return;gm('gMsg2','Verificando…');
+  try{const r=await call({accion:'estado',email:i.email,clave:store.clave});const est=r&&r.estado;
+    if(est==='Aprobado')login(r,i.email,store.clave,i);else if(est==='Pendiente'||est==='Rechazado'){waiting(est);gm('gMsg2',est==='Pendiente'?'Todavía está pendiente.':'')}else gm('gMsg2','No se pudo verificar. Ingrese de nuevo con su contraseña.','err')}
+  catch(e){gm('gMsg2','No hay conexión con el registro del curso.','err')}};
+/* Salir: guarda el avance de la persona en este navegador y cierra la sesión */
+function logout(){const i=idf();try{if(i&&i.email){const keep=JSON.parse(JSON.stringify(store));delete keep.clave;delete keep.sesion;localStorage.setItem('f101:'+i.email,JSON.stringify(keep))}localStorage.removeItem('f101')}catch(e){}location.reload()}
+$('meChange').onclick=logout;$('gOther').onclick=logout;
 (async()=>{const i=idf();
-  if(!REGISTRO_URL){if(i)enter();return}
-  if(!i)return;
-  if(store.aprobado)enter();
-  try{const r=await call({accion:'estado',email:i.email});if(r&&r.estado&&r.estado!=='Aprobado'){document.body.classList.add('locked');apply(r,i.email)}else if(r&&r.estado==='Aprobado'&&!store.aprobado)apply(r,i.email)}
-  catch(e){if(!store.aprobado){$('gEmail').value=i.email;setG('chk');gm('gMsg','No hay conexión con el registro del curso. Intente de nuevo en unos minutos.','err')}}})();
+  if(!i||!store.sesion){if(i&&i.email){$('gEmail').value=i.email;setG('chk')}
+    if(i&&store.clave&&REGISTRO_URL&&!store.sesion){try{const r=await call({accion:'estado',email:i.email,clave:store.clave});if(r&&(r.estado==='Pendiente'||r.estado==='Rechazado'))waiting(r.estado);else if(r&&r.estado==='Aprobado')login(r,i.email,store.clave,i)}catch(e){}}
+    return}
+  if(!REGISTRO_URL){enter();return}
+  enter();
+  try{const r=await call({accion:'estado',email:i.email,clave:store.clave||''});const est=r&&r.estado;
+    if(est&&est!=='Aprobado'){store.sesion=0;store.aprobado=0;save();document.body.classList.add('locked');if(est==='Pendiente'||est==='Rechazado')waiting(est);else{$('gEmail').value=i.email;setG('chk');gm('gMsg',est==='ClaveIncorrecta'?'Su contraseña cambió. Ingrese de nuevo.':'Ingrese de nuevo.','err')}}}
+  catch(e){}})();
 }
 </script>
 </body>
