@@ -5,7 +5,7 @@ rules_version = '2';
 //
 // admins/{uid}          lo crea la administración en la consola de Firebase. Nadie lo escribe desde la página.
 // participants/{correo}  solicitud de cada persona. La crea ella misma como Pendiente; solo un admin la aprueba o rechaza.
-// progress/{uid}         avance de cada persona. Solo lo escribe ella misma, y solo si está aprobada.
+// progress/{uid}         avance de cada persona (F1-01 en la raíz; otros módulos en mods.<id>). Solo lo escribe ella misma, y solo si está aprobada.
 service cloud.firestore {
   match /databases/{database}/documents {
 
@@ -53,7 +53,7 @@ service cloud.firestore {
         && request.auth.uid == uid
         && (isApproved() || isAdmin())
         && request.resource.data.email == myEmail()
-        && request.resource.data.keys().hasOnly(['email', 'nombre', 'perfil', 'les', 'lab', 'qa', 'lq', 'sims', 'updatedAt']);
+        && request.resource.data.keys().hasOnly(['email', 'nombre', 'perfil', 'les', 'lab', 'qa', 'lq', 'sims', 'mods', 'updatedAt']);
       allow delete: if isAdmin();
     }
 

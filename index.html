@@ -143,6 +143,11 @@ body.locked #gate{display:grid;min-height:100svh;place-items:center;padding:24px
 .gcard{width:min(460px,100%);background:var(--bg);border-radius:18px;padding:clamp(20px,4vw,32px);border-top:8px solid var(--or);box-shadow:0 10px 30px rgba(60,30,90,.12)}
 .gtop{margin-bottom:16px}
 .gmark{display:inline-block;background:var(--pu);color:#fff;font:800 14px Montserrat,sans-serif;padding:4px 10px;border-radius:8px;margin-bottom:10px}
+.mods{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,15em),1fr));gap:14px;margin-top:14px}
+.mod{display:block;text-decoration:none;color:var(--ink);background:var(--bg);border:2px solid var(--line);border-radius:14px;padding:14px 16px}
+a.mod:hover{border-color:var(--or)}.mod.cur{border-color:var(--or);background:var(--orbg)}.mod.lock{opacity:.6}
+.mod small{display:block;color:var(--soft);font-size:13px;font-weight:700}.mod b{display:block;font:800 17px Montserrat,sans-serif;margin:2px 0 8px}
+.mod .bar{height:8px;margin:6px 0 2px}.mod span{font-size:14px;color:var(--soft)}
 .pill{display:inline-block;background:var(--pubg);color:var(--pu);border-radius:999px;padding:3px 12px;font-weight:700}
 .rutas{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,16em),1fr));gap:14px;margin-top:14px}
 .fase{background:var(--panel);border-radius:14px;padding:14px 16px}
@@ -225,7 +230,7 @@ footer{border-top:6px solid var(--or);color:var(--soft);font-size:14px}
   </div>
 </div></header>
 <nav class="navbar" aria-label="Secciones"><div class="nav">
-  <a href="#miruta">Mi ruta</a><a href="#como">Cómo estudiar</a><a href="#guia">Lecciones</a><a href="#roles">Roles</a><a href="#acceso">Shortcut o copia</a><a href="#cargas">Cargas de trabajo</a><a href="#quiz">Autoevaluación</a><a href="#lab">Laboratorio</a><a href="#insumos">Insumos</a><a href="#admin" id="navAdmin" hidden>Administración</a>
+  <a href="#miruta">Mis módulos</a><a href="#como">Cómo estudiar</a><a href="#guia">Lecciones</a><a href="#roles">Roles</a><a href="#acceso">Shortcut o copia</a><a href="#cargas">Cargas de trabajo</a><a href="#quiz">Autoevaluación</a><a href="#lab">Laboratorio</a><a href="#insumos">Insumos</a><a href="#admin" id="navAdmin" hidden>Administración</a>
 </div></nav>
 
 <section class="band me" aria-label="Su avance"><div class="wrap mebox">
@@ -238,7 +243,9 @@ footer{border-top:6px solid var(--or);color:var(--soft);font-size:14px}
 </div></section>
 
 <section class="band" id="miruta"><div class="wrap">
-  <div class="qhead"><h2>Su ruta según su perfil</h2><span class="note" id="rutaPerfil"></span></div>
+  <div class="qhead"><h2>Mis módulos</h2><span class="note" id="rutaPerfil"></span></div>
+  <div class="mods" id="modList"></div>
+  <h3 style="margin-top:22px">Ruta completa de su perfil</h3>
   <p id="rutaIntro">Estos son los módulos que le corresponden en la ruta de conocimiento de la DACD. Este material cubre el módulo marcado como <b>actual</b>.</p>
   <div class="rutas" id="rutaList"></div>
 </div></section>
@@ -403,7 +410,7 @@ footer{border-top:6px solid var(--or);color:var(--soft);font-size:14px}
   <p class="note" id="aMode"></p>
   <div class="kpis" id="aKpis"></div>
   <div class="seg" role="group" aria-label="Filtro" id="aFilter" style="margin-top:14px"><button data-f="todos" aria-pressed="true">Todos</button><button data-f="Pendiente" aria-pressed="false">Pendientes</button><button data-f="Aprobado" aria-pressed="false">Aprobados</button><button data-f="Rechazado" aria-pressed="false">Rechazados</button></div>
-  <div class="white" style="margin-top:12px"><div class="scroll"><table class="stack"><thead><tr><th>Persona</th><th>Perfil</th><th>Estado</th><th>Lecciones</th><th>Simuladores</th><th>Autoevaluación</th><th>Laboratorio</th><th style="min-width:9em">Avance</th><th>Última actividad</th><th></th></tr></thead><tbody id="aBody"><tr><td colspan="10">Cargando…</td></tr></tbody></table></div></div>
+  <div class="white" style="margin-top:12px"><div class="scroll"><table class="stack"><thead><tr><th>Persona</th><th>Perfil</th><th>Estado</th><th style="min-width:8em">F1-01</th><th style="min-width:8em">F1-02</th><th style="min-width:9em">Avance total</th><th>Última actividad</th><th></th></tr></thead><tbody id="aBody"><tr><td colspan="10">Cargando…</td></tr></tbody></table></div></div>
   <p class="note" id="aMsg"></p>
 </div></section>
 
@@ -417,7 +424,7 @@ let store={};
 try{store=JSON.parse(localStorage.getItem('f101')||'{}')}catch(e){store={}}
 store.sims=store.sims||{};['s1e','s2','s3','s4'].forEach(k=>{store.sims[k]=store.sims[k]||{}});
 let remoteTimer=null,pushRemote=()=>{};
-const save=()=>{try{localStorage.setItem('f101',JSON.stringify(store))}catch(e){}clearTimeout(remoteTimer);remoteTimer=setTimeout(()=>pushRemote(),900);if(typeof myProg==='function')myProg()};
+const save=()=>{try{localStorage.setItem('f101',JSON.stringify(store))}catch(e){}try{const c=document.querySelector('#modList .mod.cur');if(c&&typeof summary==='function'){const p=summary(store).pct;c.querySelector('.bar i').style.width=p+'%';c.querySelector('span').textContent=p+'% de avance'}}catch(e){}clearTimeout(remoteTimer);remoteTimer=setTimeout(()=>pushRemote(),900);if(typeof myProg==='function')myProg()};
 
 /* Simulador 1 */
 const ENG=[
@@ -683,7 +690,7 @@ function code(){const s=summary(store),i=store.id||{};return 'AVANCE F1-01 | '+(
 $('meReport').onclick=()=>{const c=code();$('meCode').textContent=c;$('meCodeBox').hidden=false;try{navigator.clipboard.writeText(c).then(()=>{$('meCodeMsg').textContent='Resumen copiado.'},()=>{$('meCodeMsg').textContent='Copie el texto manualmente.'})}catch(e){$('meCodeMsg').textContent='Copie el texto manualmente.'}};
 /* ===== Ruta según perfil ===== */
 const RUTA=[
- {f:'1. Fundamentos',p:['Analista','Científico','Jefatura','Otro'],m:[['F1-01','Introducción a la analítica de punta a punta con Fabric',1],['F1-02','Lakehouses en Fabric'],['F1-03','Data warehouses en Fabric'],['F1-04','Ciencia de datos en Fabric'],['F1-05','Modelos semánticos a escala'],['F1-06','Fundamentos de Fabric IQ'],['F1-07','Real-Time Intelligence (opcional)'],['F1-08','SQL Database en Fabric (opcional)']]},
+ {f:'1. Fundamentos',p:['Analista','Científico','Jefatura','Otro'],m:[['F1-01','Introducción a la analítica de punta a punta con Fabric',1],['F1-02','Lakehouses en Fabric (disponible)'],['F1-03','Data warehouses en Fabric'],['F1-04','Ciencia de datos en Fabric'],['F1-05','Modelos semánticos a escala'],['F1-06','Fundamentos de Fabric IQ'],['F1-07','Real-Time Intelligence (opcional)'],['F1-08','SQL Database en Fabric (opcional)']]},
  {f:'2A. Analistas (ruta DP-600)',p:['Analista','Jefatura'],m:[['F2A-01','Ingesta con Dataflows Gen2 y pipelines'],['F2A-02','Arquitectura medallion en el lakehouse'],['F2A-03','Consultas T-SQL en el warehouse'],['F2A-04','Seguridad: permisos, RLS y etiquetas'],['F2A-05','Modelos semánticos: DAX y Direct Lake'],['F2A-06','Git y deployment pipelines']]},
  {f:'2B. Científicos (data science y ML)',p:['Científico','Jefatura'],m:[['F2B-01','Exploración de datos con notebooks'],['F2B-02','Preprocesamiento con Data Wrangler'],['F2B-03','Entrenamiento y seguimiento con MLflow'],['F2B-04','Predicciones por lotes con un modelo desplegado']]},
  {f:'3. Caso aplicado DACD',p:['Analista','Científico','Jefatura'],m:[['F3-01','Modelo semántico de Captación',0,'Analista'],['F3-02','Modelo de clasificación con MLflow sobre Crédito',0,'Científico'],['F3-03','Demo interna al equipo']]},
@@ -693,8 +700,14 @@ function renderRuta(pf){pf=pf||'Otro';$('rutaPerfil').textContent='Perfil: '+pf;
   const fs=RUTA.filter(x=>x.p.includes(pf));
   $('rutaIntro').textContent=pf==='Jefatura'?'Como jefatura ve la ruta completa de ambos perfiles. Este material cubre el módulo marcado como actual.':'Estos son los módulos que le corresponden según su perfil. Este material cubre el módulo marcado como actual.';
   $('rutaList').innerHTML=fs.map(x=>`<div class="fase"><h3>${esc(x.f)}</h3><ol>${x.m.filter(m=>!m[3]||pf==='Jefatura'||m[3]===pf).map(m=>`<li class="${m[2]?'now':''}">${esc(m[0])} · ${esc(m[1])}</li>`).join('')}</ol></div>`).join('')}
+/* ===== Mis módulos ===== */
+const MODS=[{id:'f101',c:'F1-01',t:'Introducción a la analítica de punta a punta',url:'#como',cur:1},{id:'f102',c:'F1-02',t:'Lakehouses en Fabric',url:'f1-02.html'},{id:'f103',c:'F1-03',t:'Data warehouses en Fabric'},{id:'f104',c:'F1-04',t:'Ciencia de datos en Fabric'}];
+function renderModulos(mods){mods=mods||{};const own=summary(store).pct;
+  $('modList').innerHTML=MODS.map(m=>{const pct=m.id==='f101'?own:(mods[m.id]&&typeof mods[m.id].pct==='number'?mods[m.id].pct:0);
+    if(!m.url)return `<div class="mod lock"><small>${m.c} · Próximamente</small><b>${esc(m.t)}</b><span>Se habilitará pronto.</span></div>`;
+    return `<a class="mod ${m.cur?'cur':''}" href="${m.url}"><small>${m.c}${m.cur?' · Está aquí':''}</small><b>${esc(m.t)}</b>${pbar(pct,100)}<span>${pct}% de avance</span></a>`}).join('')}
 function resetLocal(){['les','lab','qa','lq'].forEach(k=>{for(const x in store[k])delete store[k][x]});['s1e','s2','s3','s4'].forEach(k=>{for(const x in store.sims[k])delete store.sims[k][x]});delete store.sims.s1o;store.perfil='';restoreAll()}
-window.F101={store,save,mergeIn,restoreAll,resetLocal,sync,summary,myProg,esc,pbar,cnt,simsDone,QZ,LES,LAB,renderRuta,setPush:f=>{pushRemote=f}};
+window.F101={store,save,mergeIn,restoreAll,resetLocal,sync,summary,myProg,esc,pbar,cnt,simsDone,QZ,LES,LAB,renderRuta,renderModulos,setPush:f=>{pushRemote=f}};
 }
 </script>
 <script type="module">
@@ -759,11 +772,12 @@ async function enter(u,email,p,admin){
   S.id={email,nombre:p.nombre||email,perfil:p.perfil||''};S.perfil=p.perfil||'';
   $('meName').textContent='Avance de '+(p.nombre||email);$('mePerfilTxt').textContent=p.perfil||(admin?'Administración':'—');$('mePerfil').value=S.perfil;F.renderRuta(S.perfil||(admin?'Jefatura':'Otro'));
   const ref=doc(db,'progress',u.uid);
-  try{const sn=await getDoc(ref);if(sn.exists()){F.mergeIn(sn.data());F.restoreAll()}}catch(e){}
+  let mods={};try{const sn=await getDoc(ref);if(sn.exists()){const d=sn.data();mods=d.mods||{};F.mergeIn(d);F.restoreAll()}}catch(e){}
+  F.renderModulos(mods);
   let writing=false,pending=false;
   F.setPush(async()=>{pending=true;if(writing)return;writing=true;
     while(pending){pending=false;F.sync('Guardando…');
-      try{await setDoc(ref,{...JSON.parse(JSON.stringify({email,nombre:S.id.nombre,perfil:S.perfil||'',les:S.les,lab:S.lab,qa:S.qa,lq:S.lq,sims:S.sims})),updatedAt:serverTimestamp()});F.sync('Avance guardado en el registro del curso.')}
+      try{await setDoc(ref,{...JSON.parse(JSON.stringify({email,nombre:S.id.nombre,perfil:S.perfil||'',les:S.les,lab:S.lab,qa:S.qa,lq:S.lq,sims:S.sims})),updatedAt:serverTimestamp()},{mergeFields:['email','nombre','perfil','les','lab','qa','lq','sims','updatedAt']});F.sync('Avance guardado en el registro del curso.')}
       catch(e){F.sync(e&&e.code==='permission-denied'?'No tiene permiso para guardar: su inscripción no está aprobada.':'No se pudo guardar ahora; se volverá a intentar con su próximo avance.')}}
     writing=false});
   F.save();
@@ -777,17 +791,17 @@ function startAdmin(){if(started)return;started=true;
   $('aMode').textContent='Datos en vivo del registro del curso. Las solicitudes nuevas aparecen solas.';$('aRefresh').hidden=true;
   const fmt=t=>{const d=t&&t.toDate?t.toDate():null;if(!d)return '—';return d.toLocaleDateString('es-CR',{day:'2-digit',month:'short'})+' '+d.toLocaleTimeString('es-CR',{hour:'2-digit',minute:'2-digit'})};
   function draw(){const byEmail={};Object.values(prog).forEach(d=>{if(d&&d.email)byEmail[d.email]=d});
-    rows=Object.entries(parts).map(([em,p])=>{const d=byEmail[em]||{},s=F.summary({les:d.les,lab:d.lab,qa:d.qa,sims:d.sims});return{em,nombre:p.nombre||em,perfil:p.perfil||'',area:p.area||'',estado:p.estado||'Pendiente',s,t:d.updatedAt,sol:p.solicitado}});
-    const ap=rows.filter(x=>x.estado==='Aprobado'),n=ap.length,avg=n?Math.round(ap.reduce((a,x)=>a+x.s.pct,0)/n):0;
-    $('aKpis').innerHTML=[['Registrados',rows.length],['Pendientes',rows.filter(x=>x.estado==='Pendiente').length],['Aprobados',n],['Avance promedio',avg+'%'],['Completaron todo',ap.filter(x=>x.s.pct===100).length],['Aprobaron la autoevaluación',ap.filter(x=>x.s.qn===10&&x.s.qs>=8).length]].map(k=>`<div class="kpi"><small>${k[0]}</small><strong>${esc(k[1])}</strong></div>`).join('');
-    const list=rows.filter(x=>aF==='todos'||x.estado===aF).sort((a,b)=>(a.estado==='Pendiente'?-1:0)-(b.estado==='Pendiente'?-1:0)||b.s.pct-a.s.pct||a.nombre.localeCompare(b.nombre));
-    $('aBody').innerHTML=list.length?list.map(x=>`<tr><td><b>${esc(x.nombre)}</b><br><span class="note" style="overflow-wrap:anywhere">${esc(x.em)}${x.area?' · '+esc(x.area):''}</span></td><td>${esc(x.perfil||'—')}</td><td><span class="est ${esc(x.estado)}">${esc(x.estado)}</span></td><td class="num">${x.s.les} / 8</td><td class="num">${x.s.sim} / 4</td><td class="num">${x.s.qn===10?x.s.qs+' / 10':x.s.qn+' de 10 resp.'}</td><td class="num">${x.s.lb} / 12</td><td><div class="pbar">${F.pbar(x.s.pct,100)}<b>${x.s.pct}%</b></div></td><td class="num">${x.t?esc(fmt(x.t)):'Solicitó '+esc(fmt(x.sol))}</td><td><div class="acts">${x.estado!=='Aprobado'?`<button class="mini ok" data-a="Aprobado" data-e="${esc(x.em)}">Aprobar</button>`:''}${x.estado!=='Rechazado'?`<button class="mini no" data-a="Rechazado" data-e="${esc(x.em)}">Rechazar</button>`:''}</div></td></tr>`).join(''):'<tr><td colspan="10">No hay personas en esta vista.</td></tr>'}
+    rows=Object.entries(parts).map(([em,p])=>{const d=byEmail[em]||{},s=F.summary({les:d.les,lab:d.lab,qa:d.qa,sims:d.sims}),m2=(d.mods&&d.mods.f102)||{},s2={pct:+m2.pct||0,les:+m2.lecciones||0,sim:+m2.simuladores||0,qn:+m2.qn||0,qs:+m2.qs||0,lb:+m2.laboratorio||0},tot=Math.round((s.pct+s2.pct)/2);return{em,nombre:p.nombre||em,perfil:p.perfil||'',area:p.area||'',estado:p.estado||'Pendiente',s,s2,tot,t:d.updatedAt,sol:p.solicitado}});
+    const ap=rows.filter(x=>x.estado==='Aprobado'),n=ap.length,avg=n?Math.round(ap.reduce((a,x)=>a+x.tot,0)/n):0;
+    $('aKpis').innerHTML=[['Registrados',rows.length],['Pendientes',rows.filter(x=>x.estado==='Pendiente').length],['Aprobados',n],['Avance promedio',avg+'%'],['Completaron F1-01',ap.filter(x=>x.s.pct===100).length],['Completaron F1-02',ap.filter(x=>x.s2.pct===100).length]].map(k=>`<div class="kpi"><small>${k[0]}</small><strong>${esc(k[1])}</strong></div>`).join('');
+    const list=rows.filter(x=>aF==='todos'||x.estado===aF).sort((a,b)=>(a.estado==='Pendiente'?-1:0)-(b.estado==='Pendiente'?-1:0)||b.tot-a.tot||a.nombre.localeCompare(b.nombre));
+    $('aBody').innerHTML=list.length?list.map(x=>`<tr><td><b>${esc(x.nombre)}</b><br><span class="note" style="overflow-wrap:anywhere">${esc(x.em)}${x.area?' · '+esc(x.area):''}</span></td><td>${esc(x.perfil||'—')}</td><td><span class="est ${esc(x.estado)}">${esc(x.estado)}</span></td><td><div class="pbar">${F.pbar(x.s.pct,100)}<b>${x.s.pct}%</b></div><span class="note">${x.s.qn===10?'Nota '+x.s.qs+'/10':x.s.qn+' de 10 resp.'}</span></td><td><div class="pbar">${F.pbar(x.s2.pct,100)}<b>${x.s2.pct}%</b></div><span class="note">${x.s2.qn===10?'Nota '+x.s2.qs+'/10':x.s2.qn+' de 10 resp.'}</span></td><td><div class="pbar">${F.pbar(x.tot,100)}<b>${x.tot}%</b></div></td><td class="num">${x.t?esc(fmt(x.t)):'Solicitó '+esc(fmt(x.sol))}</td><td><div class="acts">${x.estado!=='Aprobado'?`<button class="mini ok" data-a="Aprobado" data-e="${esc(x.em)}">Aprobar</button>`:''}${x.estado!=='Rechazado'?`<button class="mini no" data-a="Rechazado" data-e="${esc(x.em)}">Rechazar</button>`:''}</div></td></tr>`).join(''):'<tr><td colspan="8">No hay personas en esta vista.</td></tr>'}
   unsub.push(onSnapshot(collection(db,'participants'),q=>{parts={};q.forEach(s=>{parts[s.id]=s.data()});draw()},e=>{$('aMsg').textContent='No se pudo leer el registro: revise las reglas de Firestore y la colección admins.'}));
   unsub.push(onSnapshot(collection(db,'progress'),q=>{prog={};q.forEach(s=>{prog[s.id]=s.data()});draw()},()=>{}));
   $('aFilter').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;aF=b.dataset.f;$('aFilter').querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x===b));draw()});
   $('aBody').addEventListener('click',async e=>{const b=e.target.closest('[data-a]');if(!b)return;b.disabled=true;
     try{await updateDoc(doc(db,'participants',b.dataset.e),{estado:b.dataset.a,revisado:serverTimestamp()});$('aMsg').textContent=b.dataset.e+' quedó como '+b.dataset.a+'.'}catch(err){$('aMsg').textContent='No se pudo cambiar el estado ('+(err.code||'error')+').';b.disabled=false}});
-  $('aCsv').onclick=()=>{const t=[['Nombre','Correo','Área','Perfil','Estado','Lecciones (8)','Simuladores (4)','Preguntas (10)','Nota (10)','Laboratorio (12)','Avance %','Última actividad']].concat(rows.map(x=>[x.nombre,x.em,x.area,x.perfil,x.estado,x.s.les,x.s.sim,x.s.qn,x.s.qs,x.s.lb,x.s.pct,fmt(x.t)]));
+  $('aCsv').onclick=()=>{const t=[['Nombre','Correo','Área','Perfil','Estado','F1-01 lecciones (8)','F1-01 simuladores (4)','F1-01 preguntas (10)','F1-01 nota (10)','F1-01 laboratorio (12)','F1-01 avance %','F1-02 lecciones (7)','F1-02 simuladores (4)','F1-02 preguntas (10)','F1-02 nota (10)','F1-02 laboratorio (10)','F1-02 avance %','Avance total %','Última actividad']].concat(rows.map(x=>[x.nombre,x.em,x.area,x.perfil,x.estado,x.s.les,x.s.sim,x.s.qn,x.s.qs,x.s.lb,x.s.pct,x.s2.les,x.s2.sim,x.s2.qn,x.s2.qs,x.s2.lb,x.s2.pct,x.tot,fmt(x.t)]));
     const csv='﻿'+t.map(r=>r.map(c=>{c=String(c);return /[",;\n]/.test(c)?'"'+c.replace(/"/g,'""')+'"':c}).join(',')).join('\r\n');
     const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download='avance-curso-fabric.csv';document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},500)};
 }
