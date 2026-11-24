@@ -1,0 +1,64 @@
+rules_version = '2';
+
+// Curso Microsoft Fabric DACD: reglas de Firestore.
+// La página vive en GitHub Pages; Firebase solo guarda usuarios, solicitudes y avance.
+//
+// admins/{uid}          lo crea la administración en la consola de Firebase. Nadie lo escribe desde la página.
+// participants/{correo}  solicitud de cada persona. La crea ella misma como Pendiente; solo un admin la aprueba o rechaza.
+// progress/{uid}         avance de cada persona. Solo lo escribe ella misma, y solo si está aprobada.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() { return request.auth != null; }
+    function myEmail() { return request.auth.token.email.lower(); }
+    function isAdmin() {
+      return signedIn() && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+    function myParticipant() {
+      return get(/databases/$(database)/documents/participants/$(myEmail())).data;
+    }
+    function isApproved() {
+      return signedIn()
+        && exists(/databases/$(database)/documents/participants/$(myEmail()))
+        && myParticipant().estado == 'Aprobado';
+    }
+
+    match /admins/{uid} {
+      allow read: if signedIn() && request.auth.uid == uid;
+      allow write: if false;
+    }
+
+    match /participants/{email} {
+      allow read: if isAdmin() || (signedIn() && myEmail() == email);
+
+      // la persona crea su propia solicitud, siempre como Pendiente
+      allow create: if signedIn()
+        && myEmail() == email
+        && request.resource.data.estado == 'Pendiente'
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.keys().hasOnly(['nombre', 'perfil', 'area', 'estado', 'uid', 'solicitado'])
+        && request.resource.data.nombre is string && request.resource.data.nombre.size() <= 120
+        && request.resource.data.perfil in ['Analista', 'Científico', 'Jefatura', 'Otro'];
+
+      // solo la administración cambia el estado
+      allow update: if isAdmin()
+        && request.resource.data.estado in ['Pendiente', 'Aprobado', 'Rechazado'];
+
+      allow delete: if isAdmin();
+    }
+
+    match /progress/{uid} {
+      allow read: if isAdmin() || (signedIn() && request.auth.uid == uid);
+      allow create, update: if signedIn()
+        && request.auth.uid == uid
+        && (isApproved() || isAdmin())
+        && request.resource.data.email == myEmail()
+        && request.resource.data.keys().hasOnly(['email', 'nombre', 'perfil', 'les', 'lab', 'qa', 'lq', 'sims', 'updatedAt']);
+      allow delete: if isAdmin();
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

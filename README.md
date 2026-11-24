@@ -1,25 +1,32 @@
 # Guía práctica Microsoft Fabric · Módulo F1-01
 
-Material de estudio interactivo para el equipo de analistas y científicos de datos de la DACD. Incluye 8 lecciones guiadas, 4 simuladores, una autoevaluación de 10 preguntas y un laboratorio paso a paso.
+Material de estudio interactivo para el equipo de analistas y científicos de datos de la DACD: 8 lecciones guiadas, 4 simuladores, una autoevaluación de 10 preguntas y un laboratorio paso a paso.
 
-Es un solo archivo, `index.html`, sin dependencias de servidor. Se publica con GitHub Pages.
+- **Página:** GitHub Pages, en https://sjblanco.github.io/curso-fabric-dacd/
+- **Registro, inicio de sesión y avance:** Firebase (proyecto `curso-fabric-dacd`, plan gratuito Spark). Firebase solo guarda los datos; no aloja la página.
 
-## Publicar en GitHub Pages
+## Cómo funciona
 
-1. Cree un repositorio en GitHub, por ejemplo `curso-fabric-dacd`.
-   - En una cuenta gratuita, GitHub Pages solo funciona con repositorios **públicos**. Con GitHub Pro o una organización con Enterprise puede ser privado.
-2. Suba `index.html`, `.nojekyll`, `README.md` y `GUIA-REGISTRO-POWER-AUTOMATE.md`, ya sea con **Add file > Upload files** o con git.
-3. En **Settings > Pages**, elija **Deploy from a branch**, rama `main` y carpeta `/ (root)`. Guarde.
-4. En uno o dos minutos la página queda en `https://SU-USUARIO.github.io/curso-fabric-dacd/`.
+1. La persona se registra con nombre, perfil, área, correo y contraseña. Su solicitud queda **Pendiente**.
+2. La administración la aprueba o la rechaza desde el panel **Administración** de la página.
+3. Al aprobarla, la persona entra al curso y ve la ruta de su perfil. Su avance se guarda solo.
+4. **Salir** cierra la sesión. **Olvidé mi contraseña** envía un correo para restablecerla.
 
-## Registro, autorización y avance
+## Administradores
 
-Las personas se registran en la página y quedan pendientes hasta que la jefatura de la DACD las aprueba. Al aprobarlas entran al curso, y su avance se registra en SharePoint mediante Power Automate. Para activarlo, siga `GUIA-REGISTRO-POWER-AUTOMATE.md`.
+Un administrador es una cuenta registrada cuyo UID está en la colección `admins` de Firestore:
 
-Cada persona entra con su correo y una contraseña, y puede cerrar la sesión con **Salir**. Todo registro queda **pendiente** hasta que un administrador lo apruebe. Los correos de la lista `ADMIN_EMAILS` (en `index.html`) entran directamente y ven el panel de Administración.
+1. La persona se registra en la página.
+2. En la consola de Firebase, en **Authentication > Usuarios**, copie su UID.
+3. En **Firestore > Datos**, cree el documento `admins/{UID}` con un campo `nombre`.
 
-Mientras `REGISTRO_URL` esté vacío no hay registro central: las solicitudes no llegan a los administradores y solo ellos pueden entrar.
+## Archivos
 
-## Actualizar
+| Archivo | Para qué |
+|---|---|
+| `index.html` | La página completa, con el `firebaseConfig` del proyecto |
+| `firestore.rules` | Reglas de seguridad publicadas en Firestore |
 
-Reemplace `index.html` en el repositorio. Si ya configuró `REGISTRO_URL` o `FORMS_URL`, vuelva a pegarlas en la versión nueva.
+La configuración de Firebase en `index.html` no es secreta: la seguridad la dan las reglas de `firestore.rules`.
+
+Si cambia `firestore.rules`, publíquelas en la consola: **Firestore > Reglas**.

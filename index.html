@@ -185,7 +185,7 @@ footer{border-top:6px solid var(--or);color:var(--soft);font-size:14px}
     <div id="gWait" hidden>
       <h3 id="gWaitT">Solicitud recibida</h3>
       <p id="gWaitP">Su registro quedó pendiente de aprobación por la jefatura de la DACD. Cuando lo aprueben, vuelva a esta página y toque "Verificar de nuevo".</p>
-      <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" id="gAgain">Verificar de nuevo</button><button class="btn sec" id="gOther">Usar otro correo</button></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" id="gAgain">Verificar de nuevo</button><button class="btn sec" id="gOther">Salir</button></div>
       <p class="lmsg" id="gMsg2" role="status"></p>
     </div>
   </div>
@@ -678,82 +678,9 @@ function mergeIn(r){['les','lab','qa','lq'].forEach(k=>{const src=r[k];if(src&&t
   const rs=r.sims||{};['s1e','s2','s3','s4'].forEach(k=>{if(rs[k]&&typeof rs[k]==='object')Object.assign(store.sims[k],rs[k])});if(rs.s1o)store.sims.s1o=1;
   if(!store.perfil&&typeof r.perfil==='string')store.perfil=r.perfil}
 function restoreAll(){document.querySelectorAll('[data-done]').forEach(c=>{c.checked=!!done[c.dataset.done]});lesProg();drawLab();drawQ();restoreScen();restoreWorks();$('mePerfil').value=store.perfil||'';myProg()}
-/* ===== Registro del avance (Power Automate) =====
-   REGISTRO_URL: URL del flujo "Cuando se recibe una solicitud HTTP". Vacío = el avance queda solo en este navegador.
-   FORMS_URL: opcional, formulario de Microsoft Forms para reportar el avance a mano. */
-const REGISTRO_URL='';
-const FORMS_URL='';
-/* ADMIN_EMAILS: correos de administración (en minúscula). Entran sin esperar aprobación y ven el panel. */
-const ADMIN_EMAILS=['sblanco@bp.fi.cr'];
-/* ================================================ */
-const idf=()=>store.id||null;
-function payload(){const s=summary(store),i=idf()||{};return{curso:'Fabric F1-01',email:i.email||'',nombre:i.nombre||'',perfil:store.perfil||i.perfil||'',lecciones:s.les,simuladores:s.sim,preguntas:s.qn,nota:s.qs,laboratorio:s.lb,avance:s.pct,
-  detalle:JSON.stringify({les:store.les,lab:store.lab,qa:store.qa,sims:{s1:(cnt(store.sims.s1e)>=4&&!!store.sims.s1o),s2:cnt(store.sims.s2)>=4,s3:cnt(store.sims.s3),s4:cnt(store.sims.s4)}}),fecha:new Date().toISOString()}}
-let lastSent='';
-if(REGISTRO_URL){pushRemote=async()=>{const p=payload();if(!p.email||!store.aprobado)return;const key=JSON.stringify({...p,fecha:0});if(key===lastSent)return;
-  sync('Registrando avance…');
-  try{await fetch(REGISTRO_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=UTF-8'},body:JSON.stringify({accion:'avance',clave:store.clave||'',...p})});lastSent=key;sync('Avance registrado en el curso ('+new Date().toLocaleTimeString('es-CR',{hour:'2-digit',minute:'2-digit'})+').')}
-  catch(e){sync('No se pudo registrar ahora; se intentará de nuevo con su próximo avance.')}}}
-function code(){const p=payload();return 'AVANCE F1-01 | '+p.nombre+' | '+p.email+' | '+p.perfil+' | Lecciones '+p.lecciones+'/8 | Simuladores '+p.simuladores+'/4 | Preguntas '+p.preguntas+'/10 | Nota '+p.nota+'/10 | Laboratorio '+p.laboratorio+'/12 | Avance '+p.avance+'% | '+new Date().toLocaleDateString('es-CR')}
-$('meReport').onclick=()=>{const c=code();$('meCode').textContent=c;$('meCodeBox').hidden=false;
-  try{navigator.clipboard.writeText(c).then(()=>{$('meCodeMsg').textContent=FORMS_URL?'Resumen copiado. Péguelo en el formulario que se abrió.':'Resumen copiado. Envíelo a la jefatura de la DACD.'},()=>{$('meCodeMsg').textContent='Copie el texto manualmente.'})}catch(e){$('meCodeMsg').textContent='Copie el texto manualmente.'}
-  if(FORMS_URL&&/^https:\/\//.test(FORMS_URL))window.open(FORMS_URL,'_blank','noopener')};
-/* ===== Registro, contraseña y sesión ===== */
-const call=async body=>{const r=await fetch(REGISTRO_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=UTF-8'},body:JSON.stringify(body)});const t=await r.text();try{return JSON.parse(t)}catch(e){return{}}};
-const gm=(id,t,k)=>{const m=$(id);m.textContent=t||'';m.className='lmsg'+(k?' '+k:'')};
-async function hashPw(email,pw){const enc=new TextEncoder(),key=await crypto.subtle.importKey('raw',enc.encode(pw),'PBKDF2',false,['deriveBits']);
-  const bits=await crypto.subtle.deriveBits({name:'PBKDF2',salt:enc.encode('curso-fabric-dacd:'+email),iterations:150000,hash:'SHA-256'},key,256);
-  return [...new Uint8Array(bits)].map(b=>b.toString(16).padStart(2,'0')).join('')}
-const LU='f101users';
-const localUsers=()=>{try{return JSON.parse(localStorage.getItem(LU)||'{}')}catch(e){return{}}};
-const saveLocalUsers=u=>{try{localStorage.setItem(LU,JSON.stringify(u))}catch(e){}};
-let gMode='reg';
-const setG=m=>{gMode=m;$('gReg').setAttribute('aria-pressed',m==='reg');$('gChk').setAttribute('aria-pressed',m==='chk');$('gRegFields').hidden=m!=='reg';$('gPass2W').hidden=m!=='reg';$('gHint').hidden=m!=='reg';$('gForgot').hidden=m!=='chk';
-  $('gPass').autocomplete=m==='reg'?'new-password':'current-password';$('gBtn').textContent=m==='reg'?'Enviar solicitud':'Ingresar';gm('gMsg','')};
-$('gReg').onclick=()=>setG('reg');$('gChk').onclick=()=>setG('chk');setG('reg');
-const isAdminEmail=e=>ADMIN_EMAILS.map(x=>String(x).toLowerCase()).includes(String(e||'').toLowerCase());
-function isAdmin(){return REGISTRO_URL?(store.rol==='Administrador'||isAdminEmail((idf()||{}).email)):isAdminEmail((idf()||{}).email)}
-function enter(){document.body.classList.remove('locked');const i=idf();$('meName').textContent='Avance de '+i.nombre;store.perfil=i.perfil||store.perfil||'';$('mePerfil').value=store.perfil;$('mePerfilTxt').textContent=store.perfil||'—';renderRuta(store.perfil);
-  sync(REGISTRO_URL?'Su avance se registra automáticamente en el curso.':'Su avance se guarda en este navegador. Use "Reportar mi avance" para enviarlo.');pushRemote();
-  const adm=isAdmin();$('admin').hidden=!adm;$('navAdmin').hidden=!adm;if(adm)loadAdmin()}
-/* trae el avance guardado de esta persona en este navegador */
-function loadMine(email){let saved=null;try{saved=JSON.parse(localStorage.getItem('f101:'+email)||'null')}catch(e){}if(saved){mergeIn(saved);if(saved.perfil&&!store.perfil)store.perfil=saved.perfil;restoreAll()}}
-function waiting(estado){$('gForm').hidden=true;$('gWait').hidden=false;$('gReg').parentElement.hidden=true;
-  if(estado==='Rechazado'){$('gWaitT').textContent='Solicitud no aprobada';$('gWaitP').textContent='Su solicitud no fue aprobada. Si cree que es un error, comuníquese con la jefatura de la DACD.'}
-  else{$('gWaitT').textContent='Solicitud pendiente';$('gWaitP').textContent='Su registro está pendiente de aprobación por la administración del curso o la jefatura de la DACD. Le avisarán cuando esté aprobado; entonces vuelva a esta página y toque "Verificar de nuevo".'}}
-function login(r,email,clave,extra){const i=Object.assign({},extra||{});store.id={email,nombre:(r&&r.nombre)||i.nombre||email,perfil:(r&&r.perfil)||i.perfil||''};store.clave=clave;store.sesion=1;store.aprobado=1;store.rol=(r&&r.rol)||'Participante';
-  loadMine(email);if(!store.perfil)store.perfil=store.id.perfil;save();enter()}
-$('gForm').addEventListener('submit',async ev=>{ev.preventDefault();const em=$('gEmail').value.trim().toLowerCase(),pw=$('gPass').value;
-  if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)){gm('gMsg','Escriba un correo válido.','err');return}
-  if(pw.length<8){gm('gMsg','La contraseña debe tener al menos 8 caracteres.','err');return}
-  const nm=$('gName').value.trim(),pf=$('gPerfil').value,ar=$('gArea').value.trim();
-  if(gMode==='reg'){if(!nm){gm('gMsg','Escriba su nombre completo.','err');return}if(pw!==$('gPass2').value){gm('gMsg','Las contraseñas no coinciden.','err');return}}
-  $('gBtn').disabled=true;gm('gMsg',gMode==='reg'?'Enviando su solicitud…':'Verificando…');
-  try{const clave=await hashPw(em,pw);
-    if(!REGISTRO_URL){/* sin registro central: solo entran los correos de ADMIN_EMAILS; el resto queda pendiente */
-      const u=localUsers();
-      if(gMode==='reg'){if(u[em]&&u[em].clave!==clave){gm('gMsg','Ese correo ya está registrado con otra contraseña. Use "Ingresar".','err');return}u[em]={clave,nombre:nm,perfil:pf};saveLocalUsers(u)}
-      else{if(!u[em]&&!isAdminEmail(em)){gm('gMsg','No encontramos ese correo. Use "Registrarme".','err');return}if(u[em]&&u[em].clave!==clave){gm('gMsg','Correo o contraseña incorrectos.','err');return}}
-      const info=u[em]||{nombre:nm||em,perfil:pf};
-      if(isAdminEmail(em)){store.rol='Administrador';login(null,em,clave,info);return}
-      store.id={email:em,nombre:info.nombre,perfil:info.perfil};store.clave=clave;store.sesion=0;store.aprobado=0;save();waiting('Pendiente');return}
-    const r=gMode==='reg'?await call({accion:'registro',email:em,nombre:nm,perfil:pf,area:ar,clave}):await call({accion:'estado',email:em,clave});
-    const est=r&&r.estado;
-    if(est==='Aprobado'){login(r,em,clave,{nombre:nm,perfil:pf});return}
-    if(est==='Pendiente'||est==='Rechazado'){store.id={email:em,nombre:(r&&r.nombre)||nm||em,perfil:(r&&r.perfil)||pf};store.clave=clave;store.sesion=0;store.aprobado=0;save();waiting(est);return}
-    if(est==='ClaveIncorrecta'){gm('gMsg','Correo o contraseña incorrectos.','err');return}
-    if(est==='YaExiste'){gm('gMsg','Ese correo ya está registrado. Use "Ingresar" con su contraseña.','err');return}
-    if(est==='NoPermitido'){gm('gMsg','Use su correo institucional.','err');return}
-    gm('gMsg',gMode==='chk'?'No encontramos ese correo. Use "Registrarme" primero.':'No se pudo registrar. Intente de nuevo en unos minutos.','err')}
-  catch(e){gm('gMsg','No hay conexión con el registro del curso. Intente de nuevo en unos minutos.','err')}
-  finally{$('gBtn').disabled=false}});
-$('gForgot').onclick=()=>gm('gMsg',REGISTRO_URL?'Pida a la jefatura de la DACD que restablezca su contraseña. Después, ingrese con una contraseña nueva: quedará guardada.':'Pida a la jefatura de la DACD que le ayude, o regístrese de nuevo en otra computadora.');
-$('gAgain').onclick=async()=>{const i=idf();if(!i||!store.clave)return;if(!REGISTRO_URL){if(isAdminEmail(i.email)){store.rol='Administrador';login(null,i.email,store.clave,i)}else gm('gMsg2','Todavía está pendiente de aprobación.');return}gm('gMsg2','Verificando…');
-  try{const r=await call({accion:'estado',email:i.email,clave:store.clave});const est=r&&r.estado;
-    if(est==='Aprobado')login(r,i.email,store.clave,i);else if(est==='Pendiente'||est==='Rechazado'){waiting(est);gm('gMsg2',est==='Pendiente'?'Todavía está pendiente.':'')}else gm('gMsg2','No se pudo verificar. Ingrese de nuevo con su contraseña.','err')}
-  catch(e){gm('gMsg2','No hay conexión con el registro del curso.','err')}};
-/* Salir: guarda el avance de la persona en este navegador y cierra la sesión */
-function logout(){const i=idf();try{if(i&&i.email){const keep=JSON.parse(JSON.stringify(store));delete keep.clave;delete keep.sesion;localStorage.setItem('f101:'+i.email,JSON.stringify(keep))}localStorage.removeItem('f101')}catch(e){}location.reload()}
+/* ===== Resumen para reportar ===== */
+function code(){const s=summary(store),i=store.id||{};return 'AVANCE F1-01 | '+(i.nombre||'')+' | '+(i.email||'')+' | '+(store.perfil||'')+' | Lecciones '+s.les+'/8 | Simuladores '+s.sim+'/4 | Preguntas '+s.qn+'/10 | Nota '+s.qs+'/10 | Laboratorio '+s.lb+'/12 | Avance '+s.pct+'% | '+new Date().toLocaleDateString('es-CR')}
+$('meReport').onclick=()=>{const c=code();$('meCode').textContent=c;$('meCodeBox').hidden=false;try{navigator.clipboard.writeText(c).then(()=>{$('meCodeMsg').textContent='Resumen copiado.'},()=>{$('meCodeMsg').textContent='Copie el texto manualmente.'})}catch(e){$('meCodeMsg').textContent='Copie el texto manualmente.'}};
 /* ===== Ruta según perfil ===== */
 const RUTA=[
  {f:'1. Fundamentos',p:['Analista','Científico','Jefatura','Otro'],m:[['F1-01','Introducción a la analítica de punta a punta con Fabric',1],['F1-02','Lakehouses en Fabric'],['F1-03','Data warehouses en Fabric'],['F1-04','Ciencia de datos en Fabric'],['F1-05','Modelos semánticos a escala'],['F1-06','Fundamentos de Fabric IQ'],['F1-07','Real-Time Intelligence (opcional)'],['F1-08','SQL Database en Fabric (opcional)']]},
@@ -766,48 +693,104 @@ function renderRuta(pf){pf=pf||'Otro';$('rutaPerfil').textContent='Perfil: '+pf;
   const fs=RUTA.filter(x=>x.p.includes(pf));
   $('rutaIntro').textContent=pf==='Jefatura'?'Como jefatura ve la ruta completa de ambos perfiles. Este material cubre el módulo marcado como actual.':'Estos son los módulos que le corresponden según su perfil. Este material cubre el módulo marcado como actual.';
   $('rutaList').innerHTML=fs.map(x=>`<div class="fase"><h3>${esc(x.f)}</h3><ol>${x.m.filter(m=>!m[3]||pf==='Jefatura'||m[3]===pf).map(m=>`<li class="${m[2]?'now':''}">${esc(m[0])} · ${esc(m[1])}</li>`).join('')}</ol></div>`).join('')}
-/* ===== Administración ===== */
-let aRows=[],aF='todos';
-const fmtD=t=>{if(!t)return '—';const d=new Date(t);if(isNaN(d))return '—';return d.toLocaleDateString('es-CR',{day:'2-digit',month:'short'})+' '+d.toLocaleTimeString('es-CR',{hour:'2-digit',minute:'2-digit'})};
-const num=v=>{v=Number(v);return isFinite(v)?v:0};
-function localRows(){const u=localUsers(),out=[];const cur=idf();
-  const emails=new Set(Object.keys(u));if(cur&&cur.email)emails.add(cur.email);
-  emails.forEach(em=>{let d=null;if(cur&&cur.email===em)d=store;else{try{d=JSON.parse(localStorage.getItem('f101:'+em)||'null')}catch(e){}}
-    const s=summary(d||{}),info=u[em]||cur||{};
-    out.push({correo:em,nombre:info.nombre||em,perfil:info.perfil||'',estado:'Aprobado',lecciones:s.les,simuladores:s.sim,preguntas:s.qn,nota:s.qs,laboratorio:s.lb,avance:s.pct,ultima:null})});return out}
-async function loadAdmin(){
-  if(!REGISTRO_URL){$('aMode').textContent='El registro central (Power Automate) todavía no está conectado: las solicitudes de las demás personas no llegan aquí y nadie más puede entrar. Al conectar el flujo verá a todo el equipo y podrá aprobarlo desde este panel.';aRows=localRows();drawAdmin();return}
-  $('aMode').textContent='Datos del registro del curso en SharePoint. Use "Actualizar" para traer los cambios más recientes.';$('aMsg').textContent='Cargando…';
-  try{const r=await call({accion:'listar',email:idf().email,clave:store.clave});
-    if(!r||!Array.isArray(r.inscritos)){$('aMsg').textContent=r&&r.estado==='NoAutorizado'?'Su usuario no tiene rol de Administrador en la lista de inscritos.':'No se pudo leer el registro del curso.';return}
-    const av={};(r.avance||[]).forEach(a=>{if(a&&a.correo)av[String(a.correo).toLowerCase()]=a});
-    aRows=r.inscritos.map(p=>{const em=String(p.correo||'').toLowerCase(),a=av[em]||{};return{correo:em,nombre:p.nombre||em,perfil:p.perfil||'',estado:p.estado||'Pendiente',lecciones:num(a.lecciones),simuladores:num(a.simuladores),preguntas:num(a.preguntas),nota:num(a.nota),laboratorio:num(a.laboratorio),avance:num(a.avance),ultima:a.ultima||null}});
-    $('aMsg').textContent='';drawAdmin()}
-  catch(e){$('aMsg').textContent='No hay conexión con el registro del curso.'}}
-function drawAdmin(){
-  const ap=aRows.filter(x=>x.estado==='Aprobado'),n=ap.length,avg=n?Math.round(ap.reduce((a,x)=>a+x.avance,0)/n):0;
-  $('aKpis').innerHTML=[['Registrados',aRows.length],['Pendientes',aRows.filter(x=>x.estado==='Pendiente').length],['Aprobados',n],['Avance promedio',avg+'%'],['Completaron todo',ap.filter(x=>x.avance===100).length],['Aprobaron la autoevaluación',ap.filter(x=>x.preguntas===10&&x.nota>=8).length]].map(k=>`<div class="kpi"><small>${k[0]}</small><strong>${esc(k[1])}</strong></div>`).join('');
-  const list=aRows.filter(x=>aF==='todos'||x.estado===aF).sort((a,b)=>(a.estado==='Pendiente'?-1:0)-(b.estado==='Pendiente'?-1:0)||b.avance-a.avance||a.nombre.localeCompare(b.nombre));
-  $('aBody').innerHTML=list.length?list.map(x=>`<tr><td><b>${esc(x.nombre)}</b><br><span class="note" style="overflow-wrap:anywhere">${esc(x.correo)}</span></td><td>${esc(x.perfil||'—')}</td><td><span class="est ${esc(x.estado)}">${esc(x.estado)}</span></td><td class="num">${x.lecciones} / 8</td><td class="num">${x.simuladores} / 4</td><td class="num">${x.preguntas===10?x.nota+' / 10':x.preguntas+' de 10 resp.'}</td><td class="num">${x.laboratorio} / 12</td><td><div class="pbar">${pbar(x.avance,100)}<b>${x.avance}%</b></div></td><td class="num">${esc(fmtD(x.ultima))}</td><td>${REGISTRO_URL?`<div class="acts">${x.estado!=='Aprobado'?`<button class="mini ok" data-a="Aprobado" data-e="${esc(x.correo)}">Aprobar</button>`:''}${x.estado!=='Rechazado'?`<button class="mini no" data-a="Rechazado" data-e="${esc(x.correo)}">Rechazar</button>`:''}</div>`:''}</td></tr>`).join(''):'<tr><td colspan="10">No hay personas en esta vista.</td></tr>'}
-$('aFilter').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;aF=b.dataset.f;$('aFilter').querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x===b));drawAdmin()});
-$('aRefresh').onclick=()=>loadAdmin();
-$('aBody').addEventListener('click',async e=>{const b=e.target.closest('[data-a]');if(!b)return;b.disabled=true;$('aMsg').textContent='Guardando…';
-  try{const r=await call({accion:'aprobar',email:idf().email,clave:store.clave,objetivo:b.dataset.e,estado:b.dataset.a});
-    if(r&&r.ok){const x=aRows.find(y=>y.correo===b.dataset.e);if(x)x.estado=b.dataset.a;drawAdmin();$('aMsg').textContent=b.dataset.e+' quedó como '+b.dataset.a+'.'}else{$('aMsg').textContent='No se pudo cambiar el estado.';b.disabled=false}}
-  catch(err){$('aMsg').textContent='No hay conexión con el registro del curso.';b.disabled=false}});
-$('aCsv').onclick=()=>{const rows=[['Nombre','Correo','Perfil','Estado','Lecciones (8)','Simuladores (4)','Preguntas (10)','Nota (10)','Laboratorio (12)','Avance %','Última actividad']].concat(aRows.map(x=>[x.nombre,x.correo,x.perfil,x.estado,x.lecciones,x.simuladores,x.preguntas,x.nota,x.laboratorio,x.avance,fmtD(x.ultima)]));
-  const csv='﻿'+rows.map(r=>r.map(c=>{c=String(c);return /[",;\n]/.test(c)?'"'+c.replace(/"/g,'""')+'"':c}).join(',')).join('\r\n');
-  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download='avance-curso-fabric.csv';document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},500)};
-$('meChange').onclick=logout;$('gOther').onclick=logout;
-(async()=>{const i=idf();
-  if(!i||!store.sesion){if(i&&i.email){$('gEmail').value=i.email;setG('chk');if(!REGISTRO_URL&&!store.aprobado&&store.clave&&!isAdminEmail(i.email)){waiting('Pendiente');return}}
-    if(i&&store.clave&&REGISTRO_URL&&!store.sesion){try{const r=await call({accion:'estado',email:i.email,clave:store.clave});if(r&&(r.estado==='Pendiente'||r.estado==='Rechazado'))waiting(r.estado);else if(r&&r.estado==='Aprobado')login(r,i.email,store.clave,i)}catch(e){}}
-    return}
-  if(!REGISTRO_URL){if(isAdminEmail(i.email)){enter();return}store.sesion=0;save();document.body.classList.add('locked');waiting('Pendiente');return}
-  enter();
-  try{const r=await call({accion:'estado',email:i.email,clave:store.clave||''});const est=r&&r.estado;
-    if(est&&est!=='Aprobado'){store.sesion=0;store.aprobado=0;save();document.body.classList.add('locked');if(est==='Pendiente'||est==='Rechazado')waiting(est);else{$('gEmail').value=i.email;setG('chk');gm('gMsg',est==='ClaveIncorrecta'?'Su contraseña cambió. Ingrese de nuevo.':'Ingrese de nuevo.','err')}}}
-  catch(e){}})();
+function resetLocal(){['les','lab','qa','lq'].forEach(k=>{for(const x in store[k])delete store[k][x]});['s1e','s2','s3','s4'].forEach(k=>{for(const x in store.sims[k])delete store.sims[k][x]});delete store.sims.s1o;store.perfil='';restoreAll()}
+window.F101={store,save,mergeIn,restoreAll,resetLocal,sync,summary,myProg,esc,pbar,cnt,simsDone,QZ,LES,LAB,renderRuta,setPush:f=>{pushRemote=f}};
+}
+</script>
+<script type="module">
+/* ===== Configuración de Firebase (solo almacenamiento e inicio de sesión; la página vive en GitHub Pages) ===== */
+const firebaseConfig = {
+  apiKey: "AIzaSyA05zxFVcJzqLF859hDAiscdX5d4owti4E",
+  authDomain: "curso-fabric-dacd.firebaseapp.com",
+  projectId: "curso-fabric-dacd",
+  storageBucket: "curso-fabric-dacd.firebasestorage.app",
+  messagingSenderId: "710076720357",
+  appId: "1:710076720357:web:3533bf72aadd41ea42e00c"
+};
+/* ============================================================================================================ */
+import {initializeApp} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+import {getAuth,onAuthStateChanged,signInWithEmailAndPassword,createUserWithEmailAndPassword,sendPasswordResetEmail,signOut} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+import {getFirestore,doc,getDoc,setDoc,updateDoc,collection,onSnapshot,serverTimestamp} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+const F=window.F101,$=id=>document.getElementById(id),esc=F.esc,S=F.store;
+const gm=(id,t,k)=>{const m=$(id);m.textContent=t||'';m.className='lmsg'+(k?' '+k:'')};
+let mode='reg';
+const setG=m=>{mode=m;$('gReg').setAttribute('aria-pressed',m==='reg');$('gChk').setAttribute('aria-pressed',m==='chk');$('gRegFields').hidden=m!=='reg';$('gPass2W').hidden=m!=='reg';$('gHint').hidden=m!=='reg';$('gForgot').hidden=m!=='chk';
+  $('gPass').autocomplete=m==='reg'?'new-password':'current-password';$('gBtn').textContent=m==='reg'?'Enviar solicitud':'Ingresar';gm('gMsg','')};
+$('gReg').onclick=()=>setG('reg');$('gChk').onclick=()=>setG('chk');setG('reg');
+const lockUI=()=>{document.body.classList.add('locked');$('gForm').hidden=false;$('gWait').hidden=true;$('gReg').parentElement.hidden=false};
+function waiting(est){document.body.classList.add('locked');$('gForm').hidden=true;$('gWait').hidden=false;$('gReg').parentElement.hidden=true;
+  if(est==='Rechazado'){$('gWaitT').textContent='Solicitud no aprobada';$('gWaitP').textContent='Su solicitud no fue aprobada. Si cree que es un error, comuníquese con la jefatura de la DACD.'}
+  else{$('gWaitT').textContent='Solicitud pendiente';$('gWaitP').textContent='Su registro está pendiente de aprobación por la administración del curso. Esta pantalla se actualiza sola cuando lo aprueben; también puede volver más tarde e ingresar con su correo y contraseña.'}}
+if(firebaseConfig.apiKey==='REEMPLAZAR'){gm('gMsg','El registro del curso todavía no está configurado.','err');$('gBtn').disabled=true}
+else{
+const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app);auth.languageCode='es';
+const errTxt=e=>({'auth/invalid-credential':'Correo o contraseña incorrectos.','auth/wrong-password':'Correo o contraseña incorrectos.','auth/user-not-found':'No encontramos ese correo. Use "Registrarme".','auth/email-already-in-use':'Ese correo ya está registrado. Use "Ingresar" o "Olvidé mi contraseña".','auth/weak-password':'La contraseña debe tener al menos 8 caracteres.','auth/too-many-requests':'Demasiados intentos. Espere unos minutos.','auth/invalid-email':'El correo no es válido.','auth/network-request-failed':'No hay conexión con el registro del curso. Si está en la red del Banco, puede que lo esté bloqueando.'}[e&&e.code]||'No se pudo completar. Intente de nuevo.');
+let pendingReg=null;
+$('gForm').addEventListener('submit',async ev=>{ev.preventDefault();const em=$('gEmail').value.trim().toLowerCase(),pw=$('gPass').value;
+  if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)){gm('gMsg','Escriba un correo válido.','err');return}
+  if(pw.length<8){gm('gMsg','La contraseña debe tener al menos 8 caracteres.','err');return}
+  if(mode==='reg'){if(!$('gName').value.trim()){gm('gMsg','Escriba su nombre completo.','err');return}if(pw!==$('gPass2').value){gm('gMsg','Las contraseñas no coinciden.','err');return}
+    pendingReg={nombre:$('gName').value.trim(),perfil:$('gPerfil').value,area:$('gArea').value.trim()}}
+  $('gBtn').disabled=true;gm('gMsg',mode==='reg'?'Enviando su solicitud…':'Ingresando…');
+  try{mode==='reg'?await createUserWithEmailAndPassword(auth,em,pw):await signInWithEmailAndPassword(auth,em,pw)}catch(e){pendingReg=null;gm('gMsg',errTxt(e),'err')}finally{$('gBtn').disabled=false}});
+$('gForgot').onclick=async()=>{const em=$('gEmail').value.trim().toLowerCase();if(!em){gm('gMsg','Escriba su correo y vuelva a tocar "Olvidé mi contraseña".','err');return}
+  try{await sendPasswordResetEmail(auth,em);gm('gMsg','Le enviamos un correo para restablecer la contraseña. Revise también el correo no deseado.','ok')}catch(e){gm('gMsg',errTxt(e),'err')}};
+const out=()=>signOut(auth).then(()=>location.reload());
+$('meChange').onclick=out;$('gOther').onclick=out;$('gAgain').onclick=()=>location.reload();
+let unsub=[],entered=false;
+onAuthStateChanged(auth,async u=>{
+  unsub.forEach(f=>f());unsub=[];entered=false;
+  if(!u){lockUI();return}
+  const email=(u.email||'').toLowerCase();
+  /* separar el avance de cada persona en una misma computadora */
+  let owner=null;try{owner=localStorage.getItem('f101owner')}catch(e){}
+  if(owner!==u.uid){try{localStorage.removeItem('f101');localStorage.setItem('f101owner',u.uid)}catch(e){}if(owner!==null){location.reload();return}F.resetLocal()}
+  const pRef=doc(db,'participants',email);
+  let admin=false;try{admin=(await getDoc(doc(db,'admins',u.uid))).exists()}catch(e){}
+  try{const ps=await getDoc(pRef);
+    if(!ps.exists()){const r=pendingReg||{nombre:u.displayName||email,perfil:'Otro',area:''};await setDoc(pRef,{nombre:r.nombre,perfil:r.perfil,area:r.area,estado:'Pendiente',uid:u.uid,solicitado:serverTimestamp()});pendingReg=null}}
+  catch(e){gm('gMsg','No se pudo leer su registro. Intente de nuevo.','err');return}
+  unsub.push(onSnapshot(pRef,s=>{const p=s.data()||{};
+    if(admin||p.estado==='Aprobado'){if(!entered){entered=true;enter(u,email,p,admin)}}
+    else{entered=false;waiting(p.estado||'Pendiente')}},()=>{}));
+});
+async function enter(u,email,p,admin){
+  document.body.classList.remove('locked');
+  S.id={email,nombre:p.nombre||email,perfil:p.perfil||''};S.perfil=p.perfil||'';
+  $('meName').textContent='Avance de '+(p.nombre||email);$('mePerfilTxt').textContent=p.perfil||(admin?'Administración':'—');$('mePerfil').value=S.perfil;F.renderRuta(S.perfil||(admin?'Jefatura':'Otro'));
+  const ref=doc(db,'progress',u.uid);
+  try{const sn=await getDoc(ref);if(sn.exists()){F.mergeIn(sn.data());F.restoreAll()}}catch(e){}
+  let writing=false,pending=false;
+  F.setPush(async()=>{pending=true;if(writing)return;writing=true;
+    while(pending){pending=false;F.sync('Guardando…');
+      try{await setDoc(ref,{...JSON.parse(JSON.stringify({email,nombre:S.id.nombre,perfil:S.perfil||'',les:S.les,lab:S.lab,qa:S.qa,lq:S.lq,sims:S.sims})),updatedAt:serverTimestamp()});F.sync('Avance guardado en el registro del curso.')}
+      catch(e){F.sync(e&&e.code==='permission-denied'?'No tiene permiso para guardar: su inscripción no está aprobada.':'No se pudo guardar ahora; se volverá a intentar con su próximo avance.')}}
+    writing=false});
+  F.save();
+  F.sync('Conectado. Su avance se guarda automáticamente.');
+  $('admin').hidden=!admin;$('navAdmin').hidden=!admin;if(admin)startAdmin();
+}
+/* ===== Panel de administración ===== */
+let started=false;
+function startAdmin(){if(started)return;started=true;
+  let parts={},prog={},aF='todos',rows=[];
+  $('aMode').textContent='Datos en vivo del registro del curso. Las solicitudes nuevas aparecen solas.';$('aRefresh').hidden=true;
+  const fmt=t=>{const d=t&&t.toDate?t.toDate():null;if(!d)return '—';return d.toLocaleDateString('es-CR',{day:'2-digit',month:'short'})+' '+d.toLocaleTimeString('es-CR',{hour:'2-digit',minute:'2-digit'})};
+  function draw(){const byEmail={};Object.values(prog).forEach(d=>{if(d&&d.email)byEmail[d.email]=d});
+    rows=Object.entries(parts).map(([em,p])=>{const d=byEmail[em]||{},s=F.summary({les:d.les,lab:d.lab,qa:d.qa,sims:d.sims});return{em,nombre:p.nombre||em,perfil:p.perfil||'',area:p.area||'',estado:p.estado||'Pendiente',s,t:d.updatedAt,sol:p.solicitado}});
+    const ap=rows.filter(x=>x.estado==='Aprobado'),n=ap.length,avg=n?Math.round(ap.reduce((a,x)=>a+x.s.pct,0)/n):0;
+    $('aKpis').innerHTML=[['Registrados',rows.length],['Pendientes',rows.filter(x=>x.estado==='Pendiente').length],['Aprobados',n],['Avance promedio',avg+'%'],['Completaron todo',ap.filter(x=>x.s.pct===100).length],['Aprobaron la autoevaluación',ap.filter(x=>x.s.qn===10&&x.s.qs>=8).length]].map(k=>`<div class="kpi"><small>${k[0]}</small><strong>${esc(k[1])}</strong></div>`).join('');
+    const list=rows.filter(x=>aF==='todos'||x.estado===aF).sort((a,b)=>(a.estado==='Pendiente'?-1:0)-(b.estado==='Pendiente'?-1:0)||b.s.pct-a.s.pct||a.nombre.localeCompare(b.nombre));
+    $('aBody').innerHTML=list.length?list.map(x=>`<tr><td><b>${esc(x.nombre)}</b><br><span class="note" style="overflow-wrap:anywhere">${esc(x.em)}${x.area?' · '+esc(x.area):''}</span></td><td>${esc(x.perfil||'—')}</td><td><span class="est ${esc(x.estado)}">${esc(x.estado)}</span></td><td class="num">${x.s.les} / 8</td><td class="num">${x.s.sim} / 4</td><td class="num">${x.s.qn===10?x.s.qs+' / 10':x.s.qn+' de 10 resp.'}</td><td class="num">${x.s.lb} / 12</td><td><div class="pbar">${F.pbar(x.s.pct,100)}<b>${x.s.pct}%</b></div></td><td class="num">${x.t?esc(fmt(x.t)):'Solicitó '+esc(fmt(x.sol))}</td><td><div class="acts">${x.estado!=='Aprobado'?`<button class="mini ok" data-a="Aprobado" data-e="${esc(x.em)}">Aprobar</button>`:''}${x.estado!=='Rechazado'?`<button class="mini no" data-a="Rechazado" data-e="${esc(x.em)}">Rechazar</button>`:''}</div></td></tr>`).join(''):'<tr><td colspan="10">No hay personas en esta vista.</td></tr>'}
+  unsub.push(onSnapshot(collection(db,'participants'),q=>{parts={};q.forEach(s=>{parts[s.id]=s.data()});draw()},e=>{$('aMsg').textContent='No se pudo leer el registro: revise las reglas de Firestore y la colección admins.'}));
+  unsub.push(onSnapshot(collection(db,'progress'),q=>{prog={};q.forEach(s=>{prog[s.id]=s.data()});draw()},()=>{}));
+  $('aFilter').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;aF=b.dataset.f;$('aFilter').querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x===b));draw()});
+  $('aBody').addEventListener('click',async e=>{const b=e.target.closest('[data-a]');if(!b)return;b.disabled=true;
+    try{await updateDoc(doc(db,'participants',b.dataset.e),{estado:b.dataset.a,revisado:serverTimestamp()});$('aMsg').textContent=b.dataset.e+' quedó como '+b.dataset.a+'.'}catch(err){$('aMsg').textContent='No se pudo cambiar el estado ('+(err.code||'error')+').';b.disabled=false}});
+  $('aCsv').onclick=()=>{const t=[['Nombre','Correo','Área','Perfil','Estado','Lecciones (8)','Simuladores (4)','Preguntas (10)','Nota (10)','Laboratorio (12)','Avance %','Última actividad']].concat(rows.map(x=>[x.nombre,x.em,x.area,x.perfil,x.estado,x.s.les,x.s.sim,x.s.qn,x.s.qs,x.s.lb,x.s.pct,fmt(x.t)]));
+    const csv='﻿'+t.map(r=>r.map(c=>{c=String(c);return /[",;\n]/.test(c)?'"'+c.replace(/"/g,'""')+'"':c}).join(',')).join('\r\n');
+    const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download='avance-curso-fabric.csv';document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},500)};
+}
 }
 </script>
 </body>
