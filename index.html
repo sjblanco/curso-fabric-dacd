@@ -683,6 +683,8 @@ function restoreAll(){document.querySelectorAll('[data-done]').forEach(c=>{c.che
    FORMS_URL: opcional, formulario de Microsoft Forms para reportar el avance a mano. */
 const REGISTRO_URL='';
 const FORMS_URL='';
+/* ADMIN_EMAILS: correos de administración (en minúscula). Entran sin esperar aprobación y ven el panel. */
+const ADMIN_EMAILS=['sblanco@bp.fi.cr'];
 /* ================================================ */
 const idf=()=>store.id||null;
 function payload(){const s=summary(store),i=idf()||{};return{curso:'Fabric F1-01',email:i.email||'',nombre:i.nombre||'',perfil:store.perfil||i.perfil||'',lecciones:s.les,simuladores:s.sim,preguntas:s.qn,nota:s.qs,laboratorio:s.lb,avance:s.pct,
@@ -709,7 +711,8 @@ let gMode='reg';
 const setG=m=>{gMode=m;$('gReg').setAttribute('aria-pressed',m==='reg');$('gChk').setAttribute('aria-pressed',m==='chk');$('gRegFields').hidden=m!=='reg';$('gPass2W').hidden=m!=='reg';$('gHint').hidden=m!=='reg';$('gForgot').hidden=m!=='chk';
   $('gPass').autocomplete=m==='reg'?'new-password':'current-password';$('gBtn').textContent=m==='reg'?'Enviar solicitud':'Ingresar';gm('gMsg','')};
 $('gReg').onclick=()=>setG('reg');$('gChk').onclick=()=>setG('chk');setG('reg');
-function isAdmin(){return REGISTRO_URL?store.rol==='Administrador':((idf()||{}).perfil==='Jefatura')}
+const isAdminEmail=e=>ADMIN_EMAILS.map(x=>String(x).toLowerCase()).includes(String(e||'').toLowerCase());
+function isAdmin(){return REGISTRO_URL?(store.rol==='Administrador'||isAdminEmail((idf()||{}).email)):isAdminEmail((idf()||{}).email)}
 function enter(){document.body.classList.remove('locked');const i=idf();$('meName').textContent='Avance de '+i.nombre;store.perfil=i.perfil||store.perfil||'';$('mePerfil').value=store.perfil;$('mePerfilTxt').textContent=store.perfil||'—';renderRuta(store.perfil);
   sync(REGISTRO_URL?'Su avance se registra automáticamente en el curso.':'Su avance se guarda en este navegador. Use "Reportar mi avance" para enviarlo.');pushRemote();
   const adm=isAdmin();$('admin').hidden=!adm;$('navAdmin').hidden=!adm;if(adm)loadAdmin()}
@@ -717,7 +720,7 @@ function enter(){document.body.classList.remove('locked');const i=idf();$('meNam
 function loadMine(email){let saved=null;try{saved=JSON.parse(localStorage.getItem('f101:'+email)||'null')}catch(e){}if(saved){mergeIn(saved);if(saved.perfil&&!store.perfil)store.perfil=saved.perfil;restoreAll()}}
 function waiting(estado){$('gForm').hidden=true;$('gWait').hidden=false;$('gReg').parentElement.hidden=true;
   if(estado==='Rechazado'){$('gWaitT').textContent='Solicitud no aprobada';$('gWaitP').textContent='Su solicitud no fue aprobada. Si cree que es un error, comuníquese con la jefatura de la DACD.'}
-  else{$('gWaitT').textContent='Solicitud pendiente';$('gWaitP').textContent='Su registro está pendiente de aprobación por la jefatura de la DACD. Cuando lo aprueben, vuelva a esta página y toque "Verificar de nuevo".'}}
+  else{$('gWaitT').textContent='Solicitud pendiente';$('gWaitP').textContent='Su registro está pendiente de aprobación por la administración del curso o la jefatura de la DACD. Le avisarán cuando esté aprobado; entonces vuelva a esta página y toque "Verificar de nuevo".'}}
 function login(r,email,clave,extra){const i=Object.assign({},extra||{});store.id={email,nombre:(r&&r.nombre)||i.nombre||email,perfil:(r&&r.perfil)||i.perfil||''};store.clave=clave;store.sesion=1;store.aprobado=1;store.rol=(r&&r.rol)||'Participante';
   loadMine(email);if(!store.perfil)store.perfil=store.id.perfil;save();enter()}
 $('gForm').addEventListener('submit',async ev=>{ev.preventDefault();const em=$('gEmail').value.trim().toLowerCase(),pw=$('gPass').value;
@@ -727,12 +730,13 @@ $('gForm').addEventListener('submit',async ev=>{ev.preventDefault();const em=$('
   if(gMode==='reg'){if(!nm){gm('gMsg','Escriba su nombre completo.','err');return}if(pw!==$('gPass2').value){gm('gMsg','Las contraseñas no coinciden.','err');return}}
   $('gBtn').disabled=true;gm('gMsg',gMode==='reg'?'Enviando su solicitud…':'Verificando…');
   try{const clave=await hashPw(em,pw);
-    if(!REGISTRO_URL){/* modo abierto: la contraseña se valida en este navegador */
+    if(!REGISTRO_URL){/* sin registro central: solo entran los correos de ADMIN_EMAILS; el resto queda pendiente */
       const u=localUsers();
-      if(gMode==='reg'){if(u[em]&&u[em].clave!==clave){gm('gMsg','Ese correo ya está registrado en esta computadora con otra contraseña. Use "Ingresar".','err');return}u[em]={clave,nombre:nm,perfil:pf};saveLocalUsers(u);if(store.id&&store.id.email===em)store.id.perfil=pf;login(null,em,clave,{nombre:nm,perfil:pf});return}
-      if(!u[em]){gm('gMsg','No encontramos ese correo en esta computadora. Use "Registrarme".','err');return}
-      if(u[em].clave!==clave){gm('gMsg','Correo o contraseña incorrectos.','err');return}
-      login(null,em,clave,u[em]);return}
+      if(gMode==='reg'){if(u[em]&&u[em].clave!==clave){gm('gMsg','Ese correo ya está registrado con otra contraseña. Use "Ingresar".','err');return}u[em]={clave,nombre:nm,perfil:pf};saveLocalUsers(u)}
+      else{if(!u[em]&&!isAdminEmail(em)){gm('gMsg','No encontramos ese correo. Use "Registrarme".','err');return}if(u[em]&&u[em].clave!==clave){gm('gMsg','Correo o contraseña incorrectos.','err');return}}
+      const info=u[em]||{nombre:nm||em,perfil:pf};
+      if(isAdminEmail(em)){store.rol='Administrador';login(null,em,clave,info);return}
+      store.id={email:em,nombre:info.nombre,perfil:info.perfil};store.clave=clave;store.sesion=0;store.aprobado=0;save();waiting('Pendiente');return}
     const r=gMode==='reg'?await call({accion:'registro',email:em,nombre:nm,perfil:pf,area:ar,clave}):await call({accion:'estado',email:em,clave});
     const est=r&&r.estado;
     if(est==='Aprobado'){login(r,em,clave,{nombre:nm,perfil:pf});return}
@@ -744,7 +748,7 @@ $('gForm').addEventListener('submit',async ev=>{ev.preventDefault();const em=$('
   catch(e){gm('gMsg','No hay conexión con el registro del curso. Intente de nuevo en unos minutos.','err')}
   finally{$('gBtn').disabled=false}});
 $('gForgot').onclick=()=>gm('gMsg',REGISTRO_URL?'Pida a la jefatura de la DACD que restablezca su contraseña. Después, ingrese con una contraseña nueva: quedará guardada.':'Pida a la jefatura de la DACD que le ayude, o regístrese de nuevo en otra computadora.');
-$('gAgain').onclick=async()=>{const i=idf();if(!i||!store.clave)return;gm('gMsg2','Verificando…');
+$('gAgain').onclick=async()=>{const i=idf();if(!i||!store.clave)return;if(!REGISTRO_URL){if(isAdminEmail(i.email)){store.rol='Administrador';login(null,i.email,store.clave,i)}else gm('gMsg2','Todavía está pendiente de aprobación.');return}gm('gMsg2','Verificando…');
   try{const r=await call({accion:'estado',email:i.email,clave:store.clave});const est=r&&r.estado;
     if(est==='Aprobado')login(r,i.email,store.clave,i);else if(est==='Pendiente'||est==='Rechazado'){waiting(est);gm('gMsg2',est==='Pendiente'?'Todavía está pendiente.':'')}else gm('gMsg2','No se pudo verificar. Ingrese de nuevo con su contraseña.','err')}
   catch(e){gm('gMsg2','No hay conexión con el registro del curso.','err')}};
@@ -772,7 +776,7 @@ function localRows(){const u=localUsers(),out=[];const cur=idf();
     const s=summary(d||{}),info=u[em]||cur||{};
     out.push({correo:em,nombre:info.nombre||em,perfil:info.perfil||'',estado:'Aprobado',lecciones:s.les,simuladores:s.sim,preguntas:s.qn,nota:s.qs,laboratorio:s.lb,avance:s.pct,ultima:null})});return out}
 async function loadAdmin(){
-  if(!REGISTRO_URL){$('aMode').textContent='Modo local: como el registro del curso todavía no está conectado (Power Automate), aquí solo aparecen las personas que se registraron en esta computadora. Al conectar el flujo verá a todo el equipo.';aRows=localRows();drawAdmin();return}
+  if(!REGISTRO_URL){$('aMode').textContent='El registro central (Power Automate) todavía no está conectado: las solicitudes de las demás personas no llegan aquí y nadie más puede entrar. Al conectar el flujo verá a todo el equipo y podrá aprobarlo desde este panel.';aRows=localRows();drawAdmin();return}
   $('aMode').textContent='Datos del registro del curso en SharePoint. Use "Actualizar" para traer los cambios más recientes.';$('aMsg').textContent='Cargando…';
   try{const r=await call({accion:'listar',email:idf().email,clave:store.clave});
     if(!r||!Array.isArray(r.inscritos)){$('aMsg').textContent=r&&r.estado==='NoAutorizado'?'Su usuario no tiene rol de Administrador en la lista de inscritos.':'No se pudo leer el registro del curso.';return}
@@ -796,10 +800,10 @@ $('aCsv').onclick=()=>{const rows=[['Nombre','Correo','Perfil','Estado','Leccion
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download='avance-curso-fabric.csv';document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},500)};
 $('meChange').onclick=logout;$('gOther').onclick=logout;
 (async()=>{const i=idf();
-  if(!i||!store.sesion){if(i&&i.email){$('gEmail').value=i.email;setG('chk')}
+  if(!i||!store.sesion){if(i&&i.email){$('gEmail').value=i.email;setG('chk');if(!REGISTRO_URL&&!store.aprobado&&store.clave&&!isAdminEmail(i.email)){waiting('Pendiente');return}}
     if(i&&store.clave&&REGISTRO_URL&&!store.sesion){try{const r=await call({accion:'estado',email:i.email,clave:store.clave});if(r&&(r.estado==='Pendiente'||r.estado==='Rechazado'))waiting(r.estado);else if(r&&r.estado==='Aprobado')login(r,i.email,store.clave,i)}catch(e){}}
     return}
-  if(!REGISTRO_URL){enter();return}
+  if(!REGISTRO_URL){if(isAdminEmail(i.email)){enter();return}store.sesion=0;save();document.body.classList.add('locked');waiting('Pendiente');return}
   enter();
   try{const r=await call({accion:'estado',email:i.email,clave:store.clave||''});const est=r&&r.estado;
     if(est&&est!=='Aprobado'){store.sesion=0;store.aprobado=0;save();document.body.classList.add('locked');if(est==='Pendiente'||est==='Rechazado')waiting(est);else{$('gEmail').value=i.email;setG('chk');gm('gMsg',est==='ClaveIncorrecta'?'Su contraseña cambió. Ingrese de nuevo.':'Ingrese de nuevo.','err')}}}
