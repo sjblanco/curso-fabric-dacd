@@ -8,6 +8,7 @@ Material de estudio interactivo para el equipo de analistas y científicos de da
 | F1-01 · Introducción a la analítica de punta a punta | `f1-01.html` |
 | F1-02 · Lakehouses en Fabric | `f1-02.html` |
 | F1-03 · Data warehouses en Fabric | `f1-03.html` |
+| F1-04 · Ciencia de datos en Fabric | `f1-04.html` |
 
 Cada página de módulo se navega por pestañas (Inicio, Lecciones, Simuladores, Autoevaluación, Laboratorio, Insumos). Las pestañas se controlan con el atributo `data-tab` de cada sección; los simuladores usan `data-sub`.
 
