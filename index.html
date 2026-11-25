@@ -165,6 +165,8 @@ body.noscroll{overflow:hidden}
 @media(max-width:600px){#aDetail{border-radius:0;border-left:0;padding:0 14px 18px}}
 @media(prefers-reduced-motion:no-preference){#aDetail:not([hidden]){animation:slidein .22s ease-out}}
 @keyframes slidein{from{transform:translateX(40px);opacity:.4}to{transform:none;opacity:1}}
+.hist{background:var(--pubg);border-radius:10px;padding:8px 12px;margin:0 0 10px;font-size:14px}.hist ul{margin:4px 0 0;padding-left:1.1em}
+.tw{color:light-dark(#9a5b00,#ffc36b)}
 .tnum{font-size:14px;line-height:1.35;min-width:7.5em;font-variant-numeric:tabular-nums}
 .tnum .note{display:block;font-size:13px;margin-top:2px}
 .tname{border:0;background:none;color:var(--pu);font:inherit;font-weight:700;padding:0;text-align:left;text-decoration:underline;cursor:pointer;min-height:32px}
@@ -473,10 +475,12 @@ function startAdmin(){if(started)return;started=true;
   const C=F.CAT,cn=F.cnt;
   const ok=b=>b?'<span class="ok">✓</span>':'<span class="no">✗</span>';
   const pend='<span class="pend">○</span>';
-  function modData(d,m){return m==='f101'?{les:d.les||{},lab:d.lab||{},qa:d.qa||{},lq:d.lq||{},sims:d.sims||{}}:((d.mods&&d.mods[m])||{les:{},lab:{},qa:{},lq:{},sims:{}})}
+  function modData(d,m){const r=m==='f101'?{les:d.les||{},lab:d.lab||{},qa:d.qa||{},lq:d.lq||{},sims:d.sims||{},intentos:d.intentos}:((d.mods&&d.mods[m])||{les:{},lab:{},qa:{},lq:{},sims:{}});const t=r.intentos||{};r.tries={qz:Array.isArray(t.qz)?t.qz:[],lq:t.lq||{},sim:t.sim||{}};return r}
+  const sumv=o=>Object.values(o||{}).reduce((a,v)=>a+(+v||0),0);
   function simRows(m,sm){sm=sm||{};
     if(m==='f101')return[['Un lago, muchos motores',cn(sm.s1e)>=4&&!!sm.s1o,`${cn(sm.s1e)} de 4 motores probados${sm.s1o?' · vio la vista de silos':''}`],['Roles del workspace',cn(sm.s2)>=4,`${cn(sm.s2)} de 4 roles revisados`],['Shortcut o copia',cn(sm.s3)>=4,`${cn(sm.s3)} de 4 escenarios correctos`],['Cargas de trabajo',cn(sm.s4)>=7,`${cn(sm.s4)} de 7 tareas correctas`]];
     const a=sm.s1||{};return[['Explorador del lakehouse',!!(a.load&&a.sel&&a.ins),[a.load?'cargó el CSV a tabla':'no cargó el CSV',a.sel?'consultó con SELECT':'sin SELECT',a.ins?'probó el INSERT':'sin INSERT'].join(' · ')],['Cargar datos',cn(sm.s2)>=5,`${cn(sm.s2)} de 5 correctos`],['Consultar',cn(sm.s3)>=4,`${cn(sm.s3)} de 4 correctos`],['Lakehouse o warehouse',cn(sm.s4)>=4,`${cn(sm.s4)} de 4 correctos`]]}
+  const SIMK={f101:[null,null,'s3','s4'],f102:[null,'s2','s3','s4']};
   function detail(){const x=rows.find(r=>r.em===detEm);const box=$('aDetail');if(!x){box.hidden=true;$('aDetailBg').hidden=true;document.body.classList.remove('noscroll');return}
     const md=modData(x.d||{},detMod),c=C[detMod],qa=md.qa||{};
     const ans=Object.keys(qa).length,good=Object.keys(qa).filter(k=>c.qz[k]&&qa[k]===c.qz[k][2]).length;
@@ -488,11 +492,11 @@ function startAdmin(){if(started)return;started=true;
         <div class="dnav">${pv?`<button class="mini" data-go="${esc(pv.em)}" title="${esc(pv.nombre)}">← Anterior</button>`:''}${nx?`<button class="mini" data-go="${esc(nx.em)}" title="${esc(nx.nombre)}">Siguiente →</button>`:''}<button class="mini" id="detClose">Cerrar ✕</button></div></div>
       <p class="note" style="margin:8px 0 0">Último ingreso: ${esc(fmt(x.ing))} · Última actividad: ${esc(fmt(x.t))} · Solicitó: ${esc(fmt(x.sol))}</p>
       <div class="seg" role="group" aria-label="Módulo" id="detTabs">${tab('f101','F1-01 · '+x.s.pct+'%')}${tab('f102','F1-02 · '+x.s2.pct+'%')}</div></div>
-      <div class="kpis">${[['Avance',sm.pct+'%'],['Lecciones',sm.les+' / '+c.les.length],['Simuladores',sm.sim+' / 4'],['Autoevaluación',good+' bien · '+(ans-good)+' mal'],['Laboratorio',sm.lb+' / '+c.lab.length]].map(q=>`<div class="kpi"><small>${q[0]}</small><strong style="font-size:20px">${esc(q[1])}</strong></div>`).join('')}</div>
+      <div class="kpis">${[['Avance',sm.pct+'%'],['Lecciones',sm.les+' / '+c.les.length],['Simuladores',sm.sim+' / 4'],['Autoevaluación',good+' bien · '+(ans-good)+' mal'],['Laboratorio',sm.lb+' / '+c.lab.length],['Reintentos',(md.tries.qz.length)+' autoeval. · '+(sumv(md.tries.lq)+Object.values(md.tries.sim).reduce((a,m)=>a+sumv(m),0))+' errores']].map(q=>`<div class="kpi"><small>${q[0]}</small><strong style="font-size:20px">${esc(q[1])}</strong></div>`).join('')}</div>
       <div class="dgrid">
-        <div><h4>Autoevaluación · ${good} correctas de ${ans} respondidas</h4><ol class="dq">${c.qz.map((q,i)=>{const a=qa[i];if(a===undefined)return `<li>${pend} ${esc(q[0])}<br><span class="note">Sin responder</span></li>`;const right=a===q[2];return `<li class="${right?'r':'w'}">${ok(right)} ${esc(q[0])}<br><span class="note">Respondió: <b>${esc(q[1][a]??'—')}</b>${right?'':' · Correcta: <b>'+esc(q[1][q[2]])+'</b>'}</span></li>`}).join('')}</ol></div>
-        <div><h4>Lecciones · ${cn(md.les)} de ${c.les.length} leídas</h4><ul class="dl">${c.les.map((t,i)=>`<li>${md.les[i]?ok(1):pend} ${esc((i+1)+'. '+t)}<br><span class="note">Pregunta de comprobación: ${md.lq&&md.lq[i]?'respondida bien':'sin responder bien'}</span></li>`).join('')}</ul>
-          <h4 style="margin-top:14px">Simuladores</h4><ul class="dl">${simRows(detMod,md.sims).map(s=>`<li>${s[1]?ok(1):pend} <b>${esc(s[0])}</b><br><span class="note">${esc(s[2])}</span></li>`).join('')}</ul></div>
+        <div><h4>Autoevaluación · intento ${md.tries.qz.length+1}: ${good} correctas de ${ans} respondidas</h4>${md.tries.qz.length?`<div class="hist"><b>Intentos anteriores (${md.tries.qz.length})</b><ul>${md.tries.qz.map((a,n)=>`<li>Intento ${n+1} · ${esc(new Date(a.t).toLocaleDateString('es-CR',{day:'2-digit',month:'short'})+' '+new Date(a.t).toLocaleTimeString('es-CR',{hour:'2-digit',minute:'2-digit'}))} · <b>${+a.ok||0} de ${+a.resp||0}</b> correctas</li>`).join('')}</ul></div>`:'<p class="note" style="margin:0 0 8px">Sin reintentos.</p>'}<ol class="dq">${c.qz.map((q,i)=>{const a=qa[i];if(a===undefined)return `<li>${pend} ${esc(q[0])}<br><span class="note">Sin responder</span></li>`;const right=a===q[2];return `<li class="${right?'r':'w'}">${ok(right)} ${esc(q[0])}<br><span class="note">Respondió: <b>${esc(q[1][a]??'—')}</b>${right?'':' · Correcta: <b>'+esc(q[1][q[2]])+'</b>'}</span></li>`}).join('')}</ol></div>
+        <div><h4>Lecciones · ${cn(md.les)} de ${c.les.length} leídas</h4><ul class="dl">${c.les.map((t,i)=>`<li>${md.les[i]?ok(1):pend} ${esc((i+1)+'. '+t)}<br><span class="note">Pregunta de comprobación: ${md.lq&&md.lq[i]?'respondida bien':'sin responder bien'}${md.tries.lq[i]?` · <b class="tw">${md.tries.lq[i]} ${+md.tries.lq[i]===1?'intento fallido':'intentos fallidos'}</b>`:''}</span></li>`).join('')}</ul>
+          <h4 style="margin-top:14px">Simuladores</h4><ul class="dl">${simRows(detMod,md.sims).map((s,j)=>{const key=SIMK[detMod][j],w=key?sumv(md.tries.sim[key]):0;return `<li>${s[1]?ok(1):pend} <b>${esc(s[0])}</b><br><span class="note">${esc(s[2])}${key?(w?` · <b class="tw">${w} ${w===1?'respuesta equivocada':'respuestas equivocadas'}</b>`:' · sin errores'):''}</span></li>`}).join('')}</ul></div>
         <div><h4>Laboratorio · ${cn(md.lab)} de ${c.lab.length} pasos</h4><ul class="dl">${c.lab.map((t,i)=>`<li>${md.lab[i]?ok(1):pend} ${esc((i+1)+'. '+t)}</li>`).join('')}</ul></div>
       </div>`}
   const openDet=em=>{detEm=em;detail();$('aDetailBg').hidden=false;document.body.classList.add('noscroll');$('aDetail').scrollTop=0;const c=$('detClose');if(c)c.focus()};

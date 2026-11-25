@@ -55,7 +55,7 @@ service cloud.firestore {
         && request.auth.uid == uid
         && (isApproved() || isAdmin())
         && request.resource.data.email == myEmail()
-        && request.resource.data.keys().hasOnly(['email', 'nombre', 'perfil', 'les', 'lab', 'qa', 'lq', 'sims', 'mods', 'updatedAt']);
+        && request.resource.data.keys().hasOnly(['email', 'nombre', 'perfil', 'les', 'lab', 'qa', 'lq', 'sims', 'intentos', 'mods', 'updatedAt']);
       allow delete: if isAdmin();
     }
 

@@ -405,6 +405,9 @@ const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'
 const KEY='f102';
 let S={};try{S=JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){S={}}
 ['les','lab','qa','lq'].forEach(k=>{S[k]=S[k]||{}});S.sims=S.sims||{};['s1','s2','s3','s4'].forEach(k=>{S.sims[k]=S.sims[k]||{}});
+if(!S.intentos)S.intentos={};['qz'].forEach(k=>{S.intentos[k]=S.intentos[k]||[]});['lq','sim'].forEach(k=>{S.intentos[k]=S.intentos[k]||{}});
+const bump=(o,k)=>{o[k]=(o[k]||0)+1};
+const bumpSim=(s,i)=>{const m=S.intentos.sim;m[s]=m[s]||{};bump(m[s],i)};
 let pushRemote=()=>{},remoteT=null;
 const cnt=o=>Object.values(o||{}).filter(Boolean).length;
 const N={les:7,sim:4,qz:10,lab:10};
@@ -460,7 +463,7 @@ function drawSim(k){const sm=SIMS[k],done=S.sims[k];
 function simProg(k){const n=cnt(S.sims[k]),t=SIMS[k].items.length;$(k+'Bar').style.width=(n/t*100)+'%';$(k+'Score').textContent=n+' de '+t+' correctas'+(n===t?'. ¡Completo!':'')}
 ['s2','s3','s4'].forEach(k=>{drawSim(k);$(k).addEventListener('click',e=>{const b=e.target.closest('button[data-o]');if(!b)return;const g=b.parentElement,i=+g.dataset.i,it=SIMS[k].items[i],ok=b.dataset.o===it[1],f=$(k+'f'+i);
   if(ok){g.querySelectorAll('button').forEach(x=>{x.className=x===b?'right':'';x.disabled=x!==b});S.sims[k][i]=1;f.className='fb show good';f.textContent='Correcto. '+it[2];save();simProg(k)}
-  else{b.className='wrong';f.className='fb show bad';f.textContent='No es la mejor opción. Revise las pistas e intente de nuevo.'}})});
+  else{b.className='wrong';f.className='fb show bad';f.textContent='No es la mejor opción. Revise las pistas e intente de nuevo.';bumpSim(k,i);save()}})});
 
 /* ===== Lecciones ===== */
 const LES=[
@@ -530,7 +533,7 @@ function drawLessons(){$('lessons').innerHTML=LES.map((l,i)=>`<article class="le
  <div class="mc"><p>Compruebe su comprensión: ${esc(l.q[0])}</p><div class="choices" data-l="${i}">${l.q[1].map((o,j)=>`<button data-j="${j}" class="${S.lq[i]&&j===l.q[2]?'right':''}">${esc(o)}</button>`).join('')}</div><div class="fb ${S.lq[i]?'show good':''}" id="lf${i}">${S.lq[i]?esc(l.q[3]):''}</div>
  <label style="display:flex;gap:10px;align-items:center;margin-top:12px;cursor:pointer;min-height:44px"><input type="checkbox" data-done="${i}" ${done[i]?'checked':''} style="width:22px;height:22px;accent-color:var(--or)"> Marcar la lección como leída</label></div></article>`).join('');lesProg()}
 $('lessons').addEventListener('click',ev=>{const b=ev.target.closest('.choices button');if(!b)return;const g=b.parentElement,i=+g.dataset.l,q=LES[i].q,ok=+b.dataset.j===q[2],f=$('lf'+i);
-  if(ok){g.querySelectorAll('button').forEach(x=>{x.className=x===b?'right':''});f.className='fb show good';f.textContent=q[3];S.lq[i]=1;save()}else{b.className='wrong';f.className='fb show bad';f.textContent='No es la respuesta correcta. Vuelva a leer los párrafos de la izquierda e intente de nuevo.'}});
+  if(ok){g.querySelectorAll('button').forEach(x=>{x.className=x===b?'right':''});f.className='fb show good';f.textContent=q[3];S.lq[i]=1;save()}else{bump(S.intentos.lq,i);save();b.className='wrong';f.className='fb show bad';f.textContent='No es la respuesta correcta. Vuelva a leer los párrafos de la izquierda e intente de nuevo.'}});
 $('lessons').addEventListener('change',ev=>{const c=ev.target;if(c.dataset.done===undefined)return;done[c.dataset.done]=c.checked;save();lesProg()});
 drawLessons();
 
@@ -556,7 +559,7 @@ function drawQ(){const q=QZ[qi],ans=qa[qi];
   $('qPrev').disabled=qi===0;$('qNext').disabled=qi===QZ.length-1}
 $('qBox').addEventListener('click',ev=>{const b=ev.target.closest('#qCh button');if(!b||qa[qi]!==undefined)return;qa[qi]=+b.dataset.i;save();drawQ()});
 $('qPrev').onclick=()=>{if(qi>0){qi--;drawQ()}};$('qNext').onclick=()=>{if(qi<QZ.length-1){qi++;drawQ()}};
-$('qReset').onclick=()=>{for(const k in qa)delete qa[k];save();qi=0;drawQ()};
+$('qReset').onclick=()=>{const n=Object.keys(qa).length;if(n){S.intentos.qz.push({t:Date.now(),ok:Object.keys(qa).filter(k=>QZ[k]&&qa[k]===QZ[k][2]).length,resp:n,ans:JSON.parse(JSON.stringify(qa))})}for(const k in qa)delete qa[k];save();qi=0;drawQ()};
 drawQ();
 
 /* ===== Laboratorio ===== */
@@ -585,11 +588,13 @@ const GL=[['Lakehouse','Elemento de Fabric que guarda archivos y tablas Delta y 
 $('glos').innerHTML=GL.map(g=>`<dt>${esc(g[0])}</dt><dd>${esc(g[1])}</dd>`).join('');
 
 /* ===== Restaurar y exponer ===== */
-function mergeIn(r){r=r||{};['les','lab','qa','lq'].forEach(k=>{const src=r[k];if(src&&typeof src==='object')Object.keys(src).forEach(x=>{if(S[k][x]===undefined||S[k][x]===false)S[k][x]=src[x]})});
+function mergeTries(T,src){if(!src||typeof src!=='object')return;const seen=new Set((T.qz||[]).map(a=>a.t));(src.qz||[]).forEach(a=>{if(a&&!seen.has(a.t)){T.qz.push(a);seen.add(a.t)}});T.qz.sort((a,b)=>a.t-b.t);
+  Object.entries(src.lq||{}).forEach(([k,v])=>{T.lq[k]=Math.max(T.lq[k]||0,+v||0)});Object.entries(src.sim||{}).forEach(([s,m])=>{T.sim[s]=T.sim[s]||{};Object.entries(m||{}).forEach(([k,v])=>{T.sim[s][k]=Math.max(T.sim[s][k]||0,+v||0)})})}
+function mergeIn(r){r=r||{};mergeTries(S.intentos,r.intentos);['les','lab','qa','lq'].forEach(k=>{const src=r[k];if(src&&typeof src==='object')Object.keys(src).forEach(x=>{if(S[k][x]===undefined||S[k][x]===false)S[k][x]=src[x]})});
   const rs=r.sims||{};['s1','s2','s3','s4'].forEach(k=>{if(rs[k]&&typeof rs[k]==='object')Object.assign(S.sims[k],rs[k])})}
 function restoreAll(){drawLessons();drawLab();drawQ();drawLh();['s2','s3','s4'].forEach(drawSim);myProg()}
-function resetLocal(){['les','lab','qa','lq'].forEach(k=>{for(const x in S[k])delete S[k][x]});['s1','s2','s3','s4'].forEach(k=>{for(const x in S.sims[k])delete S.sims[k][x]});restoreAll()}
-function payload(){const s=summary(S);return JSON.parse(JSON.stringify({les:S.les,lab:S.lab,qa:S.qa,lq:S.lq,sims:S.sims,pct:s.pct,qn:s.qn,qs:s.qs,lecciones:s.les,simuladores:s.sim,laboratorio:s.lb}))}
+function resetLocal(){S.intentos={qz:[],lq:{},sim:{}};['les','lab','qa','lq'].forEach(k=>{for(const x in S[k])delete S[k][x]});['s1','s2','s3','s4'].forEach(k=>{for(const x in S.sims[k])delete S.sims[k][x]});restoreAll()}
+function payload(){const s=summary(S);return JSON.parse(JSON.stringify({les:S.les,lab:S.lab,qa:S.qa,lq:S.lq,sims:S.sims,intentos:S.intentos,pct:s.pct,qn:s.qn,qs:s.qs,lecciones:s.les,simuladores:s.sim,laboratorio:s.lb}))}
 myProg();
 window.F102={S,save,sync,mergeIn,restoreAll,resetLocal,payload,LES,QZ,LAB,setPush:f=>{pushRemote=f}};
 }

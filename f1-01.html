@@ -442,6 +442,9 @@ const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'
 let store={};
 try{store=JSON.parse(localStorage.getItem('f101')||'{}')}catch(e){store={}}
 store.sims=store.sims||{};['s1e','s2','s3','s4'].forEach(k=>{store.sims[k]=store.sims[k]||{}});
+if(!store.intentos)store.intentos={};['qz'].forEach(k=>{store.intentos[k]=store.intentos[k]||[]});['lq','sim'].forEach(k=>{store.intentos[k]=store.intentos[k]||{}});
+const bump=(o,k)=>{o[k]=(o[k]||0)+1};
+const bumpSim=(s,i)=>{const m=store.intentos.sim;m[s]=m[s]||{};bump(m[s],i)};
 let remoteTimer=null,pushRemote=()=>{};
 const save=()=>{try{localStorage.setItem('f101',JSON.stringify(store))}catch(e){}try{const c=document.querySelector('#modList .mod.cur');if(c&&typeof summary==='function'){const p=summary(store).pct;c.querySelector('.bar i').style.width=p+'%';c.querySelector('span').textContent=p+'% de avance'}}catch(e){}clearTimeout(remoteTimer);remoteTimer=setTimeout(()=>pushRemote(),900);if(typeof myProg==='function')myProg()};
 
@@ -567,7 +570,7 @@ $('lessons').innerHTML=LES.map((l,i)=>`<article class="les" id="leccion-${i+1}">
 $('lessons').addEventListener('click',ev=>{const b=ev.target.closest('.choices button');if(!b)return;const g=b.parentElement,i=+g.dataset.l,q=LES[i].q,ok=+b.dataset.j===q[2];
   g.querySelectorAll('button').forEach(x=>{x.className=+x.dataset.j===q[2]?(ok||x===b?'right':''):(x===b?'wrong':'')});
   if(!ok)g.querySelectorAll('button').forEach(x=>{if(+x.dataset.j===q[2])x.className=''});
-  const f=$('lf'+i);f.className='fb show '+(ok?'good':'bad');f.textContent=ok?q[3]:'No es la respuesta correcta. Vuelva a leer los párrafos de la izquierda e intente de nuevo.';if(ok){store.lq[i]=1;save()}});
+  const f=$('lf'+i);f.className='fb show '+(ok?'good':'bad');f.textContent=ok?q[3]:'No es la respuesta correcta. Vuelva a leer los párrafos de la izquierda e intente de nuevo.';if(ok){store.lq[i]=1;save()}else{bump(store.intentos.lq,i);save()}});
 $('lessons').addEventListener('change',ev=>{const c=ev.target;if(c.dataset.done===undefined)return;done[c.dataset.done]=c.checked;store.les=done;save();lesProg()});
 lesProg();
 $('csvCopy').onclick=()=>{try{navigator.clipboard.writeText($('csv').textContent).then(()=>{$('csvMsg').textContent='Datos copiados. Péguelos en el Bloc de notas y guarde como captacion_demo.csv.'},()=>{$('csvMsg').textContent='No se pudo copiar automáticamente: seleccione el texto y cópielo manualmente.'})}catch(e){$('csvMsg').textContent='No se pudo copiar automáticamente: seleccione el texto y cópielo manualmente.'}};
@@ -609,7 +612,7 @@ const SC=[
 $('scen').innerHTML=SC.map((c,i)=>`<div class="white"><h3>${esc(c.t)}</h3><p style="margin:0">${esc(c.d)}</p><div class="choices" data-i="${i}">${['Shortcut','Mirroring','Copiar y transformar'].map(o=>`<button data-o="${o}">${o}</button>`).join('')}</div><div class="fb" id="sf${i}"></div></div>`).join('');
 $('scen').addEventListener('click',ev=>{const b=ev.target.closest('button');if(!b)return;const g=b.parentElement,i=+g.dataset.i,c=SC[i],ok=b.dataset.o===c.a;
   g.querySelectorAll('button').forEach(x=>{x.className=x.dataset.o===c.a?'right':(x===b?'wrong':'')});
-  const f=$('sf'+i);f.className='fb show '+(ok?'good':'bad');f.textContent=(ok?'Correcto. ':'La mejor opción es '+c.a+'. ')+c.why;if(ok){store.sims.s3[i]=1;save()}});
+  const f=$('sf'+i);f.className='fb show '+(ok?'good':'bad');f.textContent=(ok?'Correcto. ':'La mejor opción es '+c.a+'. ')+c.why;if(ok){store.sims.s3[i]=1;save()}else{bumpSim('s3',i);save()}});
 function restoreScen(){Object.keys(store.sims.s3).forEach(i=>{const g=document.querySelector('#scen .choices[data-i="'+i+'"]'),c=SC[i];if(!g||!c)return;g.querySelectorAll('button').forEach(x=>{x.className=x.dataset.o===c.a?'right':''});const f=$('sf'+i);f.className='fb show good';f.textContent='Correcto. '+c.why})}
 restoreScen();
 
@@ -627,7 +630,7 @@ const WT=[
 const wDone=store.sims.s4;
 $('works').innerHTML=WT.map((w,i)=>`<div class="white"><h3>${esc(w[0])}</h3><div class="choices" data-i="${i}">${WL.map(o=>`<button data-o="${o}">${o}</button>`).join('')}</div></div>`).join('');
 $('works').addEventListener('click',ev=>{const b=ev.target.closest('button');if(!b)return;const g=b.parentElement,i=+g.dataset.i,ok=b.dataset.o===WT[i][1];
-  if(ok){g.querySelectorAll('button').forEach(x=>{x.className=x===b?'right':'';x.disabled=x!==b});wDone[i]=1;save()}else b.className='wrong';
+  if(ok){g.querySelectorAll('button').forEach(x=>{x.className=x===b?'right':'';x.disabled=x!==b});wDone[i]=1;save()}else{b.className='wrong';bumpSim('s4',i);save()}
   wProg()});
 function wProg(){const n=Object.keys(wDone).length;$('wBar').style.width=(n/WT.length*100)+'%';$('wScore').textContent=n+' de '+WT.length+' correctas'+(n===WT.length?'. ¡Completo!':'')}
 function restoreWorks(){Object.keys(wDone).forEach(i=>{const g=document.querySelector('#works .choices[data-i="'+i+'"]');if(!g||!WT[i])return;g.querySelectorAll('button').forEach(x=>{const r=x.dataset.o===WT[i][1];x.className=r?'right':'';x.disabled=!r})});wProg()}
@@ -658,7 +661,7 @@ function drawQ(){
 }
 $('qBox').addEventListener('click',ev=>{const b=ev.target.closest('#qCh button');if(!b||qa[qi]!==undefined)return;qa[qi]=+b.dataset.i;store.qa=qa;save();drawQ()});
 $('qPrev').onclick=()=>{if(qi>0){qi--;drawQ()}};$('qNext').onclick=()=>{if(qi<QZ.length-1){qi++;drawQ()}};
-$('qReset').onclick=()=>{for(const k in qa)delete qa[k];store.qa=qa;save();qi=0;drawQ()};
+$('qReset').onclick=()=>{const n=Object.keys(qa).length;if(n){store.intentos.qz.push({t:Date.now(),ok:Object.keys(qa).filter(k=>QZ[k]&&qa[k]===QZ[k][2]).length,resp:n,ans:JSON.parse(JSON.stringify(qa))})}for(const k in qa)delete qa[k];store.qa=qa;save();qi=0;drawQ()};
 drawQ();
 
 /* Laboratorio */
@@ -700,7 +703,9 @@ myProg();
 $('mePerfil').value=store.perfil||'';
 $('mePerfil').onchange=e=>{store.perfil=e.target.value;save()};
 const sync=t=>{$('meSync').textContent=t};
-function mergeIn(r){['les','lab','qa','lq'].forEach(k=>{const src=r[k];if(src&&typeof src==='object')Object.keys(src).forEach(x=>{if(store[k][x]===undefined||store[k][x]===false)store[k][x]=src[x]})});
+function mergeTries(T,src){if(!src||typeof src!=='object')return;const seen=new Set((T.qz||[]).map(a=>a.t));(src.qz||[]).forEach(a=>{if(a&&!seen.has(a.t)){T.qz.push(a);seen.add(a.t)}});T.qz.sort((a,b)=>a.t-b.t);
+  Object.entries(src.lq||{}).forEach(([k,v])=>{T.lq[k]=Math.max(T.lq[k]||0,+v||0)});Object.entries(src.sim||{}).forEach(([s,m])=>{T.sim[s]=T.sim[s]||{};Object.entries(m||{}).forEach(([k,v])=>{T.sim[s][k]=Math.max(T.sim[s][k]||0,+v||0)})})}
+function mergeIn(r){mergeTries(store.intentos,r&&r.intentos);['les','lab','qa','lq'].forEach(k=>{const src=r[k];if(src&&typeof src==='object')Object.keys(src).forEach(x=>{if(store[k][x]===undefined||store[k][x]===false)store[k][x]=src[x]})});
   const rs=r.sims||{};['s1e','s2','s3','s4'].forEach(k=>{if(rs[k]&&typeof rs[k]==='object')Object.assign(store.sims[k],rs[k])});if(rs.s1o)store.sims.s1o=1;
   if(!store.perfil&&typeof r.perfil==='string')store.perfil=r.perfil}
 function restoreAll(){document.querySelectorAll('[data-done]').forEach(c=>{c.checked=!!done[c.dataset.done]});lesProg();drawLab();drawQ();restoreScen();restoreWorks();$('mePerfil').value=store.perfil||'';myProg()}
@@ -725,7 +730,7 @@ function renderModulos(mods){mods=mods||{};const own=summary(store).pct;
   $('modList').innerHTML=MODS.map(m=>{const pct=m.id==='f101'?own:(mods[m.id]&&typeof mods[m.id].pct==='number'?mods[m.id].pct:0);
     if(!m.url)return `<div class="mod lock"><small>${m.c} · Próximamente</small><b>${esc(m.t)}</b><span>Se habilitará pronto.</span></div>`;
     return `<a class="mod ${m.cur?'cur':''}" href="${m.url}"><small>${m.c}${m.cur?' · Está aquí':''}</small><b>${esc(m.t)}</b>${pbar(pct,100)}<span>${pct}% de avance</span></a>`}).join('')}
-function resetLocal(){['les','lab','qa','lq'].forEach(k=>{for(const x in store[k])delete store[k][x]});['s1e','s2','s3','s4'].forEach(k=>{for(const x in store.sims[k])delete store.sims[k][x]});delete store.sims.s1o;store.perfil='';restoreAll()}
+function resetLocal(){store.intentos={qz:[],lq:{},sim:{}};['les','lab','qa','lq'].forEach(k=>{for(const x in store[k])delete store[k][x]});['s1e','s2','s3','s4'].forEach(k=>{for(const x in store.sims[k])delete store.sims[k][x]});delete store.sims.s1o;store.perfil='';restoreAll()}
 window.F101={store,save,mergeIn,restoreAll,resetLocal,sync,summary,myProg,esc,pbar,cnt,simsDone,QZ,LES,LAB,renderRuta,renderModulos,setPush:f=>{pushRemote=f}};
 }
 </script>
@@ -828,7 +833,7 @@ async function enter(u,email,p,admin){
   let writing=false,pending=false;
   F.setPush(async()=>{pending=true;if(writing)return;writing=true;
     while(pending){pending=false;F.sync('Guardando…');
-      try{await setDoc(ref,{...JSON.parse(JSON.stringify({email,nombre,perfil,les:S.les,lab:S.lab,qa:S.qa,lq:S.lq,sims:S.sims})),updatedAt:serverTimestamp()},{mergeFields:['email','nombre','perfil','les','lab','qa','lq','sims','updatedAt']});F.sync('Avance guardado en el registro del curso.')}
+      try{await setDoc(ref,{...JSON.parse(JSON.stringify({email,nombre,perfil,les:S.les,lab:S.lab,qa:S.qa,lq:S.lq,sims:S.sims,intentos:S.intentos})),updatedAt:serverTimestamp()},{mergeFields:['email','nombre','perfil','les','lab','qa','lq','sims','intentos','updatedAt']});F.sync('Avance guardado en el registro del curso.')}
       catch(e){F.sync(e&&e.code==='permission-denied'?'No tiene permiso para guardar: su inscripción no está aprobada.':'No se pudo guardar ahora; se volverá a intentar con su próximo avance.')}}
     writing=false});
   F.save();F.sync('Conectado. Su avance se guarda automáticamente.');
