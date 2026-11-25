@@ -10,6 +10,7 @@ Material de estudio interactivo para el equipo de analistas y científicos de da
 | F1-03 · Data warehouses en Fabric | `f1-03.html` |
 | F1-04 · Ciencia de datos en Fabric | `f1-04.html` |
 | F1-05 · Modelos semánticos a escala | `f1-05.html` |
+| F1-06 · Fundamentos de Fabric IQ | `f1-06.html` |
 
 Cada página de módulo se navega por pestañas (Inicio, Lecciones, Simuladores, Autoevaluación, Laboratorio, Insumos). Las pestañas se controlan con el atributo `data-tab` de cada sección; los simuladores usan `data-sub`.
 
