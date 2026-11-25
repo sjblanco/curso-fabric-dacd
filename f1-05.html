@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fabric F1-05 modelos semánticos</title>
+<script>try{if(localStorage.getItem("fabSession"))document.documentElement.classList.add("hasSession")}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;800&family=Source+Sans+3:wght@400;600;700&display=swap">
+<style>
+/* VOICE everyday learning: a practice workbook for the DACD team
+   IDEA a star-schema workbench: sort flat columns into facts and dimensions
+   PICTURE live explorer where a CSV becomes a Delta table and the SQL endpoint answers
+   COLOUR Banco Popular: white ground, orange #F47920 leads, purple #7C51A1 supports, green/yellow for feedback
+   TYPE Montserrat 800 display + Source Sans 3 text
+   LAYOUT title over the lake simulator full width; then guide, three simulators, quiz, lab checklist, resources; stacks on phone */
+:root{color-scheme:light dark;--bg:light-dark(#ffffff,#16121b);--ink:light-dark(#2a2530,#f1eef5);--soft:light-dark(#666666,#b9b2c4);--panel:light-dark(#EDEEF4,#231d2b);--line:light-dark(#d9dbe6,#3a3245);--or:#F47920;--pu:light-dark(#7C51A1,#b48fdc);--gr:light-dark(#3f8f2a,#8fd877);--grbg:light-dark(#e6f5df,#1d3318);--rd:light-dark(#b3261e,#ff8a80);--rdbg:light-dark(#fbe4e2,#3a1a18);--ye:#FAA61A;--orbg:light-dark(#fff1e6,#3a2414);--pubg:light-dark(#f1eaf8,#2a1f38)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+html{scroll-padding-top:72px}
+body{margin:0;background:var(--bg);color:var(--ink);font:16.5px/1.55 "Source Sans 3",system-ui,sans-serif;overflow-x:clip}
+h1,h2,h3{font-family:Montserrat,system-ui,sans-serif;line-height:1.08;letter-spacing:-.02em;margin:0;text-wrap:balance}
+h1{font-size:clamp(32px,5vw,50px);font-weight:800}
+h2{font-size:clamp(24px,3vw,32px);font-weight:800;margin-bottom:10px}
+h3{font-size:18px;font-weight:600}
+p{margin:.4em 0 .8em;max-width:70ch}
+a{color:var(--pu)}
+.band{padding:clamp(28px,4vw,56px) max(5vw,16px)}
+.wrap{max-width:1240px;margin:0 auto}
+.top{background:var(--orbg);border-bottom:6px solid var(--or)}
+.lead{font-size:18px;color:var(--soft);max-width:62ch}
+.nav{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:14px;font-weight:600}
+.nav a{text-decoration:none;color:var(--ink);border-bottom:2px solid var(--or);padding:4px 0}
+.navbar{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:3px solid var(--or);box-shadow:0 2px 10px rgba(60,30,90,.06)}
+.navin{display:flex;align-items:center;gap:16px;max-width:1240px;margin-inline:auto;padding:8px max(5vw,16px)}
+.brand{flex:none;display:flex;align-items:center;gap:8px;text-decoration:none;color:var(--ink);font:800 15px Montserrat,sans-serif;white-space:nowrap}
+.brand i{font-style:normal;background:var(--pu);color:#fff;border-radius:7px;padding:3px 8px;font-size:13px}
+.navbar .nav{margin:0;padding:0;flex:1;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:thin;gap:4px}
+.navbar .nav a{flex:none;border:0;border-radius:8px;padding:8px 10px;font-size:15px;white-space:nowrap}
+.navbar .nav a:hover{background:var(--orbg)}
+@media(max-width:600px){.navin{gap:10px}.brand span{display:none}}
+
+.sim{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:24px;margin-top:22px;align-items:stretch}
+@media(max-width:760px){.sim{grid-template-columns:minmax(0,1fr)}}
+.panel{background:var(--panel);border-radius:14px;padding:18px}
+.white{background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:18px}
+.seg{display:inline-flex;flex-wrap:wrap;background:var(--bg);border:1px solid var(--line);border-radius:999px;padding:4px;gap:4px}
+button{font:inherit;cursor:pointer}
+.seg button{border:0;background:transparent;color:var(--ink);padding:10px 16px;border-radius:999px;min-height:44px;font-weight:600}
+.seg button[aria-pressed=true]{background:var(--or);color:#fff}
+.engines{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:14px}
+.eng{border:2px solid var(--line);background:var(--bg);color:var(--ink);border-radius:12px;padding:12px;text-align:left;min-height:64px}
+.eng b{display:block;font-family:Montserrat,sans-serif;font-size:15px}
+.eng span{font-size:14px;color:var(--soft)}
+.eng[aria-pressed=true]{border-color:var(--or);background:var(--orbg)}
+button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid var(--pu);outline-offset:2px}
+.lake{position:relative;min-height:330px;border-radius:14px;overflow:hidden;background:linear-gradient(180deg,light-dark(#f7f2fb,#211a2a),light-dark(#e9ddf4,#2b1f3a))}
+.lake svg{position:absolute;inset:0;width:100%;height:100%}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(9em,1fr));gap:10px;margin-top:12px}
+.kpi{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.kpi small{display:block;color:var(--soft);font-size:14px}
+.kpi strong{font:800 clamp(24px,3vw,30px) Montserrat,sans-serif;white-space:nowrap}
+pre{background:light-dark(#2a2530,#0f0c13);color:#f4eefa;border-radius:12px;padding:14px;overflow-x:auto;font-size:14px;margin:10px 0 0}
+.note{font-size:14px;color:var(--soft)}
+.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,17em),1fr));gap:14px;margin-top:16px}
+.card{background:var(--panel);border-radius:14px;padding:16px}
+.card h3{color:var(--pu);margin-bottom:6px}
+.card p{margin:0;font-size:16px}
+.alt{background:var(--panel)}
+.alt .card,.alt .white{background:var(--bg)}
+.obj{counter-reset:o;list-style:none;padding:0;display:grid;gap:8px;margin:12px 0 0}
+.obj li{counter-increment:o;display:grid;grid-template-columns:2.2em 1fr;align-items:start}
+.obj li::before{content:counter(o);font:800 22px Montserrat,sans-serif;color:var(--or)}
+table{border-collapse:collapse;width:100%;font-size:15px}
+th,td{padding:9px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{font-weight:700}
+.scroll{overflow-x:auto}
+.ok{color:var(--gr);font-weight:700}.no{color:var(--rd);font-weight:700}
+.choices{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.choices button{border:2px solid var(--line);background:var(--bg);color:var(--ink);border-radius:10px;padding:10px 14px;min-height:44px;font-weight:600}
+.choices button.right{border-color:var(--gr);background:var(--grbg)}
+.choices button.wrong{border-color:var(--rd);background:var(--rdbg)}
+.fb{margin-top:10px;padding:10px 12px;border-radius:10px;font-size:16px;display:none}
+.fb.show{display:block}.fb.good{background:var(--grbg)}.fb.bad{background:var(--rdbg)}
+.scen{display:grid;gap:14px;margin-top:16px}
+.scen .white h3{margin-bottom:4px}
+.bar{height:12px;background:var(--line);border-radius:99px;overflow:hidden;margin:8px 0}
+.bar i{display:block;height:100%;background:var(--or);width:0;transition:width .4s}
+.q{display:none}.q.on{display:block}
+.qhead{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:baseline}
+.btn{border:0;background:var(--pu);color:#fff;border-radius:10px;padding:12px 18px;min-height:44px;font-weight:700}
+.btn.sec{background:transparent;color:var(--pu);border:2px solid var(--pu)}
+.check{list-style:none;padding:0;margin:14px 0 0;display:grid;gap:10px}
+.check li{background:var(--bg);border:1px solid var(--line);border-radius:12px}
+.check label{display:grid;grid-template-columns:28px 1fr;gap:10px;align-items:start;padding:12px;cursor:pointer}
+@media(max-width:600px){.check details.sub{padding-left:12px!important}}
+.check input{width:22px;height:22px;accent-color:var(--or);margin-top:3px}
+.check b{display:block}
+.check span{font-size:15px;color:var(--soft)}
+.glos{display:grid;grid-template-columns:minmax(9em,max-content) 1fr;gap:6px 18px;margin:12px 0 0}
+.glos dt{font-weight:700;color:var(--pu)}.glos dd{margin:0}
+@media(max-width:600px){.glos{grid-template-columns:1fr}.glos dd{margin-bottom:8px}table{font-size:13px}th,td{padding:6px 4px}}
+.steps{padding-left:1.3em;margin:10px 0 0;display:grid;gap:8px}
+.steps li::marker{color:var(--or);font-weight:800}
+.lesidx{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 18px}
+.lesidx a{display:inline-flex;align-items:center;gap:6px;text-decoration:none;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:999px;padding:8px 14px;min-height:44px;font-weight:600;font-size:15px}
+.lesidx a.done{border-color:var(--gr);background:var(--grbg)}
+.les{background:var(--bg);border:1px solid var(--line);border-radius:16px;padding:clamp(16px,3vw,28px);margin-bottom:18px;scroll-margin-top:72px}
+.les header{display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:center;margin-bottom:10px}
+.num{width:48px;height:48px;border-radius:50%;background:var(--or);color:#fff;display:grid;place-items:center;font:800 20px Montserrat,sans-serif}
+.les .goal{color:var(--soft);margin:2px 0 0;font-size:16px}
+.lbody{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:22px;margin-top:8px}
+@media(max-width:760px){.lbody{grid-template-columns:minmax(0,1fr)}}
+.lbody p{max-width:none}
+.box{border-radius:12px;padding:12px 14px;margin-bottom:12px;font-size:16px}
+.box b{display:block;font-family:Montserrat,sans-serif;font-size:14px;margin-bottom:4px}
+.box.an{background:var(--pubg)}.box.an b{color:var(--pu)}
+.box.dacd{background:var(--orbg)}.box.dacd b{color:light-dark(#b8560f,#ffb27a)}
+.box.err{background:var(--panel)}
+.keys{margin:6px 0 0;padding-left:1.2em}.keys li{margin-bottom:4px}
+.mc{border-top:1px solid var(--line);margin-top:14px;padding-top:14px}
+.mc p{font-weight:600;margin:0}
+.howto{background:var(--bg);border:1px solid var(--line);border-left:6px solid var(--pu);border-radius:12px;padding:14px 16px;margin:14px 0}
+.alt .howto{background:var(--bg)}
+.howto h3{font-size:16px;margin-bottom:6px}
+.howto ol{margin:0;padding-left:1.3em}
+.howto .end{margin:8px 0 0;font-size:16px}
+details.sub{margin-top:6px}
+details.sub summary{cursor:pointer;color:var(--pu);font-weight:600;font-size:15px;min-height:32px}
+details.sub ol{margin:6px 0 0;padding-left:1.3em;font-size:15px}
+.copyrow{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-top:16px}
+.me{padding-block:16px;background:var(--bg);border-bottom:1px solid var(--line)}
+.mehead{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center}
+.mehead .note{margin:2px 0 0}
+.perf{display:flex;gap:8px;align-items:center;font-weight:600}
+select{font:inherit;font-size:16px;min-height:44px;padding:6px 10px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink)}
+.meparts{display:grid;grid-template-columns:repeat(auto-fit,minmax(10em,1fr));gap:10px;margin-top:10px}
+.mp{background:var(--panel);border-radius:10px;padding:8px 12px}
+.mp small{display:block;color:var(--soft);font-size:14px}
+.mp strong{font:800 20px Montserrat,sans-serif;white-space:nowrap}
+.mp .bar{height:8px;margin:4px 0 0}
+.mp.tot{background:var(--orbg)}
+.pbar{display:flex;align-items:center;gap:8px}.pbar .bar{flex:1;margin:0;min-width:3em}.pbar b{white-space:nowrap;font-variant-numeric:tabular-nums}
+td.num{white-space:nowrap;font-variant-numeric:tabular-nums}
+.fl{display:block;font-weight:600;margin:10px 0 4px}
+.in{width:100%;font:inherit;font-size:16px;min-height:44px;padding:8px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink)}
+.idrow{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,14em),1fr));gap:0 14px}
+body.locked:not(.booting)>:not(#gate):not(script){display:none!important}
+body.booting #gate{display:none!important}
+html:not(.hasSession) body.booting>:not(#bootMsg):not(script){display:none!important}
+#bootMsg{display:none}
+html:not(.hasSession) body.booting #bootMsg{display:grid;place-items:center;min-height:100svh;color:var(--soft);font:600 17px "Source Sans 3",sans-serif;background:linear-gradient(160deg,var(--orbg),var(--pubg))}
+#gate{display:none}
+body.locked:not(.booting) #gate{display:grid;min-height:100svh;place-items:center;padding:24px 16px;background:linear-gradient(160deg,var(--orbg),var(--pubg))}
+.gcard{width:min(460px,100%);background:var(--bg);border-radius:18px;padding:clamp(20px,4vw,32px);border-top:8px solid var(--or);box-shadow:0 10px 30px rgba(60,30,90,.12)}
+.gtop{margin-bottom:16px}
+.gmark{display:inline-block;background:var(--pu);color:#fff;font:800 14px Montserrat,sans-serif;padding:4px 10px;border-radius:8px;margin-bottom:10px}
+.pill{display:inline-block;background:var(--pubg);color:var(--pu);border-radius:999px;padding:3px 12px;font-weight:700}
+.rutas{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,16em),1fr));gap:14px;margin-top:14px}
+.fase{background:var(--panel);border-radius:14px;padding:14px 16px}
+.fase h3{color:var(--pu);margin-bottom:8px}
+.fase ol{margin:0;padding-left:1.2em;display:grid;gap:6px;font-size:15px}
+.fase li.now{font-weight:700}
+.fase li.now::after{content:'actual';margin-left:8px;background:var(--or);color:#fff;border-radius:999px;padding:1px 8px;font-size:12px;font-weight:700}
+.est{display:inline-block;border-radius:999px;padding:2px 10px;font-size:13px;font-weight:700;white-space:nowrap}
+.est.Pendiente{background:light-dark(#fff4d6,#3a3010);color:light-dark(#8a5a00,#ffd479)}.est.Aprobado{background:var(--grbg);color:var(--gr)}.est.Rechazado{background:var(--rdbg);color:var(--rd)}
+.acts{display:flex;gap:6px;flex-wrap:wrap}
+.mini{border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:8px;padding:6px 10px;min-height:36px;font-weight:600;cursor:pointer}
+.mini.ok{color:var(--gr);border-color:var(--gr)}.mini.no{color:var(--rd);border-color:var(--rd)}
+.lnk{border:0;background:none;color:var(--pu);font:inherit;font-weight:600;padding:8px 0;min-height:40px;text-decoration:underline;cursor:pointer}
+.lmsg{min-height:1.4em;margin:10px 0 0;font-size:15px}.lmsg.err{color:var(--rd)}.lmsg.ok{color:var(--gr)}
+footer{border-top:6px solid var(--or);color:var(--soft);font-size:14px}
+@media(prefers-reduced-motion:reduce){.bar i{transition:none}.pulse{animation:none!important}}
+.pulse{animation:flow 1.4s linear infinite}
+@keyframes flow{to{stroke-dashoffset:-24}}
+
+.back{font-weight:700;color:var(--pu);text-decoration:none}
+.lh{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px}
+.lhcol{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:10px;min-height:170px}
+.lhh{font:800 15px Montserrat,sans-serif;margin-bottom:8px;display:flex;justify-content:space-between;gap:6px;flex-wrap:wrap}
+.lhi{display:flex;align-items:center;gap:8px;width:100%;text-align:left;border:2px solid var(--line);background:var(--bg);color:var(--ink);border-radius:10px;padding:8px 10px;margin-bottom:6px;min-height:44px;font:inherit;font-size:15px;overflow-wrap:anywhere}
+button.lhi{cursor:pointer}.lhi.on{border-color:var(--or);background:var(--orbg)}.lhi.tb{border-color:var(--gr);background:var(--grbg)}
+.ft{flex:none;font-size:12px;font-weight:700;background:var(--pubg);color:var(--pu);border-radius:6px;padding:1px 6px}
+#sqlOut{min-height:120px;white-space:pre-wrap}
+/* pestañas */
+[data-tab][hidden]{display:none!important}
+.navbar .nav a.act{background:var(--or);color:#fff}
+.navbar .nav a.ext{color:var(--pu)}
+.top.compact{padding-block:18px}
+.top.compact h1{font-size:clamp(24px,3vw,32px)}
+.top.compact .lead{display:none}
+.subnav{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 4px}
+.subnav a{flex:none;text-decoration:none;color:var(--ink);background:var(--bg);border:2px solid var(--line);border-radius:999px;padding:9px 16px;min-height:44px;display:inline-flex;align-items:center;font-weight:600;font-size:15px}
+.subnav a.act{border-color:var(--or);background:var(--orbg)}
+.subnav a .ok{color:var(--gr)}
+.pager{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:18px}
+.pager a{text-decoration:none}
+.pager .btn{display:inline-flex;align-items:center}
+.tabnext{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:28px;padding-top:18px;border-top:1px solid var(--line)}
+.tabnext a{text-decoration:none;font-weight:700;color:var(--pu);padding:10px 0;min-height:44px}
+.tabnext a.nx{margin-left:auto;background:var(--pu);color:#fff;border-radius:10px;padding:10px 18px}
+
+
+.stc{display:grid;grid-template-columns:1fr;gap:4px;padding:8px 0;border-bottom:1px solid var(--line)}
+.stc .choices{display:flex;flex-wrap:wrap;gap:6px}
+#sim1 .sim{grid-template-columns:minmax(0,1.25fr) minmax(0,1fr)}
+@media(max-width:1000px){#sim1 .sim{grid-template-columns:minmax(0,1fr)}}
+.stc code{font-size:14px;overflow-wrap:anywhere}.stc .choices{margin:0}.stc .choices button{padding:6px 10px;min-height:38px;font-size:14px}
+.stc.done code{color:var(--gr);font-weight:700}
+
+.star{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:10px}
+.stb{background:var(--bg);border:2px solid var(--pu);border-radius:10px;padding:8px;font-size:13px;min-height:84px;display:flex;flex-direction:column;gap:3px}
+.stb b{font:800 13px Montserrat,sans-serif;color:var(--pu);overflow-wrap:anywhere}.stb.f{border-color:var(--or);background:var(--orbg)}.stb.f b{color:light-dark(#b8560f,#ffb27a)}
+.stb span{overflow-wrap:anywhere}
+#stSql{white-space:pre-wrap;font-size:13px}
+
+table.runs{font-size:14px}table.runs td,table.runs th{padding:7px 6px}
+.relrow{border:1px solid var(--line);border-radius:10px;padding:10px;display:grid;gap:8px;margin-bottom:8px}
+.relrow.ok{background:var(--grbg)}
+.relopt{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.relopt>span{min-width:14em;font-size:14px;color:var(--soft)}
+.mini.on{background:var(--pu);color:#fff;border-color:var(--pu)}
+#relOut{white-space:pre-wrap;font-size:13px;min-height:120px}
+#sim1 .sim{grid-template-columns:minmax(0,1.3fr) minmax(0,1fr)}
+@media(max-width:1000px){#sim1 .sim{grid-template-columns:minmax(0,1fr)}}
+</style>
+</head>
+<body class="locked booting">
+<div id="bootMsg" role="status">Cargando…</div>
+<div id="gate">
+  <div class="gcard">
+    <div class="gtop"><span class="gmark">DACD</span><h1 style="font-size:clamp(26px,4vw,36px)">Ruta de conocimiento Microsoft Fabric</h1><p class="note" style="margin:6px 0 0">Módulo F1-05 · Data warehouses en Microsoft Fabric</p></div>
+    <form id="gForm" autocomplete="on">
+      <label class="fl" for="gEmail">Correo institucional</label><input class="in" id="gEmail" type="email" autocomplete="username" required>
+      <label class="fl" for="gPass">Contraseña</label><input class="in" id="gPass" type="password" autocomplete="current-password" minlength="8" required>
+      <button class="btn" id="gBtn" style="margin-top:16px;width:100%">Ingresar</button>
+      <p class="lmsg" id="gMsg" role="status"></p>
+      <p class="note">¿Todavía no tiene cuenta? <a href="./">Regístrese en la página principal del curso</a>.</p>
+    </form>
+    <div id="gWait" hidden>
+      <h3 id="gWaitT">Solicitud pendiente</h3>
+      <p id="gWaitP">Su registro está pendiente de aprobación por la administración del curso.</p>
+      <button class="btn sec" id="gOther">Salir</button>
+    </div>
+  </div>
+</div>
+
+<nav class="navbar" aria-label="Menú del módulo"><div class="navin">
+  <a class="brand" href="./"><i>DACD</i><span>Fabric · F1-05</span></a>
+  <div class="nav"><a class="ext" href="./">← Mis módulos</a><a href="#inicio">Inicio</a><a href="#lecciones">Lecciones</a><a href="#simuladores">Simuladores</a><a href="#autoevaluacion">Autoevaluación</a><a href="#laboratorio">Laboratorio</a><a href="#insumos">Insumos</a></div>
+</div></nav>
+<header class="band top"><div class="wrap">
+  <h1>Modelos semánticos a escala: guía práctica del módulo F1-05</h1>
+  <p class="lead">Material de apoyo para el módulo <i>Design semantic models for scale in Microsoft Fabric</i>. Aprenderá a elegir el modo de almacenamiento, a diseñar relaciones en estrella, a escribir cálculos que crecen bien y a configurar el modelo para muchos usuarios.</p>
+</div></header>
+
+
+<section class="band me" aria-label="Su avance"><div class="wrap mebox">
+  <div class="mehead"><div><h3 id="meName">Su avance en el F1-05</h3><p class="note" id="meSync">Conectando…</p></div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center"><span class="perf">Perfil: <b class="pill" id="mePerfilTxt">—</b></span><button class="btn sec" id="meOut">Salir</button></div></div>
+  <div class="meparts" id="meParts"></div>
+</div></section>
+
+<section class="band" id="como" data-tab="inicio"><div class="wrap">
+  <h2>Cómo usar este material</h2>
+  <div class="sim" style="grid-template-columns:repeat(auto-fit,minmax(min(100%,20em),1fr));margin-top:10px">
+    <div class="card">
+      <h3>Lo que debe dominar al terminar</h3>
+      <ol class="obj">
+        <li><span>Elegir el modo de almacenamiento según la frescura de los datos, el rendimiento y dónde están las fuentes.</span></li>
+        <li><span>Diseñar relaciones de esquema estrella claras y eficientes.</span></li>
+        <li><span>Diseñar cálculos que sigan siendo rápidos y fáciles de mantener cuando crecen los datos y el equipo.</span></li>
+        <li><span>Configurar el modelo para que soporte un consumo a gran escala.</span></li>
+      </ol>
+      <p class="note">Objetivos oficiales del módulo en Microsoft Learn (nivel intermedio, unos 65 minutos, con ejercicio). Es el primer módulo pensado sobre todo para analistas: prepara para la ruta DP-600.</p>
+    </div>
+    <div class="card">
+      <h3>Ruta sugerida (unas 4 horas y media)</h3>
+      <ol class="steps">
+        <li><b>Lea el módulo oficial en Learn</b> (65 min).</li>
+        <li><b>Recorra las 8 lecciones guiadas</b> (70 min) y responda la pregunta de cada una.</li>
+        <li><b>Haga los 4 simuladores</b> (30 min).</li>
+        <li><b>Responda la autoevaluación</b> (15 min). Meta: 8 de 10.</li>
+        <li><b>Haga el laboratorio</b> (90 min) en su workspace de prueba.</li>
+      </ol>
+      <p class="note">Requisito: entender hechos, dimensiones y esquema estrella (F1-03) y haber creado un modelo semántico (F1-02). Si es científico, las lecciones 1, 2 y 6 son las más útiles para su trabajo.</p>
+    </div>
+  </div>
+</div></section>
+
+<section class="band alt" id="guia" data-tab="lecciones"><div class="wrap">
+  <div class="qhead"><h2>Lecciones guiadas</h2><span class="note" id="lesScore"></span></div>
+  <div class="bar" aria-hidden="true"><i id="lesBar"></i></div>
+  <p>Cada lección explica un concepto en lenguaje sencillo y lo conecta con el trabajo de la DACD. Lea en orden.</p>
+  <div class="lesidx" id="lesIdx"></div>
+  <div id="lessons"></div>
+</div></section>
+
+<section class="band" data-tab="simuladores"><div class="wrap">
+  <h2>Simuladores</h2>
+  <p>Practique cada concepto con las manos. Haga los cuatro simuladores en orden; cada uno trae instrucciones y la conclusión a la que debe llegar.</p>
+  <div class="subnav" id="simNav"></div>
+</div></section>
+<section class="band alt" id="sim1" data-tab="simuladores" data-sub="s1" data-label="Relaciones del modelo"><div class="wrap">
+  <h2>Simulador 1. Diseñe las relaciones del modelo</h2>
+  <p>El modelo <b>sm_captacion</b> tiene la tabla de hechos <b>fact_saldos</b> (saldos mensuales por cliente) y tres dimensiones. La tabla de hechos tiene <b>dos fechas</b>: la de corte del saldo y la de apertura de la cuenta. Configure cada relación y valídela.</p>
+  <div class="sim">
+    <div class="panel"><h3>Relaciones del modelo (todas de muchos a uno)</h3><div id="relList"></div><p class="fb" id="relFb"></p></div>
+    <div class="panel"><h3>Resultado en el modelo</h3><pre id="relOut"></pre><div id="relMx"></div></div>
+  </div>
+  <div class="howto">
+    <h3>Cómo usar este simulador</h3>
+    <ol>
+      <li>En cada relación elija la dirección del filtro, si queda activa y si se asume integridad referencial.</li>
+      <li>Toque <b>Validar</b>. Si algo no está bien, la explicación le dirá qué corregir.</li>
+      <li>Con las cuatro relaciones correctas aparece una matriz: cambie entre <b>Actual</b>, <b>Mes anterior</b> y <b>Variación %</b> para ver un grupo de cálculo en acción.</li>
+    </ol>
+    <p class="end"><b>Conclusión:</b> en un esquema estrella los filtros van de las dimensiones a los hechos, en una sola dirección. Entre dos tablas solo una relación puede estar activa; la segunda fecha queda inactiva y se activa en una medida con USERELATIONSHIP.</p>
+  </div>
+</div></section>
+
+<section class="band" id="modo" data-tab="simuladores" data-sub="s2" data-label="Modo de almacenamiento"><div class="wrap">
+  <h2>Simulador 2. ¿Qué modo de almacenamiento uso?</h2>
+  <p>El modo de almacenamiento decide de dónde lee el modelo y qué tan frescos están los datos.</p>
+  <div class="howto"><h3>Pistas para elegir</h3><ol>
+    <li><b>Direct Lake:</b> datos grandes que ya están como tablas Delta en OneLake. Es la opción predeterminada en Fabric.</li>
+    <li><b>Import:</b> volumen moderado, preparación con Power Query dentro del modelo o funciones que Direct Lake no soporta.</li>
+    <li><b>DirectQuery:</b> la consulta debe ir a la fuente en vivo, o los datos no se pueden copiar.</li>
+    <li><b>Compuesto:</b> mezclar tablas con distintos modos en un mismo modelo.</li>
+  </ol></div>
+  <div class="bar" aria-hidden="true"><i id="s2Bar"></i></div><p class="note" id="s2Score"></p>
+  <div class="scen" id="s2"></div>
+</div></section>
+
+<section class="band alt" id="tecnica" data-tab="simuladores" data-sub="s3" data-label="Técnica de escala"><div class="wrap">
+  <h2>Simulador 3. ¿Qué técnica resuelve el problema?</h2>
+  <p>Cada problema de escala tiene su herramienta. Elija la adecuada.</p>
+  <div class="howto"><h3>Pistas para elegir</h3><ol>
+    <li><b>Grupo de cálculo:</b> evita repetir la misma lógica en decenas de medidas.</li>
+    <li><b>Query scale-out:</b> réplicas de solo lectura para muchas consultas al mismo tiempo.</li>
+    <li><b>Actualización incremental:</b> en modelos Import, refresca solo los datos recientes.</li>
+    <li><b>Formato de modelo grande:</b> permite que el modelo crezca más allá de 10 GB.</li>
+    <li><b>Optimizar tablas Delta:</b> menos archivos y grupos de filas para respetar los límites de Direct Lake.</li>
+  </ol></div>
+  <div class="bar" aria-hidden="true"><i id="s3Bar"></i></div><p class="note" id="s3Score"></p>
+  <div class="scen" id="s3"></div>
+</div></section>
+
+<section class="band" id="dax" data-tab="simuladores" data-sub="s4" data-label="Patrón de DAX"><div class="wrap">
+  <h2>Simulador 4. ¿Qué patrón de DAX aplica?</h2>
+  <p>Elija el patrón que resuelve cada necesidad de cálculo.</p>
+  <div class="bar" aria-hidden="true"><i id="s4Bar"></i></div><p class="note" id="s4Score"></p>
+  <div class="scen" id="s4"></div>
+</div></section>
+
+<section class="band alt" id="quiz" data-tab="autoevaluacion"><div class="wrap">
+  <h2>Autoevaluación: 10 preguntas</h2>
+  <div class="white">
+    <div class="qhead"><h3 id="qNum"></h3><span class="note" id="qPts"></span></div>
+    <div class="bar" aria-hidden="true"><i id="qBar"></i></div>
+    <div id="qBox"></div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px">
+      <button class="btn sec" id="qPrev">Anterior</button><button class="btn" id="qNext">Siguiente</button><button class="btn sec" id="qReset">Reiniciar</button>
+    </div>
+  </div>
+</div></section>
+
+<section class="band" id="lab" data-tab="laboratorio"><div class="wrap">
+  <h2>Laboratorio guiado: un modelo de Captación preparado para crecer</h2>
+  <p>Use su workspace de prueba (no Mi área de trabajo: ahí no se pueden crear modelos Direct Lake) y solo los datos ficticios de esta página. Abra el detalle de cada paso para ver dónde hacer clic y cómo se ve en Fabric.</p>
+  <div class="bar" aria-hidden="true"><i id="lBar"></i></div><p class="note" id="lScore"></p>
+  <div class="copyrow"><h3>Script de datos de práctica (PySpark, ficticios)</h3><button class="btn sec" id="csvCopy">Copiar script</button></div>
+  <pre id="csv">def guardar(filas, esquema, nombre):
+    spark.createDataFrame(filas, esquema).write.mode("overwrite").format("delta").saveAsTable(nombre)
+
+guardar([(20260930, "2026-09-30", 2026, 9, "Septiembre", 1),
+         (20261031, "2026-10-31", 2026, 10, "Octubre", 2),
+         (20261130, "2026-11-30", 2026, 11, "Noviembre", 3)],
+        "fecha_key INT, fecha STRING, anio INT, mes INT, nombre_mes STRING, mes_idx INT", "dim_fecha")
+
+guardar([(1, "Cliente A", "Personas", "San José"), (2, "Cliente B", "Personas", "Heredia"),
+         (3, "Cliente C", "Pymes", "Alajuela"), (4, "Cliente D", "Corporativo", "San José"),
+         (5, "Cliente E", "Personas", "Cartago"), (6, "Cliente F", "Pymes", "Heredia")],
+        "cliente_key INT, nombre STRING, segmento STRING, provincia STRING", "dim_cliente")
+
+guardar([(10, "Ahorro a la vista", "Vista"), (20, "Plazo fijo", "Plazo"), (30, "Ahorro programado", "Programado")],
+        "producto_key INT, producto STRING, tipo STRING", "dim_producto")
+
+guardar([(20260930, 20260930, 1, 10, 1000000), (20261031, 20260930, 1, 10, 1200000), (20261130, 20260930, 1, 10, 1500000),
+         (20260930, 20260930, 2, 20, 8000000), (20261031, 20260930, 2, 20, 8000000), (20261130, 20260930, 2, 20, 8400000),
+         (20261031, 20261031, 3, 10, 15000000), (20261130, 20261031, 3, 10, 16000000),
+         (20260930, 20260930, 4, 20, 200000000), (20261031, 20260930, 4, 20, 250000000), (20261130, 20260930, 4, 20, 240000000),
+         (20261130, 20261130, 5, 30, 500000),
+         (20261031, 20261031, 6, 20, 40000000), (20261130, 20261031, 6, 20, 42000000)],
+        "fecha_corte_key INT, fecha_apertura_key INT, cliente_key INT, producto_key INT, saldo BIGINT", "fact_saldos")
+print("Listo: dim_fecha, dim_cliente, dim_producto y fact_saldos")</pre>
+  <p class="note" id="csvMsg">Datos inventados para practicar; no corresponden a datos del Banco.</p>
+  <ul class="check" id="labList"></ul>
+  <button class="btn sec" id="lReset" style="margin-top:14px">Reiniciar checklist</button>
+</div></section>
+
+<section class="band alt" id="insumos" data-tab="insumos"><div class="wrap">
+  <h2>Insumos adicionales</h2>
+  <div class="sim" style="grid-template-columns:repeat(auto-fit,minmax(min(100%,22em),1fr))">
+    <div class="card">
+      <h3>Lecturas oficiales</h3>
+      <ul>
+        <li><a href="https://learn.microsoft.com/training/modules/design-semantic-models-scale/">Módulo F1-05 en Microsoft Learn</a></li>
+        <li><a href="https://microsoftlearning.github.io/mslearn-fabric/Instructions/Labs/15-design-semantic-model-scale.html">Ejercicio oficial: diseñar un modelo semántico para escala</a></li>
+        <li><a href="https://learn.microsoft.com/fabric/fundamentals/direct-lake-overview">Direct Lake: descripción general</a></li>
+        <li><a href="https://learn.microsoft.com/power-bi/transform-model/calculation-groups">Grupos de cálculo</a></li>
+        <li><a href="https://learn.microsoft.com/training/paths/design-manage-semantic-models-fabric/">Ruta siguiente: diseñar y administrar modelos semánticos</a></li>
+      </ul>
+      <h3 style="margin-top:14px">Para discutir en equipo (30 min)</h3>
+      <ul>
+        <li>¿Qué modelos de CLICK podrían pasar a Direct Lake y cuáles deben seguir en Import?</li>
+        <li>¿Qué medidas repetimos hoy con variantes de tiempo y podrían ser un grupo de cálculo?</li>
+        <li>¿Qué convención de nombres y carpetas usaremos para las medidas del equipo?</li>
+      </ul>
+    </div>
+    <div class="card"><h3>Glosario rápido</h3><dl class="glos" id="glos"></dl></div>
+  </div>
+</div></section>
+
+<footer class="band"><div class="wrap">DACD · Banco Popular · Ruta de conocimiento Microsoft Fabric, fase 1, módulo F1-05. Los contenidos resumen la documentación pública de Microsoft Learn; ante cualquier diferencia, manda la fuente oficial.</div></footer>
+<script src="lab-f105.js?v=1"></script>
+<script src="labvis.js?v=2"></script>
+<script>
+{
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const KEY='f105';
+let S={};try{S=JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){S={}}
+['les','lab','qa','lq'].forEach(k=>{S[k]=S[k]||{}});S.sims=S.sims||{};['s1','s2','s3','s4'].forEach(k=>{S.sims[k]=S.sims[k]||{}});
+if(!S.intentos)S.intentos={};['qz'].forEach(k=>{S.intentos[k]=S.intentos[k]||[]});['lq','sim'].forEach(k=>{S.intentos[k]=S.intentos[k]||{}});
+const bump=(o,k)=>{o[k]=(o[k]||0)+1};
+const bumpSim=(s,i)=>{const m=S.intentos.sim;m[s]=m[s]||{};bump(m[s],i)};
+let pushRemote=()=>{},remoteT=null;
+const cnt=o=>Object.values(o||{}).filter(Boolean).length;
+const N={les:8,sim:4,qz:10,lab:10};
+function simsDone(sm){sm=sm||{};let n=0;if(cnt(sm.s1)>=4)n++;if(cnt(sm.s2)>=5)n++;if(cnt(sm.s3)>=5)n++;if(cnt(sm.s4)>=5)n++;return n}
+function summary(d){d=d||{};const les=cnt(d.les),sim=simsDone(d.sims),qn=Object.keys(d.qa||{}).length,qs=Object.keys(d.qa||{}).filter(k=>QZ[k]&&d.qa[k]===QZ[k][2]).length,lb=cnt(d.lab);return{les,sim,qn,qs,lb,pct:Math.round((les+sim+qn+lb)/(N.les+N.sim+N.qz+N.lab)*100)}}
+const pbar=(v,t)=>`<div class="bar"><i style="width:${Math.min(100,v/t*100)}%"></i></div>`;
+function myProg(){const s=summary(S);
+  $('meParts').innerHTML=[['Lecciones',s.les,N.les],['Simuladores',s.sim,N.sim],['Preguntas respondidas',s.qn,N.qz],['Laboratorio',s.lb,N.lab]].map(p=>`<div class="mp"><small>${p[0]}</small><strong>${p[1]} / ${p[2]}</strong>${pbar(p[1],p[2])}</div>`).join('')+`<div class="mp tot"><small>Avance del módulo</small><strong>${s.pct}%</strong>${pbar(s.pct,100)}</div>`}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}myProg();clearTimeout(remoteT);remoteT=setTimeout(()=>pushRemote(),900)};
+const sync=t=>{$('meSync').textContent=t};
+
+/* ===== Simulador 1: relaciones del modelo ===== */
+const RELS=[
+ {de:'fact_saldos[fecha_corte_key]',a:'dim_fecha[fecha_key]',ok:{dir:'Única',act:'Activa',ri:'Sí'},why:'Correcto: es la fecha principal del saldo, así que queda activa y filtra de la dimensión a los hechos.'},
+ {de:'fact_saldos[fecha_apertura_key]',a:'dim_fecha[fecha_key]',ok:{dir:'Única',act:'Inactiva',ri:'Sí'},why:'Correcto: entre dos tablas solo una relación puede estar activa. Esta queda inactiva y se usa en una medida con USERELATIONSHIP.'},
+ {de:'fact_saldos[cliente_key]',a:'dim_cliente[cliente_key]',ok:{dir:'Única',act:'Activa',ri:'Sí'},why:'Correcto: relación clásica de muchos a uno entre hechos y dimensión.'},
+ {de:'fact_saldos[producto_key]',a:'dim_producto[producto_key]',ok:{dir:'Única',act:'Activa',ri:'Sí'},why:'Correcto: con las cuatro relaciones el modelo queda en estrella.'}];
+const ROPT={dir:['Única','Ambas'],act:['Activa','Inactiva'],ri:['Sí','No']};
+const RLBL={dir:'Dirección del filtro',act:'Estado',ri:'Asumir integridad referencial'};
+const RHINT={dir:'La dirección en ambos sentidos crea ambigüedad y consultas más lentas. En un esquema estrella el filtro va de la dimensión a los hechos: dirección única.',
+ ri:'Todas las claves de fact_saldos existen en las dimensiones, así que puede asumir integridad referencial: el motor usa combinaciones internas, que son más eficientes.'};
+const relSel={};
+const MX={Actual:[['Personas','10 400 000'],['Pymes','58 000 000'],['Corporativo','240 000 000'],['Total','308 400 000']],
+ 'Mes anterior':[['Personas','9 200 000'],['Pymes','55 000 000'],['Corporativo','250 000 000'],['Total','314 200 000']],
+ 'Variación %':[['Personas','13,04 %'],['Pymes','5,45 %'],['Corporativo','−4,00 %'],['Total','−1,85 %']]};
+let relCi='Actual';
+function drawRel(){const st=S.sims.s1;
+  $('relList').innerHTML=RELS.map((r,i)=>{const done=!!st['r'+i],sel=relSel[i]||{};
+    return `<div class="relrow ${done?'ok':''}"><b>${i+1}. ${esc(r.de)} → ${esc(r.a)}</b>${done?'<span class="pill">Correcta</span>':Object.keys(ROPT).map(k=>`<div class="relopt"><span>${RLBL[k]}</span>${ROPT[k].map(o=>`<button class="mini ${sel[k]===o?'on':''}" data-r="${i}" data-k="${k}" data-v="${o}" aria-pressed="${sel[k]===o}">${o}</button>`).join('')}</div>`).join('')+`<div><button class="btn sec" data-val="${i}">Validar</button></div>`}</div>`}).join('');
+  const ok=RELS.filter((r,i)=>st['r'+i]).length;
+  $('relOut').textContent=['dim_fecha ◄── fecha_corte_key ── fact_saldos   '+(st.r0?'✓ activa':'· pendiente'),'dim_fecha ◄┄┄ fecha_apertura_key ┄ fact_saldos '+(st.r1?'✓ inactiva':'· pendiente'),'dim_cliente ◄── cliente_key ── fact_saldos    '+(st.r2?'✓ activa':'· pendiente'),'dim_producto ◄── producto_key ── fact_saldos  '+(st.r3?'✓ activa':'· pendiente'),'',ok+' de 4 relaciones correctas'].join('\n');
+  $('relMx').innerHTML=ok<4?'':`<p class="note" style="margin-top:10px">Matriz con la medida <b>Saldo al cierre</b>, noviembre 2026. Grupo de cálculo <b>Periodo</b>:</p><div class="relopt">${Object.keys(MX).map(k=>`<button class="mini ${relCi===k?'on':''}" data-ci="${k}" aria-pressed="${relCi===k}">${k}</button>`).join('')}</div><div class="scroll"><table class="runs"><thead><tr><th>Segmento</th><th>${esc(relCi)}</th></tr></thead><tbody>${MX[relCi].map(r=>`<tr${r[0]==='Total'?' style="font-weight:700"':''}><td>${r[0]}</td><td class="tnum">${r[1]}</td></tr>`).join('')}</tbody></table></div><p class="note">Una sola medida y tres elementos de cálculo: sin el grupo harían falta tres medidas por cada medida base.</p>`}
+$('relList').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
+  if(b.dataset.r!==undefined){const i=+b.dataset.r;relSel[i]=relSel[i]||{};relSel[i][b.dataset.k]=b.dataset.v;drawRel();return}
+  if(b.dataset.val!==undefined){const i=+b.dataset.val,r=RELS[i],sel=relSel[i]||{},f=$('relFb');
+    if(Object.keys(ROPT).some(k=>!sel[k])){f.className='fb show bad';f.textContent='Elija una opción en cada fila antes de validar.';return}
+    const bad=Object.keys(ROPT).find(k=>sel[k]!==r.ok[k]);
+    if(!bad){S.sims.s1['r'+i]=1;f.className='fb show good';f.textContent=r.why;save();drawRel();return}
+    let msg=RHINT[bad]||'';
+    if(bad==='act')msg=i===1?'Entre dim_fecha y fact_saldos ya hay una relación activa (fecha de corte). Solo una puede estar activa: esta debe quedar inactiva.':'Esta es la relación principal entre estas dos tablas: debe estar activa para que los filtros funcionen.';
+    f.className='fb show bad';f.textContent=msg;bumpSim('s1',i);save()}});
+$('relMx').addEventListener('click',e=>{const b=e.target.closest('[data-ci]');if(!b)return;relCi=b.dataset.ci;drawRel()});
+drawRel();
+
+/* ===== Simuladores 2 a 4 (motor de opciones) ===== */
+const SIMS={
+ s2:{opts:['Direct Lake','Import','DirectQuery','Compuesto'],items:[
+  ['Saldos diarios de 80 millones de filas que ya están como tablas Delta en el lakehouse de captación.','Direct Lake','Datos grandes en OneLake: Direct Lake los lee sin copiarlos y su actualización solo toma segundos.'],
+  ['Un analista prepara un archivo de metas comerciales con Power Query y no tiene permiso de escritura en el lake.','Import','La preparación con Power Query dentro del modelo es un caso típico de Import.'],
+  ['Un tablero de operaciones debe mostrar cada consulta contra la base transaccional en vivo.','DirectQuery','Cuando la consulta debe ir a la fuente en vivo, se usa DirectQuery.'],
+  ['Un modelo combina las tablas Delta de saldos con una tabla pequeña de metas importada.','Compuesto','Mezclar tablas con distintos modos en un mismo modelo es un modelo compuesto.'],
+  ['Un modelo necesita agregaciones definidas por el usuario y particiones propias.','Import','Las agregaciones definidas por el usuario y las particiones del modelo no están disponibles en Direct Lake.']]},
+ s3:{opts:['Grupo de cálculo','Query scale-out','Actualización incremental','Formato de modelo grande','Optimizar tablas Delta'],items:[
+  ['Hay 12 medidas y a cada una le piden versión acumulada del año, mes anterior y variación.','Grupo de cálculo','Un grupo de cálculo aplica la misma lógica de tiempo a cualquier medida, sin crear 36 medidas nuevas.'],
+  ['El primer día del mes 300 personas abren el mismo reporte a la vez y las consultas se encolan.','Query scale-out','Query scale-out reparte las consultas en réplicas de solo lectura.'],
+  ['Un modelo Import de 5 años tarda 3 horas en actualizarse, aunque solo cambia el último mes.','Actualización incremental','La actualización incremental refresca solo el periodo reciente.'],
+  ['Un modelo Import va a superar los 10 GB.','Formato de modelo grande','El formato de modelo grande permite crecer más allá de 10 GB, hasta el límite que fije la capacidad.'],
+  ['Un modelo Direct Lake falla porque una tabla tiene demasiados archivos Parquet pequeños.','Optimizar tablas Delta','Antes de subir la capacidad, se optimizan las tablas (menos archivos y grupos de filas) para respetar los límites.']]},
+ s4:{opts:['Variables (VAR)','DIVIDE','USERELATIONSHIP','SELECTEDMEASURE','Saldo al cierre (semiaditivo)'],items:[
+  ['Calcular un margen sin que falle cuando el denominador es cero.','DIVIDE','DIVIDE maneja la división entre cero sin errores.'],
+  ['Reutilizar el mismo subtotal tres veces en una medida, calculándolo una sola vez.','Variables (VAR)','Una variable se calcula una vez y hace la medida más legible y rápida.'],
+  ['Contar cuentas por fecha de apertura cuando la relación activa es la fecha de corte.','USERELATIONSHIP','USERELATIONSHIP activa la relación inactiva solo dentro de esa medida.'],
+  ['Escribir un elemento de cálculo que funcione para cualquier medida.','SELECTEDMEASURE','SELECTEDMEASURE representa la medida que el usuario está viendo.'],
+  ['Mostrar el saldo de captación de un trimestre sin sumar los tres cierres mensuales.','Saldo al cierre (semiaditivo)','Los saldos no se suman en el tiempo: se toma el último cierre del periodo.']]}
+};
+function drawSim(k){const sm=SIMS[k],done=S.sims[k];
+  $(k).innerHTML=sm.items.map((it,i)=>`<div class="white"><h3>${esc(it[0])}</h3><div class="choices" data-s="${k}" data-i="${i}">${sm.opts.map(o=>`<button data-o="${esc(o)}" class="${done[i]&&o===it[1]?'right':''}" ${done[i]&&o!==it[1]?'disabled':''}>${esc(o)}</button>`).join('')}</div><div class="fb ${done[i]?'show good':''}" id="${k}f${i}">${done[i]?'Correcto. '+esc(it[2]):''}</div></div>`).join('');
+  simProg(k)}
+function simProg(k){const n=cnt(S.sims[k]),t=SIMS[k].items.length;$(k+'Bar').style.width=(n/t*100)+'%';$(k+'Score').textContent=n+' de '+t+' correctas'+(n===t?'. ¡Completo!':'')}
+['s2','s3','s4'].forEach(k=>{drawSim(k);$(k).addEventListener('click',e=>{const b=e.target.closest('button[data-o]');if(!b)return;const g=b.parentElement,i=+g.dataset.i,it=SIMS[k].items[i],ok=b.dataset.o===it[1],f=$(k+'f'+i);
+  if(ok){g.querySelectorAll('button').forEach(x=>{x.className=x===b?'right':'';x.disabled=x!==b});S.sims[k][i]=1;f.className='fb show good';f.textContent='Correcto. '+it[2];save();simProg(k)}
+  else{b.className='wrong';f.className='fb show bad';f.textContent='No es la mejor opción. Revise las pistas e intente de nuevo.';bumpSim(k,i);save()}})});
+
+/* ===== Lecciones ===== */
+const LES=[
+ {t:'Por qué hay que diseñar para escala',g:'Entender qué cambia cuando el modelo crece.',
+  p:['Un modelo que funciona bien para un equipo pequeño en Power BI Desktop no necesariamente aguanta más datos, más usuarios al mismo tiempo y más formas de consumo (reportes, Excel, Copilot, agentes).',
+     'El módulo propone <b>cuatro decisiones</b>: el modo de almacenamiento, las relaciones, los cálculos y la configuración del modelo.',
+     'Esas mismas decisiones preparan el modelo para la IA: Copilot y los agentes necesitan datos actuales, relaciones claras, nombres descriptivos y capacidad suficiente.'],
+  an:'Es como pasar de una pulpería a un supermercado: no basta con agrandar el local; hay que ordenar pasillos, cajas y bodega.',
+  dacd:'Los tableros de CLICK crecieron uno por uno. Un modelo de Captación bien diseñado podría servir a muchos reportes y a Copilot a la vez.',
+  k:['Más datos, usuarios y consumos.','Cuatro decisiones: almacenamiento, relaciones, cálculos, configuración.','Un modelo escalable también sirve mejor a la IA.'],
+  q:['¿Cuáles son las cuatro decisiones de diseño del módulo?',['Almacenamiento, relaciones, cálculos y configuración','Colores, fuentes, iconos y temas','Usuarios, contraseñas, roles y correos'],0,'Correcto: son las cuatro decisiones que preparan el modelo para escala.']},
+ {t:'Elegir el modo de almacenamiento',g:'Saber cuándo usar Direct Lake, Import, DirectQuery o un modelo compuesto.',
+  p:['<b>Direct Lake</b> lee las tablas Delta de OneLake y responde con el mismo motor en memoria que Import. Es la opción recomendada cuando los datos son grandes y ya están en OneLake.',
+     '<b>Import</b> copia los datos al modelo: conviene si el volumen es moderado, si el analista prepara datos con Power Query o si necesita funciones que Direct Lake no soporta, como agregaciones definidas por el usuario.',
+     '<b>DirectQuery</b> consulta la fuente en vivo. Un modelo <b>compuesto</b> mezcla tablas con distintos modos.'],
+  an:'Import es tener una fotocopia del archivo; DirectQuery es llamar cada vez a quien tiene el original; Direct Lake es tener una ventana directa al archivo original.',
+  dacd:'Las tablas de saldos de la capa oro irían en Direct Lake; un archivo de metas comerciales armado por un analista podría entrar como tabla Import.',
+  k:['Direct Lake: predeterminado para datos en OneLake.','Import: volumen moderado o Power Query.','DirectQuery: fuente en vivo.','Compuesto: mezcla de modos.'],
+  q:['Los datos son grandes y ya están como tablas Delta en OneLake. ¿Qué modo conviene?',['Import','Direct Lake','DirectQuery'],1,'Correcto: Direct Lake los lee sin copiarlos.']},
+ {t:'Direct Lake en detalle',g:'Conocer cómo se actualiza Direct Lake y sus límites.',
+  p:['La actualización de Direct Lake se llama <b>framing</b>: solo copia metadatos y apunta a la versión más reciente de las tablas Delta. Tarda segundos y no copia datos.',
+     'Las columnas se cargan en memoria solo cuando una consulta las necesita. Por eso un modelo puede ser más grande que la memoria de la capacidad, aunque si se excede mucho, las consultas se vuelven lentas.',
+     'Hay dos variantes. <b>Direct Lake sobre OneLake</b> nunca cambia a DirectQuery. <b>Direct Lake sobre el SQL endpoint</b> puede cambiar a DirectQuery (fallback) en casos como vistas SQL, seguridad a nivel de SQL o límites excedidos. Cada capacidad tiene límites (guardrails) de archivos, grupos de filas y filas por tabla.'],
+  an:'Framing es cambiar el marcador de un libro: no se copia el libro, solo se indica en qué página está la versión nueva.',
+  dacd:'Antes de pedir una capacidad más grande para un modelo, conviene optimizar las tablas Delta: menos archivos pequeños y grupos de filas bien formados.',
+  k:['Framing: actualización de segundos, solo metadatos.','Columnas en memoria bajo demanda.','Sobre SQL endpoint puede haber fallback a DirectQuery.','Respetar los límites de la capacidad.'],
+  q:['¿Qué hace una actualización (framing) de Direct Lake?',['Copia todos los datos al modelo','Actualiza las referencias a la versión más reciente de las tablas Delta','Borra la caché de Power BI'],1,'Correcto: solo copia metadatos, por eso tarda segundos.']},
+ {t:'Esquema estrella en el modelo',g:'Diseñar relaciones claras y eficientes.',
+  p:['El modelo semántico debe reflejar el esquema estrella: una tabla de <b>hechos</b> en el centro y <b>dimensiones</b> alrededor, unidas por relaciones de <b>muchos a uno</b>.',
+     'La dirección del filtro debe ser <b>única</b>: de la dimensión a los hechos. La dirección en ambos sentidos genera ambigüedad y consultas más lentas.',
+     'Si todas las claves de los hechos existen en la dimensión, active <b>Asumir integridad referencial</b>: el motor usa combinaciones internas, más eficientes. Las columnas de la relación deben tener el mismo tipo de dato y el lado “uno” debe tener valores únicos.'],
+  an:'La estrella es una rueda de bicicleta: el centro (hechos) se une a cada rayo (dimensión) por un solo camino.',
+  dacd:'En el modelo de Captación: fact_saldos al centro y dim_cliente, dim_producto y dim_fecha alrededor.',
+  k:['Hechos al centro, dimensiones alrededor.','Muchos a uno, dirección única.','Integridad referencial cuando las claves existen.','Mismo tipo de dato en ambos lados.'],
+  q:['¿Qué dirección de filtro se recomienda en un esquema estrella?',['Ambas direcciones','Única, de la dimensión a los hechos','Única, de los hechos a la dimensión'],1,'Correcto: evita ambigüedad y es más eficiente.']},
+ {t:'Relaciones inactivas y fechas de rol',g:'Analizar los mismos hechos por fechas distintas.',
+  p:['Una tabla de hechos puede tener varias fechas: corte, apertura, vencimiento. Todas apuntan a la misma dimensión de fecha, que cumple varios <b>roles</b>.',
+     'Entre dos tablas solo una relación puede estar <b>activa</b>. Las demás quedan <b>inactivas</b> y se activan dentro de una medida con <code>USERELATIONSHIP</code>.',
+     'Ejemplo: <code>Cuentas abiertas = CALCULATE(DISTINCTCOUNT(fact_saldos[cliente_key]), USERELATIONSHIP(fact_saldos[fecha_apertura_key], dim_fecha[fecha_key]))</code>.'],
+  an:'Es como un actor que interpreta dos papeles en la misma obra: es la misma persona, pero en cada escena cumple un rol distinto.',
+  dacd:'En Crédito, la misma operación se analiza por fecha de desembolso, de vencimiento y de cancelación.',
+  k:['Una dimensión de fecha, varios roles.','Solo una relación activa entre dos tablas.','USERELATIONSHIP activa la inactiva en una medida.'],
+  q:['¿Qué función activa una relación inactiva dentro de una medida?',['RELATED','USERELATIONSHIP','CROSSFILTER'],1,'Correcto: USERELATIONSHIP la activa solo en esa medida.']},
+ {t:'Medidas que escalan',g:'Escribir medidas rápidas y fáciles de mantener.',
+  p:['Use <b>medidas explícitas</b> (escritas en DAX) en lugar de sumar columnas directamente en el reporte. Así la lógica queda en un solo lugar.',
+     'Use <b>variables</b> (<code>VAR … RETURN</code>) para calcular una vez y reutilizar, y <code>DIVIDE</code> para dividir sin errores. Acuerde <b>convenciones de nombres</b> y carpetas de visualización para que el equipo encuentre las medidas.',
+     'Cuidado con los <b>saldos</b>: son semiaditivos. Se suman entre clientes, pero no entre meses. El saldo de un trimestre es el del último cierre, no la suma de los tres.'],
+  an:'Sumar saldos de tres meses es como sumar la temperatura de tres días: el número existe, pero no significa nada.',
+  dacd:'Con los datos del laboratorio, SUM(saldo) sin filtro da 831,6 millones; el saldo real al cierre de noviembre es 308,4 millones.',
+  k:['Medidas explícitas, no implícitas.','VAR y DIVIDE.','Nombres y carpetas acordados.','Los saldos no se suman en el tiempo.'],
+  q:['¿Por qué no se debe sumar el saldo de captación de tres meses?',['Porque es un valor semiaditivo: corresponde al último cierre','Porque DAX no permite sumar','Porque los saldos son texto'],0,'Correcto: los saldos son fotos de un momento.']},
+ {t:'Grupos de cálculo',g:'Reducir la explosión de medidas.',
+  p:['Si 10 medidas necesitan versión actual, mes anterior y variación, terminaría con 30 medidas. Un <b>grupo de cálculo</b> define esas variantes una vez y las aplica a cualquier medida.',
+     'Cada <b>elemento de cálculo</b> usa <code>SELECTEDMEASURE()</code> para referirse a la medida que se está viendo. Por ejemplo: <code>Mes anterior = CALCULATE(SELECTEDMEASURE(), …)</code>.',
+     'Un elemento puede tener una <b>cadena de formato dinámica</b>: por ejemplo, mostrar la variación en porcentaje. Al crear un grupo de cálculo, el modelo deja de permitir medidas implícitas.'],
+  an:'Es como un filtro de cámara: no cambia la foto (la medida), pero la muestra de otra forma según el filtro que elija.',
+  dacd:'Un grupo “Periodo” podría servir a saldo, clientes y tasa promedio de Captación al mismo tiempo.',
+  k:['Una lógica, muchas medidas.','SELECTEDMEASURE() en cada elemento.','Formato dinámico por elemento.','Desactiva las medidas implícitas.'],
+  q:['¿Qué función usan los elementos de un grupo de cálculo para referirse a la medida actual?',['SELECTEDMEASURE','SUMX','EARLIER'],0,'Correcto: SELECTEDMEASURE representa la medida en contexto.']},
+ {t:'Configuración para escala',g:'Preparar el modelo para muchos usuarios y muchos datos.',
+  p:['El <b>formato de modelo grande</b> permite superar los 10 GB, hasta el límite que fije la capacidad. Los modelos Direct Lake ya lo usan.',
+     '<b>Query scale-out</b> crea réplicas de solo lectura para repartir muchas consultas simultáneas. La <b>actualización incremental</b> refresca solo los datos recientes en modelos Import.',
+     'El <b>punto de conexión XMLA</b> permite que herramientas externas lean o administren el modelo; su modo de lectura y escritura lo define la capacidad.'],
+  an:'Query scale-out es abrir más cajas en el supermercado cuando hay fila: los productos son los mismos, pero se atiende a más gente a la vez.',
+  dacd:'El cierre de mes concentra consultas; query scale-out ayudaría a que los reportes no se pongan lentos ese día.',
+  k:['Formato grande: más de 10 GB.','Query scale-out: muchos usuarios a la vez.','Actualización incremental: solo lo reciente.','XMLA: herramientas externas.'],
+  q:['¿Qué opción reparte muchas consultas simultáneas en réplicas de solo lectura?',['Actualización incremental','Query scale-out','Formato de modelo grande'],1,'Correcto: query scale-out agrega réplicas.']}
+];
+const done=S.les;
+function lesProg(){const n=cnt(done);$('lesBar').style.width=(n/LES.length*100)+'%';$('lesScore').textContent=n+' de '+LES.length+' lecciones leídas';
+  $('lesIdx').innerHTML=LES.map((l,i)=>`<a href="#leccion-${i+1}" class="${done[i]?'done':''}">${done[i]?'✓ ':''}${i+1}. ${esc(l.t.split(':')[0])}</a>`).join('')}
+function drawLessons(){$('lessons').innerHTML=LES.map((l,i)=>`<article class="les" id="leccion-${i+1}"><header><div class="num">${i+1}</div><div><h3 style="font-size:clamp(19px,2.2vw,24px);font-weight:800">${esc(l.t)}</h3><p class="goal"><b>Objetivo:</b> ${esc(l.g)}</p></div></header>
+ <div class="lbody"><div>${l.p.map(x=>`<p>${x}</p>`).join('')}</div>
+ <div><div class="box an"><b>Para entenderlo</b>${esc(l.an)}</div><div class="box dacd"><b>En la DACD</b>${esc(l.dacd)}</div><div class="box err"><b>Puntos clave</b><ul class="keys">${l.k.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div></div></div>
+ <div class="mc"><p>Compruebe su comprensión: ${esc(l.q[0])}</p><div class="choices" data-l="${i}">${l.q[1].map((o,j)=>`<button data-j="${j}" class="${S.lq[i]&&j===l.q[2]?'right':''}">${esc(o)}</button>`).join('')}</div><div class="fb ${S.lq[i]?'show good':''}" id="lf${i}">${S.lq[i]?esc(l.q[3]):''}</div>
+ <label style="display:flex;gap:10px;align-items:center;margin-top:12px;cursor:pointer;min-height:44px"><input type="checkbox" data-done="${i}" ${done[i]?'checked':''} style="width:22px;height:22px;accent-color:var(--or)"> Marcar la lección como leída</label></div></article>`).join('');lesProg()}
+$('lessons').addEventListener('click',ev=>{const b=ev.target.closest('.choices button');if(!b)return;const g=b.parentElement,i=+g.dataset.l,q=LES[i].q,ok=+b.dataset.j===q[2],f=$('lf'+i);
+  if(ok){g.querySelectorAll('button').forEach(x=>{x.className=x===b?'right':''});f.className='fb show good';f.textContent=q[3];S.lq[i]=1;save()}else{bump(S.intentos.lq,i);save();b.className='wrong';f.className='fb show bad';f.textContent='No es la respuesta correcta. Vuelva a leer los párrafos de la izquierda e intente de nuevo.'}});
+$('lessons').addEventListener('change',ev=>{const c=ev.target;if(c.dataset.done===undefined)return;done[c.dataset.done]=c.checked;save();lesProg()});
+drawLessons();
+
+/* ===== Autoevaluación ===== */
+const QZ=[
+ ['¿Qué modo de almacenamiento se recomienda por defecto para datos grandes que ya están en OneLake?',['Import','DirectQuery','Direct Lake','Dual'],2,'Direct Lake lee las tablas Delta sin copiarlas.'],
+ ['¿Cuándo conviene Import en lugar de Direct Lake?',['Cuando el analista prepara datos con Power Query y el volumen es moderado','Siempre que los datos estén en OneLake','Cuando se necesitan datos en vivo','Nunca'],0,'Import es útil para preparación en el modelo y volúmenes moderados.'],
+ ['¿Qué variante de Direct Lake puede cambiar a DirectQuery (fallback)?',['Direct Lake sobre OneLake','Direct Lake sobre el SQL endpoint','Ninguna','Ambas siempre'],1,'Solo la variante sobre el SQL endpoint tiene fallback.'],
+ ['¿Qué hace el framing en Direct Lake?',['Copia todos los datos','Actualiza las referencias a la última versión de las tablas Delta','Crea réplicas de lectura','Comprime los reportes'],1,'Solo actualiza metadatos y tarda segundos.'],
+ ['En un esquema estrella, la dirección de filtro recomendada es…',['Ambas','Única, de la dimensión a los hechos','Única, de los hechos a la dimensión','Ninguna'],1,'Evita ambigüedad y mejora el rendimiento.'],
+ ['Una tabla de hechos tiene fecha de corte y fecha de apertura. ¿Cómo se relacionan con dim_fecha?',['Dos relaciones activas','Una activa y otra inactiva que se usa con USERELATIONSHIP','Se duplica dim_fecha siempre','Una relación de muchos a muchos'],1,'Solo una relación puede estar activa entre dos tablas.'],
+ ['¿Qué problema resuelven los grupos de cálculo?',['La explosión de medidas repetidas','La seguridad por filas','La carga de archivos','El linaje'],0,'Definen una vez variantes que se aplican a cualquier medida.'],
+ ['¿Por qué no se suman los saldos de varios meses?',['Son semiaditivos: corresponden al último cierre','DAX no lo permite','Ocupan mucha memoria','Son columnas de texto'],0,'Se suman entre clientes, no en el tiempo.'],
+ ['¿Qué configuración ayuda cuando cientos de personas consultan el modelo al mismo tiempo?',['Actualización incremental','Query scale-out','Medidas implícitas','Relaciones bidireccionales'],1,'Agrega réplicas de solo lectura.'],
+ ['¿Para qué sirve DIVIDE en DAX?',['Para dividir sin error cuando el denominador es cero','Para separar tablas','Para crear relaciones','Para dividir el modelo en particiones'],0,'Devuelve un valor alternativo en lugar de un error.']
+];
+let qi=0;const qa=S.qa;
+function drawQ(){const q=QZ[qi],ans=qa[qi];
+  $('qNum').textContent='Pregunta '+(qi+1)+' de '+QZ.length;
+  const pts=Object.keys(qa).filter(k=>qa[k]===QZ[k][2]).length,dn=Object.keys(qa).length;
+  $('qPts').textContent=pts+' correctas de '+dn+' respondidas';$('qBar').style.width=(dn/QZ.length*100)+'%';
+  $('qBox').innerHTML=`<p style="font-size:18px;font-weight:600;margin-top:12px">${esc(q[0])}</p><div class="choices" id="qCh">${q[1].map((o,i)=>`<button data-i="${i}" class="${ans===undefined?'':(i===q[2]?'right':(i===ans?'wrong':''))}" ${ans===undefined?'':'disabled'}>${esc(o)}</button>`).join('')}</div><div class="fb ${ans===undefined?'':'show '+(ans===q[2]?'good':'bad')}">${ans===undefined?'':esc((ans===q[2]?'Correcto. ':'Repase este punto. ')+q[3])}</div>`+(dn===QZ.length?`<p class="fb show ${pts>=8?'good':'bad'}" style="margin-top:12px"><b>Resultado: ${pts}/10.</b> ${pts>=8?'Listo para pasar al siguiente módulo.':'Repase las lecciones antes de seguir; la meta es 8 o más.'}</p>`:'');
+  $('qPrev').disabled=qi===0;$('qNext').disabled=qi===QZ.length-1}
+$('qBox').addEventListener('click',ev=>{const b=ev.target.closest('#qCh button');if(!b||qa[qi]!==undefined)return;qa[qi]=+b.dataset.i;save();drawQ()});
+$('qPrev').onclick=()=>{if(qi>0){qi--;drawQ()}};$('qNext').onclick=()=>{if(qi<QZ.length-1){qi++;drawQ()}};
+$('qReset').onclick=()=>{const n=Object.keys(qa).length;if(n){S.intentos.qz.push({t:Date.now(),ok:Object.keys(qa).filter(k=>QZ[k]&&qa[k]===QZ[k][2]).length,resp:n,ans:JSON.parse(JSON.stringify(qa))})}for(const k in qa)delete qa[k];save();qi=0;drawQ()};
+drawQ();
+
+/* ===== Laboratorio ===== */
+const LAB=[
+ ['Prepare el workspace y un lakehouse','Para los datos del modelo.',['Abra su workspace DACD-Lab-SuNombre (no use Mi área de trabajo).','Cree un lakehouse llamado lh_f105_demo.']],
+ ['Cree las tablas de práctica','Con el script de esta página.',['Desde el lakehouse: Open notebook › New notebook.','Pegue el script de datos de práctica en una celda y ejecútelo.','Refresque Tables: deben aparecer dim_fecha, dim_cliente, dim_producto y fact_saldos.']],
+ ['Cree el modelo semántico','En modo Direct Lake.',['En el lakehouse elija New semantic model.','Nómbrelo sm_captacion y marque las cuatro tablas. Confirmar.','Qué observar: el modelo queda en Direct Lake; no hace falta programar actualizaciones.']],
+ ['Cree las relaciones activas','Esquema estrella.',['Abra el modelo y elija Open data model (o Abrir modelo de datos) para editar.','Manage relationships › New relationship: fact_saldos[fecha_corte_key] → dim_fecha[fecha_key], muchos a uno, dirección única.','Repita para cliente_key → dim_cliente y producto_key → dim_producto.','En las tres, marque Assume referential integrity.']],
+ ['Cree la relación inactiva','La fecha de apertura.',['New relationship: fact_saldos[fecha_apertura_key] → dim_fecha[fecha_key].','Desmarque Make this relationship active y marque Assume referential integrity.','Qué observar: en el diagrama aparece como línea punteada.']],
+ ['Cree las medidas base','Con VAR y DIVIDE.',['Sobre fact_saldos elija New measure y cree: Saldo al cierre = VAR ultimo = MAX(dim_fecha[mes_idx]) RETURN CALCULATE(SUM(fact_saldos[saldo]), dim_fecha[mes_idx] = ultimo)','Clientes al cierre = VAR ultimo = MAX(dim_fecha[mes_idx]) RETURN CALCULATE(DISTINCTCOUNT(fact_saldos[cliente_key]), dim_fecha[mes_idx] = ultimo)','Saldo promedio = DIVIDE([Saldo al cierre], [Clientes al cierre])','Qué observar: sin filtros, Saldo al cierre muestra 308 400 000 (noviembre).']],
+ ['Cree la medida de rol','Con USERELATIONSHIP.',['New measure: Cuentas abiertas = CALCULATE(DISTINCTCOUNT(fact_saldos[cliente_key]), USERELATIONSHIP(fact_saldos[fecha_apertura_key], dim_fecha[fecha_key]))','Qué observar: por mes da 3 (septiembre), 2 (octubre) y 1 (noviembre).']],
+ ['Cree un grupo de cálculo','Periodo: actual, mes anterior y variación.',['En la cinta elija Calculation group y acepte el aviso sobre medidas implícitas.','Renombre la tabla a Periodo y la columna a Periodo.','Elementos: Actual = SELECTEDMEASURE()','Mes anterior = VAR m = MAX(dim_fecha[mes_idx]) RETURN CALCULATE(SELECTEDMEASURE(), REMOVEFILTERS(dim_fecha), dim_fecha[mes_idx] = m - 1)','Variación % = VAR actual = SELECTEDMEASURE() VAR previo = CALCULATE(SELECTEDMEASURE(), REMOVEFILTERS(dim_fecha), dim_fecha[mes_idx] = MAX(dim_fecha[mes_idx]) - 1) RETURN DIVIDE(actual - previo, previo)','En Variación %, active Dynamic format string con "0.00%".']],
+ ['Revise la configuración para escala','Y valide con un reporte.',['En el workspace: sm_captacion › ··· › Settings. Revise Large semantic model storage format y active Query scale-out.','Desde el modelo: Create report. Agregue una matriz con dim_cliente[segmento] en filas, Saldo al cierre en valores y Periodo en columnas.','Qué observar: Personas 10,4 M; Pymes 58 M; Corporativo 240 M; variación total −1,85 %.']],
+ ['Registre la evidencia','Es la evidencia del módulo F1-05.',['Complete el módulo en Microsoft Learn y obtenga el trofeo.','Pegue el enlace o la captura en la hoja Seguimiento y cambie el estado a Completado.']]
+];
+const lab=S.lab;
+function labProg(){const n=cnt(lab);$('lBar').style.width=(n/LAB.length*100)+'%';$('lScore').textContent=n+' de '+LAB.length+' pasos completados'}
+function drawLab(){$('labList').innerHTML=LAB.map((l,i)=>`<li><label for="lab${i}"><input type="checkbox" id="lab${i}" data-i="${i}" ${lab[i]?'checked':''}><div><b>${i+1}. ${esc(l[0])}</b><span>${esc(l[1])}</span></div></label><details class="sub" style="padding:0 12px 4px 50px"><summary>Ver el paso a paso y cómo se ve en Fabric</summary><ol>${l[2].map(x=>`<li><code style="font-family:inherit">${esc(x)}</code></li>`).join('')}</ol>${window.LabVis?LabVis.step(i):''}</details></li>`).join('');labProg()}
+$('labList').addEventListener('change',ev=>{const c=ev.target;if(c.dataset.i===undefined)return;lab[c.dataset.i]=c.checked;save();labProg()});
+$('lReset').onclick=()=>{for(const k in lab)delete lab[k];save();drawLab()};
+drawLab();
+$('csvCopy').onclick=()=>{try{navigator.clipboard.writeText($('csv').textContent).then(()=>{$('csvMsg').textContent='Script copiado. Péguelo en una celda de un notebook del lakehouse lh_f105_demo y ejecútelo.'},()=>{$('csvMsg').textContent='Seleccione el texto y cópielo manualmente.'})}catch(e){$('csvMsg').textContent='Seleccione el texto y cópielo manualmente.'}};
+
+/* ===== Glosario ===== */
+const GL=[['Direct Lake','Modo que lee tablas Delta de OneLake con el motor en memoria, sin copiar datos.'],['Framing','Actualización de Direct Lake: solo actualiza metadatos y tarda segundos.'],['Fallback','Cambio automático a DirectQuery en Direct Lake sobre el SQL endpoint.'],['Integridad referencial','Garantía de que toda clave de los hechos existe en la dimensión.'],['Relación inactiva','Relación que solo se usa dentro de una medida con USERELATIONSHIP.'],['Semiaditivo','Valor que se suma entre categorías pero no en el tiempo, como un saldo.'],['Grupo de cálculo','Variantes reutilizables (mes anterior, variación) que se aplican a cualquier medida.'],['Query scale-out','Réplicas de solo lectura para atender muchas consultas a la vez.']];
+$('glos').innerHTML=GL.map(g=>`<dt>${esc(g[0])}</dt><dd>${esc(g[1])}</dd>`).join('');
+
+/* ===== Restaurar y exponer ===== */
+function mergeTries(T,src){if(!src||typeof src!=='object')return;const seen=new Set((T.qz||[]).map(a=>a.t));(src.qz||[]).forEach(a=>{if(a&&!seen.has(a.t)){T.qz.push(a);seen.add(a.t)}});T.qz.sort((a,b)=>a.t-b.t);
+  Object.entries(src.lq||{}).forEach(([k,v])=>{T.lq[k]=Math.max(T.lq[k]||0,+v||0)});Object.entries(src.sim||{}).forEach(([s,m])=>{T.sim[s]=T.sim[s]||{};Object.entries(m||{}).forEach(([k,v])=>{T.sim[s][k]=Math.max(T.sim[s][k]||0,+v||0)})})}
+function mergeIn(r){r=r||{};mergeTries(S.intentos,r.intentos);['les','lab','qa','lq'].forEach(k=>{const src=r[k];if(src&&typeof src==='object')Object.keys(src).forEach(x=>{if(S[k][x]===undefined||S[k][x]===false)S[k][x]=src[x]})});
+  const rs=r.sims||{};['s1','s2','s3','s4'].forEach(k=>{if(rs[k]&&typeof rs[k]==='object')Object.assign(S.sims[k],rs[k])})}
+function restoreAll(){drawLessons();drawLab();drawQ();drawRel();['s2','s3','s4'].forEach(drawSim);myProg()}
+function resetLocal(){S.intentos={qz:[],lq:{},sim:{}};['les','lab','qa','lq'].forEach(k=>{for(const x in S[k])delete S[k][x]});['s1','s2','s3','s4'].forEach(k=>{for(const x in S.sims[k])delete S.sims[k][x]});restoreAll()}
+function payload(){const s=summary(S);return JSON.parse(JSON.stringify({les:S.les,lab:S.lab,qa:S.qa,lq:S.lq,sims:S.sims,intentos:S.intentos,pct:s.pct,qn:s.qn,qs:s.qs,lecciones:s.les,simuladores:s.sim,laboratorio:s.lb}))}
+myProg();
+window.F105={S,save,sync,mergeIn,restoreAll,resetLocal,payload,LES,QZ,LAB,setPush:f=>{pushRemote=f}};
+}
+</script>
+<script>
+{
+/* Navegación por pestañas: cada opción del menú muestra solo su sección */
+const $$=s=>[...document.querySelectorAll(s)];
+const secs=$$('[data-tab]');
+const names=[...new Set(secs.map(t=>t.dataset.tab))];
+const links=$$('.navbar .nav a[href^="#"]');
+const label=n=>{const a=links.find(x=>x.getAttribute('href')==='#'+n);return a?a.textContent.trim():n};
+/* botones Anterior / Siguiente al pie de cada pestaña */
+const subsOf=n=>secs.filter(s=>s.dataset.tab===n&&s.dataset.sub);
+if(!document.body.hasAttribute('data-notabnext'))names.forEach((n,i)=>{const ss=subsOf(n);
+  if(ss.length){ss.forEach((s,j)=>{const w=s.querySelector('.wrap')||s;const d=document.createElement('div');d.className='tabnext';
+    const prev=j>0?`<a href="#simuladores-${ss[j-1].dataset.sub}">← ${ss[j-1].dataset.label}</a>`:(i>0?`<a href="#${names[i-1]}">← ${label(names[i-1])}</a>`:'');
+    const next=j<ss.length-1?`<a class="nx" href="#simuladores-${ss[j+1].dataset.sub}">Siguiente simulador: ${ss[j+1].dataset.label} →</a>`:(i<names.length-1?`<a class="nx" href="#${names[i+1]}">Siguiente: ${label(names[i+1])} →</a>`:'');
+    d.innerHTML=prev+next;w.appendChild(d)});return}
+  const last=secs.filter(s=>s.dataset.tab===n).pop();const w=last.querySelector('.wrap')||last;
+  const d=document.createElement('div');d.className='tabnext';
+  d.innerHTML=(i>0?`<a href="#${names[i-1]}">← ${label(names[i-1])}</a>`:'')+(i<names.length-1?`<a class="nx" href="#${names[i+1]}">Siguiente: ${label(names[i+1])} →</a>`:'');
+  if(d.innerHTML)w.appendChild(d)});
+/* sub-pestañas de simuladores */
+const subs=secs.filter(s=>s.dataset.sub);
+const subnav=document.getElementById('simNav');
+if(subnav)subnav.innerHTML=subs.map(s=>`<a href="#simuladores-${s.dataset.sub}" data-s="${s.dataset.sub}">${s.dataset.label||s.dataset.sub}</a>`).join('');
+/* lecciones: una a la vez */
+const lesBox=document.getElementById('lessons');
+let curLes=1;
+function applyLessons(){if(!lesBox)return;const arts=[...lesBox.querySelectorAll('.les')];if(!arts.length)return;curLes=Math.min(Math.max(1,curLes),arts.length);
+  arts.forEach((a,i)=>{a.hidden=i+1!==curLes});
+  let pg=document.getElementById('lesPager');if(!pg){pg=document.createElement('div');pg.id='lesPager';pg.className='pager';lesBox.after(pg)}
+  pg.innerHTML=(curLes>1?`<a class="btn sec" href="#lecciones-${curLes-1}">← Lección ${curLes-1}</a>`:'<span></span>')+`<span class="note" style="align-self:center">Lección ${curLes} de ${arts.length}</span>`+(curLes<arts.length?`<a class="btn" href="#lecciones-${curLes+1}">Lección ${curLes+1} →</a>`:'<span></span>');
+  $$('#lesIdx a').forEach((a,i)=>{a.setAttribute('href','#lecciones-'+(i+1));a.classList.toggle('cur',i+1===curLes)})}
+if(lesBox)new MutationObserver(()=>applyLessons()).observe(lesBox,{childList:true});
+const idx=document.getElementById('lesIdx');if(idx)new MutationObserver(()=>applyLessons()).observe(idx,{childList:true});
+function show(){const h=decodeURIComponent((location.hash||'').slice(1));let tab=names[0],sub=null,m;
+  if(m=h.match(/^lecciones?-(\d+)$/)){tab='lecciones';curLes=+m[1]}
+  else if(m=h.match(/^simuladores-(s\d)$/)){tab='simuladores';sub=m[1]}
+  else if(names.includes(h))tab=h;
+  else if(h){const el=document.getElementById(h);const host=el&&el.closest('[data-tab]');if(host){tab=host.dataset.tab;sub=host.dataset.sub||null}}
+  if(tab==='admin'&&!document.body.classList.contains('is-admin'))tab=names[0];
+  if(tab==='simuladores'&&!sub)sub=(subs[0]&&subs[0].dataset.sub)||null;
+  secs.forEach(s=>{s.hidden=s.dataset.tab!==tab||(s.dataset.sub&&s.dataset.sub!==sub)});
+  links.forEach(a=>a.classList.toggle('act',a.getAttribute('href')==='#'+tab));
+  if(subnav)subnav.querySelectorAll('a').forEach(a=>a.classList.toggle('act',a.dataset.s===sub));
+  const hd=document.querySelector('header.top');if(hd)hd.classList.toggle('compact',tab!==names[0]);
+  applyLessons();
+  window.dispatchEvent(new Event('resize'));
+  window.scrollTo({top:0})}
+window.addEventListener('hashchange',show);show();
+window.TABS={show};
+}
+
+</script>
+<script type="module">
+const firebaseConfig = {
+  apiKey: "AIzaSyA05zxFVcJzqLF859hDAiscdX5d4owti4E",
+  authDomain: "curso-fabric-dacd.firebaseapp.com",
+  projectId: "curso-fabric-dacd",
+  storageBucket: "curso-fabric-dacd.firebasestorage.app",
+  messagingSenderId: "710076720357",
+  appId: "1:710076720357:web:3533bf72aadd41ea42e00c"
+};
+import {initializeApp} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+import {getAuth,onAuthStateChanged,signInWithEmailAndPassword,signOut} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+import {getFirestore,doc,getDoc,setDoc,updateDoc,onSnapshot,serverTimestamp,FieldPath} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+const F=window.F105,$=id=>document.getElementById(id);
+const gm=(t,k)=>{const m=$('gMsg');m.textContent=t||'';m.className='lmsg'+(k?' '+k:'')};
+const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app);auth.languageCode='es';
+const errTxt=e=>({'auth/invalid-credential':'Correo o contraseña incorrectos.','auth/wrong-password':'Correo o contraseña incorrectos.','auth/user-not-found':'No encontramos ese correo. Regístrese en la página principal.','auth/too-many-requests':'Demasiados intentos. Espere unos minutos.','auth/invalid-email':'El correo no es válido.','auth/network-request-failed':'No hay conexión con el registro del curso.'}[e&&e.code]||'No se pudo ingresar. Intente de nuevo.');
+$('gForm').addEventListener('submit',async ev=>{ev.preventDefault();$('gBtn').disabled=true;gm('Ingresando…');
+  try{await signInWithEmailAndPassword(auth,$('gEmail').value.trim().toLowerCase(),$('gPass').value)}catch(e){gm(errTxt(e),'err')}finally{$('gBtn').disabled=false}});
+const out=()=>{try{localStorage.removeItem('fabSession')}catch(e){}return signOut(auth).then(()=>location.reload())};$('meOut').onclick=out;$('gOther').onclick=out;
+let entered=false,unsub=null;
+const unboot=()=>document.body.classList.remove('booting');
+const sess=on=>{try{on?localStorage.setItem('fabSession','1'):localStorage.removeItem('fabSession')}catch(e){}};
+onAuthStateChanged(auth,async u=>{
+  if(unsub){unsub();unsub=null}entered=false;
+  if(!u){sess(0);document.body.classList.add('locked');$('gForm').hidden=false;$('gWait').hidden=true;unboot();return}
+  sess(1);
+  const email=(u.email||'').toLowerCase();
+  let owner=null;try{owner=localStorage.getItem('f101owner')}catch(e){}
+  if(owner!==u.uid){try{localStorage.removeItem('f101');localStorage.removeItem('f102');localStorage.removeItem('f103');localStorage.removeItem('f104');localStorage.removeItem('f105');localStorage.setItem('f101owner',u.uid)}catch(e){}if(owner!==null){location.reload();return}F.resetLocal()}
+  let admin=false;try{admin=(await getDoc(doc(db,'admins',u.uid))).exists()}catch(e){}
+  try{if(sessionStorage.getItem('fabIn')!==u.uid){await updateDoc(doc(db,'participants',email),{ultimoIngreso:serverTimestamp()});sessionStorage.setItem('fabIn',u.uid)}}catch(e){}
+  unsub=onSnapshot(doc(db,'participants',email),s=>{const p=s.data()||{};
+    if(admin||p.estado==='Aprobado'){if(!entered){entered=true;enter(u,email,p,admin)}}
+    else{document.body.classList.add('locked');unboot();$('gForm').hidden=true;$('gWait').hidden=false;
+      if(!s.exists()){$('gWaitT').textContent='No encontramos su registro';$('gWaitP').textContent='Regístrese primero en la página principal del curso.'}
+      else if(p.estado==='Rechazado'){$('gWaitT').textContent='Solicitud no aprobada';$('gWaitP').textContent='Su solicitud no fue aprobada. Comuníquese con la jefatura de la DACD.'}}},()=>{});
+});
+async function enter(u,email,p,admin){
+  document.body.classList.remove('locked');unboot();
+  const nombre=p.nombre||email,perfil=p.perfil||'';
+  $('meName').textContent='Avance de '+nombre+' en el F1-05';$('mePerfilTxt').textContent=perfil||(admin?'Administración':'—');
+  const ref=doc(db,'progress',u.uid);
+  try{const sn=await getDoc(ref);const m=sn.exists()&&sn.data().mods&&sn.data().mods.f105;if(m){F.mergeIn(m);F.restoreAll()}}catch(e){}
+  let writing=false,pending=false;
+  F.setPush(async()=>{pending=true;if(writing)return;writing=true;
+    while(pending){pending=false;F.sync('Guardando…');
+      try{await setDoc(ref,{email,nombre,perfil,updatedAt:serverTimestamp(),mods:{f105:F.payload()}},{mergeFields:['email','nombre','perfil','updatedAt',new FieldPath('mods','f105')]});F.sync('Avance guardado en el registro del curso.')}
+      catch(e){F.sync(e&&e.code==='permission-denied'?'No tiene permiso para guardar: su inscripción no está aprobada.':'No se pudo guardar ahora; se volverá a intentar con su próximo avance.')}}
+    writing=false});
+  F.save();F.sync('Conectado. Su avance se guarda automáticamente.');
+}
+</script>
+</body>
+</html>

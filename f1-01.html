@@ -816,7 +816,7 @@ onAuthStateChanged(auth,async u=>{
   sess(1);
   const email=(u.email||'').toLowerCase();
   let owner=null;try{owner=localStorage.getItem('f101owner')}catch(e){}
-  if(owner!==u.uid){try{localStorage.removeItem('f101');localStorage.removeItem('f102');localStorage.removeItem('f103');localStorage.removeItem('f104');localStorage.setItem('f101owner',u.uid)}catch(e){}if(owner!==null){location.reload();return}F.resetLocal()}
+  if(owner!==u.uid){try{localStorage.removeItem('f101');localStorage.removeItem('f102');localStorage.removeItem('f103');localStorage.removeItem('f104');localStorage.removeItem('f105');localStorage.setItem('f101owner',u.uid)}catch(e){}if(owner!==null){location.reload();return}F.resetLocal()}
   let admin=false;try{admin=(await getDoc(doc(db,'admins',u.uid))).exists()}catch(e){}
   try{if(sessionStorage.getItem('fabIn')!==u.uid){await updateDoc(doc(db,'participants',email),{ultimoIngreso:serverTimestamp()});sessionStorage.setItem('fabIn',u.uid)}}catch(e){}
   unsub=onSnapshot(doc(db,'participants',email),s=>{const p=s.data()||{};
