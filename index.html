@@ -30,8 +30,15 @@ a{color:var(--pu)}
 .lead{font-size:18px;color:var(--soft);max-width:62ch}
 .nav{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:14px;font-weight:600}
 .nav a{text-decoration:none;color:var(--ink);border-bottom:2px solid var(--or);padding:4px 0}
-@media(min-width:900px){.navbar{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}}
-.navbar .nav{margin:0;padding:10px max(5vw,16px);max-width:1240px;margin-inline:auto}
+.navbar{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:3px solid var(--or);box-shadow:0 2px 10px rgba(60,30,90,.06)}
+.navin{display:flex;align-items:center;gap:16px;max-width:1240px;margin-inline:auto;padding:8px max(5vw,16px)}
+.brand{flex:none;display:flex;align-items:center;gap:8px;text-decoration:none;color:var(--ink);font:800 15px Montserrat,sans-serif;white-space:nowrap}
+.brand i{font-style:normal;background:var(--pu);color:#fff;border-radius:7px;padding:3px 8px;font-size:13px}
+.navbar .nav{margin:0;padding:0;flex:1;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:thin;gap:4px}
+.navbar .nav a{flex:none;border:0;border-radius:8px;padding:8px 10px;font-size:15px;white-space:nowrap}
+.navbar .nav a:hover{background:var(--orbg)}
+@media(max-width:600px){.navin{gap:10px}.brand span{display:none}}
+
 .sim{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:24px;margin-top:22px;align-items:stretch}
 @media(max-width:760px){.sim{grid-template-columns:minmax(0,1fr)}}
 .panel{background:var(--panel);border-radius:14px;padding:18px}
@@ -195,6 +202,12 @@ footer{border-top:6px solid var(--or);color:var(--soft);font-size:14px}
     </div>
   </div>
 </div>
+<nav class="navbar" aria-label="Menú del curso"><div class="navin">
+  <a class="brand" href="#miruta"><i>DACD</i><span>Fabric · F1-01</span></a>
+  <div class="nav">
+  <a href="#miruta">Mis módulos</a><a href="#como">Cómo estudiar</a><a href="#guia">Lecciones</a><a href="#roles">Roles</a><a href="#acceso">Shortcut o copia</a><a href="#cargas">Cargas de trabajo</a><a href="#quiz">Autoevaluación</a><a href="#lab">Laboratorio</a><a href="#insumos">Insumos</a><a href="#admin" id="navAdmin" hidden>Administración</a>
+  </div>
+</div></nav>
 <header class="band top"><div class="wrap">
   <h1>Fabric de punta a punta: guía práctica del módulo F1-01</h1>
   <p class="lead">Material de apoyo para analistas y científicos de la DACD que acompaña el módulo <i>Introduction to end-to-end analytics using Microsoft Fabric</i>. Lea la guía, practique con los simuladores y cierre con la autoevaluación y el laboratorio.</p>
@@ -229,9 +242,6 @@ footer{border-top:6px solid var(--or);color:var(--soft);font-size:14px}
     <p class="end"><b>Conclusión:</b> en Fabric cada equipo usa su herramienta preferida sin duplicar datos. Menos copias significa menos procesos que mantener y una sola cifra oficial de saldos.</p>
   </div>
 </div></header>
-<nav class="navbar" aria-label="Secciones"><div class="nav">
-  <a href="#miruta">Mis módulos</a><a href="#como">Cómo estudiar</a><a href="#guia">Lecciones</a><a href="#roles">Roles</a><a href="#acceso">Shortcut o copia</a><a href="#cargas">Cargas de trabajo</a><a href="#quiz">Autoevaluación</a><a href="#lab">Laboratorio</a><a href="#insumos">Insumos</a><a href="#admin" id="navAdmin" hidden>Administración</a>
-</div></nav>
 
 <section class="band me" aria-label="Su avance"><div class="wrap mebox">
   <div class="mehead"><div><h3 id="meName">Su avance</h3><p class="note" id="meSync">Su avance se guarda en este navegador.</p></div>
