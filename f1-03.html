@@ -403,7 +403,7 @@ INSERT INTO dbo.fact_captacion VALUES
 
 <footer class="band"><div class="wrap">DACD · Banco Popular · Ruta de conocimiento Microsoft Fabric, fase 1, módulo F1-03. Los contenidos resumen la documentación pública de Microsoft Learn; ante cualquier diferencia, manda la fuente oficial.</div></footer>
 <script src="lab-f103.js?v=1"></script>
-<script src="labvis.js?v=2"></script>
+<script src="labvis.js?v=3"></script>
 <script>
 {
 const $=id=>document.getElementById(id);
@@ -589,7 +589,7 @@ const LAB=[
  ['Cree una vista','Para que los analistas reutilicen la consulta.',['Ejecute: CREATE VIEW dbo.vw_captacion_segmento AS SELECT c.segmento, SUM(f.monto_deposito) AS total FROM dbo.fact_captacion f JOIN dbo.dim_cliente c ON f.id_cliente = c.id_cliente GROUP BY c.segmento;','Luego: SELECT * FROM dbo.vw_captacion_segmento;']],
  ['Pruebe el editor visual de consultas','La misma consulta sin escribir SQL.',['Elija New visual query.','Arrastre fact_captacion y dim_cliente, y combínelas por id_cliente.','Agrupe por segmento y sume monto_deposito.','Qué observar: el resultado coincide con la vista.']],
  ['Haga una consulta entre bases','Leer el lakehouse del F1-02 sin copiarlo.',['Ejecute: SELECT TOP 5 * FROM lh_f102_demo.dbo.clientes_demo;','Luego cree una tabla curada: CREATE TABLE dbo.clientes_lake AS SELECT segmento, provincia, saldo FROM lh_f102_demo.dbo.clientes_demo;','Qué observar: si no tiene el lakehouse del F1-02, cree uno o salte este paso.']],
- ['Opcional: enmascare una columna','Pruebe el enmascaramiento dinámico.',['Ejecute: ALTER TABLE dbo.dim_cliente ALTER COLUMN nombre ADD MASKED WITH (FUNCTION = \'default()\');','Qué observar: los usuarios sin permiso UNMASK ven el valor enmascarado; usted, como administrador del workspace, lo sigue viendo completo.']],
+ ['Enmascare una columna','Pruebe el enmascaramiento dinámico.',['Ejecute: ALTER TABLE dbo.dim_cliente ALTER COLUMN nombre ADD MASKED WITH (FUNCTION = \'default()\');','Qué observar: los usuarios sin permiso UNMASK ven el valor enmascarado; usted, como administrador del workspace, lo sigue viendo completo.']],
  ['Registre la evidencia','Es la evidencia del módulo F1-03.',['Complete el módulo en Microsoft Learn y obtenga el trofeo.','Pegue el enlace o la captura en la hoja Seguimiento y cambie el estado a Completado.']]
 ];
 const lab=S.lab;
@@ -696,7 +696,7 @@ onAuthStateChanged(auth,async u=>{
   sess(1);
   const email=(u.email||'').toLowerCase();
   let owner=null;try{owner=localStorage.getItem('f101owner')}catch(e){}
-  if(owner!==u.uid){try{localStorage.removeItem('f101');localStorage.removeItem('f102');localStorage.removeItem('f103');localStorage.removeItem('f104');localStorage.removeItem('f105');localStorage.removeItem('f106');localStorage.setItem('f101owner',u.uid)}catch(e){}if(owner!==null){location.reload();return}F.resetLocal()}
+  if(owner!==u.uid){try{localStorage.removeItem('f101');localStorage.removeItem('f102');localStorage.removeItem('f103');localStorage.removeItem('f104');localStorage.removeItem('f105');localStorage.removeItem('f106');localStorage.removeItem('f107');localStorage.setItem('f101owner',u.uid)}catch(e){}if(owner!==null){location.reload();return}F.resetLocal()}
   let admin=false;try{admin=(await getDoc(doc(db,'admins',u.uid))).exists()}catch(e){}
   try{if(sessionStorage.getItem('fabIn')!==u.uid){await updateDoc(doc(db,'participants',email),{ultimoIngreso:serverTimestamp()});sessionStorage.setItem('fabIn',u.uid)}}catch(e){}
   unsub=onSnapshot(doc(db,'participants',email),s=>{const p=s.data()||{};

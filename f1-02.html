@@ -399,7 +399,7 @@ button.lhi{cursor:pointer}.lhi.on{border-color:var(--or);background:var(--orbg)}
 
 <footer class="band"><div class="wrap">DACD · Banco Popular · Ruta de conocimiento Microsoft Fabric, fase 1, módulo F1-02. Los contenidos resumen la documentación pública de Microsoft Learn; ante cualquier diferencia, manda la fuente oficial.</div></footer>
 <script src="lab-f102.js?v=1"></script>
-<script src="labvis.js?v=2"></script>
+<script src="labvis.js?v=3"></script>
 <script>
 {
 const $=id=>document.getElementById(id);
@@ -574,7 +574,7 @@ const LAB=[
  ['Consulte con el SQL analytics endpoint','Y compruebe que es de solo lectura.',['Abra el SQL analytics endpoint del lakehouse.','Ejecute: SELECT * FROM clientes_resumen ORDER BY saldo_total DESC;','Intente: UPDATE clientes_demo SET saldo = 0 WHERE id_cliente = 1001;','Qué observar: la consulta funciona y el UPDATE da error, porque el endpoint es de solo lectura.']],
  ['Cree un modelo semántico','Necesario para Power BI.',['Desde el lakehouse o el SQL analytics endpoint, elija New semantic model.','Nómbrelo sm_f102_demo y seleccione las tablas clientes_demo y clientes_resumen.','Qué observar: el modelo aparece como un elemento aparte en el workspace.']],
  ['Haga un reporte rápido en Power BI','Sobre el modelo semántico.',['Abra el modelo semántico y elija crear un reporte.','Agregue un gráfico de barras con segmento y saldo_total.','Qué observar: el reporte lee las mismas tablas que el notebook y el endpoint.']],
- ['Opcional: cargue con un Dataflow Gen2','Compare la experiencia visual.',['Cree un Dataflow Gen2, tome clientes_demo.csv como origen y filtre el segmento Personas.','Defina como destino el lakehouse lh_f102_demo, en una tabla clientes_personas.','Qué observar: el mismo resultado se logra sin escribir código.']],
+ ['Cargue con un Dataflow Gen2','Compare la experiencia visual.',['Cree un Dataflow Gen2, tome clientes_demo.csv como origen y filtre el segmento Personas.','Defina como destino el lakehouse lh_f102_demo, en una tabla clientes_personas.','Qué observar: el mismo resultado se logra sin escribir código.']],
  ['Registre la evidencia','Es la evidencia del módulo F1-02.',['Complete el módulo en Microsoft Learn y obtenga el trofeo.','Pegue el enlace o la captura en la hoja Seguimiento y cambie el estado a Completado.']]
 ];
 const lab=S.lab;
@@ -681,7 +681,7 @@ onAuthStateChanged(auth,async u=>{
   sess(1);
   const email=(u.email||'').toLowerCase();
   let owner=null;try{owner=localStorage.getItem('f101owner')}catch(e){}
-  if(owner!==u.uid){try{localStorage.removeItem('f101');localStorage.removeItem('f102');localStorage.removeItem('f103');localStorage.removeItem('f104');localStorage.removeItem('f105');localStorage.removeItem('f106');localStorage.setItem('f101owner',u.uid)}catch(e){}if(owner!==null){location.reload();return}F.resetLocal()}
+  if(owner!==u.uid){try{localStorage.removeItem('f101');localStorage.removeItem('f102');localStorage.removeItem('f103');localStorage.removeItem('f104');localStorage.removeItem('f105');localStorage.removeItem('f106');localStorage.removeItem('f107');localStorage.setItem('f101owner',u.uid)}catch(e){}if(owner!==null){location.reload();return}F.resetLocal()}
   let admin=false;try{admin=(await getDoc(doc(db,'admins',u.uid))).exists()}catch(e){}
   try{if(sessionStorage.getItem('fabIn')!==u.uid){await updateDoc(doc(db,'participants',email),{ultimoIngreso:serverTimestamp()});sessionStorage.setItem('fabIn',u.uid)}}catch(e){}
   unsub=onSnapshot(doc(db,'participants',email),s=>{const p=s.data()||{};

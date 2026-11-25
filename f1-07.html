@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fabric F1-07 Real-Time Intelligence</title>
+<script>try{if(localStorage.getItem("fabSession"))document.documentElement.classList.add("hasSession")}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;800&family=Source+Sans+3:wght@400;600;700&display=swap">
+<style>
+/* VOICE everyday learning: a practice workbook for the DACD team
+   IDEA a star-schema workbench: sort flat columns into facts and dimensions
+   PICTURE live explorer where a CSV becomes a Delta table and the SQL endpoint answers
+   COLOUR Banco Popular: white ground, orange #F47920 leads, purple #7C51A1 supports, green/yellow for feedback
+   TYPE Montserrat 800 display + Source Sans 3 text
+   LAYOUT title over the lake simulator full width; then guide, three simulators, quiz, lab checklist, resources; stacks on phone */
+:root{color-scheme:light dark;--bg:light-dark(#ffffff,#16121b);--ink:light-dark(#2a2530,#f1eef5);--soft:light-dark(#666666,#b9b2c4);--panel:light-dark(#EDEEF4,#231d2b);--line:light-dark(#d9dbe6,#3a3245);--or:#F47920;--pu:light-dark(#7C51A1,#b48fdc);--gr:light-dark(#3f8f2a,#8fd877);--grbg:light-dark(#e6f5df,#1d3318);--rd:light-dark(#b3261e,#ff8a80);--rdbg:light-dark(#fbe4e2,#3a1a18);--ye:#FAA61A;--orbg:light-dark(#fff1e6,#3a2414);--pubg:light-dark(#f1eaf8,#2a1f38)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+html{scroll-padding-top:72px}
+body{margin:0;background:var(--bg);color:var(--ink);font:16.5px/1.55 "Source Sans 3",system-ui,sans-serif;overflow-x:clip}
+h1,h2,h3{font-family:Montserrat,system-ui,sans-serif;line-height:1.08;letter-spacing:-.02em;margin:0;text-wrap:balance}
+h1{font-size:clamp(32px,5vw,50px);font-weight:800}
+h2{font-size:clamp(24px,3vw,32px);font-weight:800;margin-bottom:10px}
+h3{font-size:18px;font-weight:600}
+p{margin:.4em 0 .8em;max-width:70ch}
+a{color:var(--pu)}
+.band{padding:clamp(28px,4vw,56px) max(5vw,16px)}
+.wrap{max-width:1240px;margin:0 auto}
+.top{background:var(--orbg);border-bottom:6px solid var(--or)}
+.lead{font-size:18px;color:var(--soft);max-width:62ch}
+.nav{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:14px;font-weight:600}
+.nav a{text-decoration:none;color:var(--ink);border-bottom:2px solid var(--or);padding:4px 0}
+.navbar{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:3px solid var(--or);box-shadow:0 2px 10px rgba(60,30,90,.06)}
+.navin{display:flex;align-items:center;gap:16px;max-width:1240px;margin-inline:auto;padding:8px max(5vw,16px)}
+.brand{flex:none;display:flex;align-items:center;gap:8px;text-decoration:none;color:var(--ink);font:800 15px Montserrat,sans-serif;white-space:nowrap}
+.brand i{font-style:normal;background:var(--pu);color:#fff;border-radius:7px;padding:3px 8px;font-size:13px}
+.navbar .nav{margin:0;padding:0;flex:1;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:thin;gap:4px}
+.navbar .nav a{flex:none;border:0;border-radius:8px;padding:8px 10px;font-size:15px;white-space:nowrap}
+.navbar .nav a:hover{background:var(--orbg)}
+@media(max-width:600px){.navin{gap:10px}.brand span{display:none}}
+
+.sim{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:24px;margin-top:22px;align-items:stretch}
+@media(max-width:760px){.sim{grid-template-columns:minmax(0,1fr)}}
+.panel{background:var(--panel);border-radius:14px;padding:18px}
+.white{background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:18px}
+.seg{display:inline-flex;flex-wrap:wrap;background:var(--bg);border:1px solid var(--line);border-radius:999px;padding:4px;gap:4px}
+button{font:inherit;cursor:pointer}
+.seg button{border:0;background:transparent;color:var(--ink);padding:10px 16px;border-radius:999px;min-height:44px;font-weight:600}
+.seg button[aria-pressed=true]{background:var(--or);color:#fff}
+.engines{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:14px}
+.eng{border:2px solid var(--line);background:var(--bg);color:var(--ink);border-radius:12px;padding:12px;text-align:left;min-height:64px}
+.eng b{display:block;font-family:Montserrat,sans-serif;font-size:15px}
+.eng span{font-size:14px;color:var(--soft)}
+.eng[aria-pressed=true]{border-color:var(--or);background:var(--orbg)}
+button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid var(--pu);outline-offset:2px}
+.lake{position:relative;min-height:330px;border-radius:14px;overflow:hidden;background:linear-gradient(180deg,light-dark(#f7f2fb,#211a2a),light-dark(#e9ddf4,#2b1f3a))}
+.lake svg{position:absolute;inset:0;width:100%;height:100%}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(9em,1fr));gap:10px;margin-top:12px}
+.kpi{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.kpi small{display:block;color:var(--soft);font-size:14px}
+.kpi strong{font:800 clamp(24px,3vw,30px) Montserrat,sans-serif;white-space:nowrap}
+pre{background:light-dark(#2a2530,#0f0c13);color:#f4eefa;border-radius:12px;padding:14px;overflow-x:auto;font-size:14px;margin:10px 0 0}
+.note{font-size:14px;color:var(--soft)}
+.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,17em),1fr));gap:14px;margin-top:16px}
+.card{background:var(--panel);border-radius:14px;padding:16px}
+.card h3{color:var(--pu);margin-bottom:6px}
+.card p{margin:0;font-size:16px}
+.alt{background:var(--panel)}
+.alt .card,.alt .white{background:var(--bg)}
+.obj{counter-reset:o;list-style:none;padding:0;display:grid;gap:8px;margin:12px 0 0}
+.obj li{counter-increment:o;display:grid;grid-template-columns:2.2em 1fr;align-items:start}
+.obj li::before{content:counter(o);font:800 22px Montserrat,sans-serif;color:var(--or)}
+table{border-collapse:collapse;width:100%;font-size:15px}
+th,td{padding:9px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{font-weight:700}
+.scroll{overflow-x:auto}
+.ok{color:var(--gr);font-weight:700}.no{color:var(--rd);font-weight:700}
+.choices{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.choices button{border:2px solid var(--line);background:var(--bg);color:var(--ink);border-radius:10px;padding:10px 14px;min-height:44px;font-weight:600}
+.choices button.right{border-color:var(--gr);background:var(--grbg)}
+.choices button.wrong{border-color:var(--rd);background:var(--rdbg)}
+.fb{margin-top:10px;padding:10px 12px;border-radius:10px;font-size:16px;display:none}
+.fb.show{display:block}.fb.good{background:var(--grbg)}.fb.bad{background:var(--rdbg)}
+.scen{display:grid;gap:14px;margin-top:16px}
+.scen .white h3{margin-bottom:4px}
+.bar{height:12px;background:var(--line);border-radius:99px;overflow:hidden;margin:8px 0}
+.bar i{display:block;height:100%;background:var(--or);width:0;transition:width .4s}
+.q{display:none}.q.on{display:block}
+.qhead{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:baseline}
+.btn{border:0;background:var(--pu);color:#fff;border-radius:10px;padding:12px 18px;min-height:44px;font-weight:700}
+.btn.sec{background:transparent;color:var(--pu);border:2px solid var(--pu)}
+.check{list-style:none;padding:0;margin:14px 0 0;display:grid;gap:10px}
+.check li{background:var(--bg);border:1px solid var(--line);border-radius:12px}
+.check label{display:grid;grid-template-columns:28px 1fr;gap:10px;align-items:start;padding:12px;cursor:pointer}
+@media(max-width:600px){.check details.sub{padding-left:12px!important}}
+.check input{width:22px;height:22px;accent-color:var(--or);margin-top:3px}
+.check b{display:block}
+.check span{font-size:15px;color:var(--soft)}
+.glos{display:grid;grid-template-columns:minmax(9em,max-content) 1fr;gap:6px 18px;margin:12px 0 0}
+.glos dt{font-weight:700;color:var(--pu)}.glos dd{margin:0}
+@media(max-width:600px){.glos{grid-template-columns:1fr}.glos dd{margin-bottom:8px}table{font-size:13px}th,td{padding:6px 4px}}
+.steps{padding-left:1.3em;margin:10px 0 0;display:grid;gap:8px}
+.steps li::marker{color:var(--or);font-weight:800}
+.lesidx{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 18px}
+.lesidx a{display:inline-flex;align-items:center;gap:6px;text-decoration:none;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:999px;padding:8px 14px;min-height:44px;font-weight:600;font-size:15px}
+.lesidx a.done{border-color:var(--gr);background:var(--grbg)}
+.les{background:var(--bg);border:1px solid var(--line);border-radius:16px;padding:clamp(16px,3vw,28px);margin-bottom:18px;scroll-margin-top:72px}
+.les header{display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:center;margin-bottom:10px}
+.num{width:48px;height:48px;border-radius:50%;background:var(--or);color:#fff;display:grid;place-items:center;font:800 20px Montserrat,sans-serif}
+.les .goal{color:var(--soft);margin:2px 0 0;font-size:16px}
+.lbody{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:22px;margin-top:8px}
+@media(max-width:760px){.lbody{grid-template-columns:minmax(0,1fr)}}
+.lbody p{max-width:none}
+.box{border-radius:12px;padding:12px 14px;margin-bottom:12px;font-size:16px}
+.box b{display:block;font-family:Montserrat,sans-serif;font-size:14px;margin-bottom:4px}
+.box.an{background:var(--pubg)}.box.an b{color:var(--pu)}
+.box.dacd{background:var(--orbg)}.box.dacd b{color:light-dark(#b8560f,#ffb27a)}
+.box.err{background:var(--panel)}
+.keys{margin:6px 0 0;padding-left:1.2em}.keys li{margin-bottom:4px}
+.mc{border-top:1px solid var(--line);margin-top:14px;padding-top:14px}
+.mc p{font-weight:600;margin:0}
+.howto{background:var(--bg);border:1px solid var(--line);border-left:6px solid var(--pu);border-radius:12px;padding:14px 16px;margin:14px 0}
+.alt .howto{background:var(--bg)}
+.howto h3{font-size:16px;margin-bottom:6px}
+.howto ol{margin:0;padding-left:1.3em}
+.howto .end{margin:8px 0 0;font-size:16px}
+details.sub{margin-top:6px}
+details.sub summary{cursor:pointer;color:var(--pu);font-weight:600;font-size:15px;min-height:32px}
+details.sub ol{margin:6px 0 0;padding-left:1.3em;font-size:15px}
+.copyrow{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-top:16px}
+.me{padding-block:16px;background:var(--bg);border-bottom:1px solid var(--line)}
+.mehead{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center}
+.mehead .note{margin:2px 0 0}
+.perf{display:flex;gap:8px;align-items:center;font-weight:600}
+select{font:inherit;font-size:16px;min-height:44px;padding:6px 10px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink)}
+.meparts{display:grid;grid-template-columns:repeat(auto-fit,minmax(10em,1fr));gap:10px;margin-top:10px}
+.mp{background:var(--panel);border-radius:10px;padding:8px 12px}
+.mp small{display:block;color:var(--soft);font-size:14px}
+.mp strong{font:800 20px Montserrat,sans-serif;white-space:nowrap}
+.mp .bar{height:8px;margin:4px 0 0}
+.mp.tot{background:var(--orbg)}
+.pbar{display:flex;align-items:center;gap:8px}.pbar .bar{flex:1;margin:0;min-width:3em}.pbar b{white-space:nowrap;font-variant-numeric:tabular-nums}
+td.num{white-space:nowrap;font-variant-numeric:tabular-nums}
+.fl{display:block;font-weight:600;margin:10px 0 4px}
+.in{width:100%;font:inherit;font-size:16px;min-height:44px;padding:8px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink)}
+.idrow{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,14em),1fr));gap:0 14px}
+body.locked:not(.booting)>:not(#gate):not(script){display:none!important}
+body.booting #gate{display:none!important}
+html:not(.hasSession) body.booting>:not(#bootMsg):not(script){display:none!important}
+#bootMsg{display:none}
+html:not(.hasSession) body.booting #bootMsg{display:grid;place-items:center;min-height:100svh;color:var(--soft);font:600 17px "Source Sans 3",sans-serif;background:linear-gradient(160deg,var(--orbg),var(--pubg))}
+#gate{display:none}
+body.locked:not(.booting) #gate{display:grid;min-height:100svh;place-items:center;padding:24px 16px;background:linear-gradient(160deg,var(--orbg),var(--pubg))}
+.gcard{width:min(460px,100%);background:var(--bg);border-radius:18px;padding:clamp(20px,4vw,32px);border-top:8px solid var(--or);box-shadow:0 10px 30px rgba(60,30,90,.12)}
+.gtop{margin-bottom:16px}
+.gmark{display:inline-block;background:var(--pu);color:#fff;font:800 14px Montserrat,sans-serif;padding:4px 10px;border-radius:8px;margin-bottom:10px}
+.pill{display:inline-block;background:var(--pubg);color:var(--pu);border-radius:999px;padding:3px 12px;font-weight:700}
+.rutas{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,16em),1fr));gap:14px;margin-top:14px}
+.fase{background:var(--panel);border-radius:14px;padding:14px 16px}
+.fase h3{color:var(--pu);margin-bottom:8px}
+.fase ol{margin:0;padding-left:1.2em;display:grid;gap:6px;font-size:15px}
+.fase li.now{font-weight:700}
+.fase li.now::after{content:'actual';margin-left:8px;background:var(--or);color:#fff;border-radius:999px;padding:1px 8px;font-size:12px;font-weight:700}
+.est{display:inline-block;border-radius:999px;padding:2px 10px;font-size:13px;font-weight:700;white-space:nowrap}
+.est.Pendiente{background:light-dark(#fff4d6,#3a3010);color:light-dark(#8a5a00,#ffd479)}.est.Aprobado{background:var(--grbg);color:var(--gr)}.est.Rechazado{background:var(--rdbg);color:var(--rd)}
+.acts{display:flex;gap:6px;flex-wrap:wrap}
+.mini{border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:8px;padding:6px 10px;min-height:36px;font-weight:600;cursor:pointer}
+.mini.ok{color:var(--gr);border-color:var(--gr)}.mini.no{color:var(--rd);border-color:var(--rd)}
+.lnk{border:0;background:none;color:var(--pu);font:inherit;font-weight:600;padding:8px 0;min-height:40px;text-decoration:underline;cursor:pointer}
+.lmsg{min-height:1.4em;margin:10px 0 0;font-size:15px}.lmsg.err{color:var(--rd)}.lmsg.ok{color:var(--gr)}
+footer{border-top:6px solid var(--or);color:var(--soft);font-size:14px}
+@media(prefers-reduced-motion:reduce){.bar i{transition:none}.pulse{animation:none!important}}
+.pulse{animation:flow 1.4s linear infinite}
+@keyframes flow{to{stroke-dashoffset:-24}}
+
+.back{font-weight:700;color:var(--pu);text-decoration:none}
+.lh{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px}
+.lhcol{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:10px;min-height:170px}
+.lhh{font:800 15px Montserrat,sans-serif;margin-bottom:8px;display:flex;justify-content:space-between;gap:6px;flex-wrap:wrap}
+.lhi{display:flex;align-items:center;gap:8px;width:100%;text-align:left;border:2px solid var(--line);background:var(--bg);color:var(--ink);border-radius:10px;padding:8px 10px;margin-bottom:6px;min-height:44px;font:inherit;font-size:15px;overflow-wrap:anywhere}
+button.lhi{cursor:pointer}.lhi.on{border-color:var(--or);background:var(--orbg)}.lhi.tb{border-color:var(--gr);background:var(--grbg)}
+.ft{flex:none;font-size:12px;font-weight:700;background:var(--pubg);color:var(--pu);border-radius:6px;padding:1px 6px}
+#sqlOut{min-height:120px;white-space:pre-wrap}
+/* pestañas */
+[data-tab][hidden]{display:none!important}
+.navbar .nav a.act{background:var(--or);color:#fff}
+.navbar .nav a.ext{color:var(--pu)}
+.top.compact{padding-block:18px}
+.top.compact h1{font-size:clamp(24px,3vw,32px)}
+.top.compact .lead{display:none}
+.subnav{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 4px}
+.subnav a{flex:none;text-decoration:none;color:var(--ink);background:var(--bg);border:2px solid var(--line);border-radius:999px;padding:9px 16px;min-height:44px;display:inline-flex;align-items:center;font-weight:600;font-size:15px}
+.subnav a.act{border-color:var(--or);background:var(--orbg)}
+.subnav a .ok{color:var(--gr)}
+.pager{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:18px}
+.pager a{text-decoration:none}
+.pager .btn{display:inline-flex;align-items:center}
+.tabnext{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:28px;padding-top:18px;border-top:1px solid var(--line)}
+.tabnext a{text-decoration:none;font-weight:700;color:var(--pu);padding:10px 0;min-height:44px}
+.tabnext a.nx{margin-left:auto;background:var(--pu);color:#fff;border-radius:10px;padding:10px 18px}
+
+
+.stc{display:grid;grid-template-columns:1fr;gap:4px;padding:8px 0;border-bottom:1px solid var(--line)}
+.stc .choices{display:flex;flex-wrap:wrap;gap:6px}
+#sim1 .sim{grid-template-columns:minmax(0,1.25fr) minmax(0,1fr)}
+@media(max-width:1000px){#sim1 .sim{grid-template-columns:minmax(0,1fr)}}
+.stc code{font-size:14px;overflow-wrap:anywhere}.stc .choices{margin:0}.stc .choices button{padding:6px 10px;min-height:38px;font-size:14px}
+.stc.done code{color:var(--gr);font-weight:700}
+
+.star{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:10px}
+.stb{background:var(--bg);border:2px solid var(--pu);border-radius:10px;padding:8px;font-size:13px;min-height:84px;display:flex;flex-direction:column;gap:3px}
+.stb b{font:800 13px Montserrat,sans-serif;color:var(--pu);overflow-wrap:anywhere}.stb.f{border-color:var(--or);background:var(--orbg)}.stb.f b{color:light-dark(#b8560f,#ffb27a)}
+.stb span{overflow-wrap:anywhere}
+#stSql{white-space:pre-wrap;font-size:13px}
+
+table.runs{font-size:14px}table.runs td,table.runs th{padding:6px}
+.relrow{border:1px solid var(--line);border-radius:10px;padding:10px;display:grid;gap:8px;margin-bottom:8px}
+.relrow.ok{background:var(--grbg)}
+.relopt{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+#rtLive pre{white-space:pre-wrap;font-size:13px}
+#sim1 .sim{grid-template-columns:minmax(0,1.2fr) minmax(0,1fr)}
+@media(max-width:1000px){#sim1 .sim{grid-template-columns:minmax(0,1fr)}}
+</style>
+</head>
+<body class="locked booting">
+<div id="bootMsg" role="status">Cargando…</div>
+<div id="gate">
+  <div class="gcard">
+    <div class="gtop"><span class="gmark">DACD</span><h1 style="font-size:clamp(26px,4vw,36px)">Ruta de conocimiento Microsoft Fabric</h1><p class="note" style="margin:6px 0 0">Módulo F1-07 · Data warehouses en Microsoft Fabric</p></div>
+    <form id="gForm" autocomplete="on">
+      <label class="fl" for="gEmail">Correo institucional</label><input class="in" id="gEmail" type="email" autocomplete="username" required>
+      <label class="fl" for="gPass">Contraseña</label><input class="in" id="gPass" type="password" autocomplete="current-password" minlength="8" required>
+      <button class="btn" id="gBtn" style="margin-top:16px;width:100%">Ingresar</button>
+      <p class="lmsg" id="gMsg" role="status"></p>
+      <p class="note">¿Todavía no tiene cuenta? <a href="./">Regístrese en la página principal del curso</a>.</p>
+    </form>
+    <div id="gWait" hidden>
+      <h3 id="gWaitT">Solicitud pendiente</h3>
+      <p id="gWaitP">Su registro está pendiente de aprobación por la administración del curso.</p>
+      <button class="btn sec" id="gOther">Salir</button>
+    </div>
+  </div>
+</div>
+
+<nav class="navbar" aria-label="Menú del módulo"><div class="navin">
+  <a class="brand" href="./"><i>DACD</i><span>Fabric · F1-07</span></a>
+  <div class="nav"><a class="ext" href="./">← Mis módulos</a><a href="#inicio">Inicio</a><a href="#lecciones">Lecciones</a><a href="#simuladores">Simuladores</a><a href="#autoevaluacion">Autoevaluación</a><a href="#laboratorio">Laboratorio</a><a href="#insumos">Insumos</a></div>
+</div></nav>
+<header class="band top"><div class="wrap">
+  <h1>Real-Time Intelligence: guía práctica del módulo F1-07</h1>
+  <p class="lead">Material de apoyo para el módulo <i>Get started with Real-Time Intelligence in Microsoft Fabric</i>. Aprenderá a capturar eventos mientras ocurren, guardarlos en un eventhouse, consultarlos con KQL, verlos en un tablero en tiempo real y actuar automáticamente con Activator.</p>
+</div></header>
+
+
+<section class="band me" aria-label="Su avance"><div class="wrap mebox">
+  <div class="mehead"><div><h3 id="meName">Su avance en el F1-07</h3><p class="note" id="meSync">Conectando…</p></div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center"><span class="perf">Perfil: <b class="pill" id="mePerfilTxt">—</b></span><button class="btn sec" id="meOut">Salir</button></div></div>
+  <div class="meparts" id="meParts"></div>
+</div></section>
+
+<section class="band" id="como" data-tab="inicio"><div class="wrap">
+  <h2>Cómo usar este material</h2>
+  <div class="sim" style="grid-template-columns:repeat(auto-fit,minmax(min(100%,20em),1fr));margin-top:10px">
+    <div class="card">
+      <h3>Lo que debe dominar al terminar</h3>
+      <ol class="obj">
+        <li><span>Describir el análisis en tiempo real, los flujos (streams) y los eventos.</span></li>
+        <li><span>Entender los componentes de Real-Time Intelligence en Fabric.</span></li>
+        <li><span>Ingerir y transformar datos en movimiento.</span></li>
+        <li><span>Guardar y consultar datos en bases de datos KQL.</span></li>
+        <li><span>Visualizar datos en flujo con Real-Time Dashboards.</span></li>
+        <li><span>Automatizar acciones con Activator.</span></li>
+      </ol>
+      <p class="note">Objetivos oficiales del módulo en Microsoft Learn (nivel principiante, con ejercicio práctico). Este módulo es obligatorio para todo el equipo.</p>
+    </div>
+    <div class="card">
+      <h3>Ruta sugerida (unas 4 horas y media)</h3>
+      <ol class="steps">
+        <li><b>Lea el módulo oficial en Learn</b> (60 min), incluido su ejercicio.</li>
+        <li><b>Recorra las 7 lecciones guiadas</b> (60 min) y responda la pregunta de cada una.</li>
+        <li><b>Haga los 4 simuladores</b> (30 min).</li>
+        <li><b>Responda la autoevaluación</b> (15 min). Meta: 8 de 10.</li>
+        <li><b>Haga el laboratorio</b> (90 min) en su workspace de prueba.</li>
+      </ol>
+      <p class="note">No necesita saber KQL de antemano: las lecciones 5 y el laboratorio le enseñan lo básico. Si sabe SQL, verá que la lógica es parecida.</p>
+    </div>
+  </div>
+</div></section>
+
+<section class="band alt" id="guia" data-tab="lecciones"><div class="wrap">
+  <div class="qhead"><h2>Lecciones guiadas</h2><span class="note" id="lesScore"></span></div>
+  <div class="bar" aria-hidden="true"><i id="lesBar"></i></div>
+  <p>Cada lección explica un concepto en lenguaje sencillo y lo conecta con el trabajo de la DACD. Lea en orden.</p>
+  <div class="lesidx" id="lesIdx"></div>
+  <div id="lessons"></div>
+</div></section>
+
+<section class="band" data-tab="simuladores"><div class="wrap">
+  <h2>Simuladores</h2>
+  <p>Practique cada concepto con las manos. Haga los cuatro simuladores en orden; cada uno trae instrucciones y la conclusión a la que debe llegar.</p>
+  <div class="subnav" id="simNav"></div>
+</div></section>
+<section class="band alt" id="sim1" data-tab="simuladores" data-sub="s1" data-label="Monitoreo de cajeros"><div class="wrap">
+  <h2>Simulador 1. Arme la solución de monitoreo de cajeros</h2>
+  <p>La gerencia quiere enterarse en minutos, y no al día siguiente, cuando un cajero automático empieza a rechazar transacciones. Elija el componente de Real-Time Intelligence para cada etapa y luego encienda la transmisión.</p>
+  <div class="sim">
+    <div class="panel"><h3>Etapas de la solución</h3><div id="rtList"></div><p class="fb" id="rtFb"></p></div>
+    <div class="panel"><h3>Monitor en vivo</h3><div id="rtLive"></div></div>
+  </div>
+  <div class="howto">
+    <h3>Cómo usar este simulador</h3>
+    <ol>
+      <li>Para cada etapa, elija el componente que la resuelve.</li>
+      <li>Con las seis etapas correctas, toque <b>Iniciar transmisión</b>: llegarán las transacciones del día una a una.</li>
+      <li>Observe cuándo Activator dispara la alerta.</li>
+    </ol>
+    <p class="end"><b>Conclusión:</b> Eventstream captura los eventos, el eventhouse los guarda, KQL los consulta, el Real-Time Dashboard los muestra y Activator actúa sin que nadie tenga que estar mirando la pantalla.</p>
+  </div>
+</div></section>
+
+<section class="band" id="lotes" data-tab="simuladores" data-sub="s2" data-label="Lotes o tiempo real"><div class="wrap">
+  <h2>Simulador 2. ¿Por lotes o en tiempo real?</h2>
+  <p>No todo necesita tiempo real. Elija el enfoque adecuado para cada necesidad.</p>
+  <div class="howto"><h3>Pistas para elegir</h3><ol>
+    <li><b>Por lotes:</b> los datos se procesan cada cierto tiempo (cada noche, cada mes). Sirve cuando la decisión puede esperar.</li>
+    <li><b>En tiempo real:</b> los eventos se procesan mientras ocurren. Sirve cuando cada minuto cuenta.</li>
+  </ol></div>
+  <div class="bar" aria-hidden="true"><i id="s2Bar"></i></div><p class="note" id="s2Score"></p>
+  <div class="scen" id="s2"></div>
+</div></section>
+
+<section class="band alt" id="kql" data-tab="simuladores" data-sub="s3" data-label="Operador KQL"><div class="wrap">
+  <h2>Simulador 3. ¿Qué operador de KQL uso?</h2>
+  <p>En KQL cada paso se encadena con una barra vertical <code>|</code>. Elija el operador que resuelve cada necesidad.</p>
+  <div class="howto"><h3>Pistas para elegir</h3><ol>
+    <li><b>take:</b> ver unas cuantas filas. <b>where:</b> filtrar. <b>project:</b> elegir columnas.</li>
+    <li><b>summarize:</b> agrupar y calcular. <b>bin():</b> agrupar el tiempo en intervalos. <b>render:</b> dibujar un gráfico.</li>
+  </ol></div>
+  <div class="bar" aria-hidden="true"><i id="s3Bar"></i></div><p class="note" id="s3Score"></p>
+  <div class="scen" id="s3"></div>
+</div></section>
+
+<section class="band" id="componente" data-tab="simuladores" data-sub="s4" data-label="Componente RTI"><div class="wrap">
+  <h2>Simulador 4. ¿Qué componente de Real-Time Intelligence?</h2>
+  <p>Elija el componente de Fabric que corresponde a cada tarea.</p>
+  <div class="bar" aria-hidden="true"><i id="s4Bar"></i></div><p class="note" id="s4Score"></p>
+  <div class="scen" id="s4"></div>
+</div></section>
+
+<section class="band alt" id="quiz" data-tab="autoevaluacion"><div class="wrap">
+  <h2>Autoevaluación: 10 preguntas</h2>
+  <div class="white">
+    <div class="qhead"><h3 id="qNum"></h3><span class="note" id="qPts"></span></div>
+    <div class="bar" aria-hidden="true"><i id="qBar"></i></div>
+    <div id="qBox"></div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px">
+      <button class="btn sec" id="qPrev">Anterior</button><button class="btn" id="qNext">Siguiente</button><button class="btn sec" id="qReset">Reiniciar</button>
+    </div>
+  </div>
+</div></section>
+
+<section class="band" id="lab" data-tab="laboratorio"><div class="wrap">
+  <h2>Laboratorio guiado: monitoreo de cajeros en tiempo real</h2>
+  <p>Use su workspace de prueba y solo los datos ficticios de esta página. Abra el detalle de cada paso para ver dónde hacer clic y cómo se ve en Fabric.</p>
+  <div class="bar" aria-hidden="true"><i id="lBar"></i></div><p class="note" id="lScore"></p>
+  <div class="copyrow"><h3>Datos de práctica: transacciones_cajero.csv (ficticios)</h3><button class="btn sec" id="csvCopy">Copiar datos</button></div>
+  <pre id="csv">Timestamp,cajero_id,oficina,tipo,monto,resultado
+2026-11-24T08:02:00Z,ATM-02,Oficina Central,Retiro,10000,Rechazada
+2026-11-24T08:09:00Z,ATM-01,Oficina Central,Retiro,10000,Aprobada
+2026-11-24T08:11:00Z,ATM-01,Oficina Central,Retiro,50000,Rechazada
+2026-11-24T08:15:00Z,ATM-04,Alajuela Centro,Retiro,100000,Aprobada
+2026-11-24T08:21:00Z,ATM-01,Oficina Central,Consulta,0,Aprobada
+2026-11-24T08:26:00Z,ATM-01,Oficina Central,Consulta,0,Aprobada
+2026-11-24T08:33:00Z,ATM-02,Oficina Central,Retiro,100000,Aprobada
+2026-11-24T08:36:00Z,ATM-01,Oficina Central,Consulta,0,Aprobada
+2026-11-24T08:42:00Z,ATM-01,Oficina Central,Consulta,0,Rechazada
+2026-11-24T08:45:00Z,ATM-02,Oficina Central,Retiro,100000,Aprobada
+2026-11-24T08:52:00Z,ATM-04,Alajuela Centro,Consulta,0,Aprobada
+2026-11-24T08:57:00Z,ATM-02,Oficina Central,Consulta,0,Aprobada
+2026-11-24T09:01:00Z,ATM-01,Oficina Central,Consulta,0,Aprobada
+2026-11-24T09:07:00Z,ATM-04,Alajuela Centro,Retiro,10000,Aprobada
+2026-11-24T09:13:00Z,ATM-02,Oficina Central,Consulta,0,Aprobada
+2026-11-24T09:18:00Z,ATM-04,Alajuela Centro,Retiro,150000,Rechazada
+2026-11-24T09:24:00Z,ATM-03,Heredia Centro,Retiro,40000,Rechazada
+2026-11-24T09:29:00Z,ATM-04,Alajuela Centro,Consulta,0,Aprobada
+2026-11-24T09:30:00Z,ATM-03,Heredia Centro,Retiro,150000,Rechazada
+2026-11-24T09:35:00Z,ATM-01,Oficina Central,Consulta,0,Aprobada
+2026-11-24T09:44:00Z,ATM-04,Alajuela Centro,Retiro,50000,Aprobada
+2026-11-24T09:47:00Z,ATM-01,Oficina Central,Depósito,40000,Aprobada
+2026-11-24T09:50:00Z,ATM-04,Alajuela Centro,Retiro,40000,Aprobada
+2026-11-24T09:56:00Z,ATM-04,Alajuela Centro,Retiro,50000,Aprobada</pre>
+  <p class="note" id="csvMsg">Datos inventados para practicar; no corresponden a datos del Banco.</p>
+  <ul class="check" id="labList"></ul>
+  <button class="btn sec" id="lReset" style="margin-top:14px">Reiniciar checklist</button>
+</div></section>
+
+<section class="band alt" id="insumos" data-tab="insumos"><div class="wrap">
+  <h2>Insumos adicionales</h2>
+  <div class="sim" style="grid-template-columns:repeat(auto-fit,minmax(min(100%,22em),1fr))">
+    <div class="card">
+      <h3>Lecturas oficiales</h3>
+      <ul>
+        <li><a href="https://learn.microsoft.com/training/modules/get-started-kusto-fabric">Módulo F1-07 en Microsoft Learn</a></li>
+        <li><a href="https://learn.microsoft.com/training/paths/explore-real-time-analytics-microsoft-fabric">Ruta: Implement Real-Time Intelligence with Microsoft Fabric</a></li>
+        <li><a href="https://learn.microsoft.com/fabric/real-time-intelligence/overview">Documentación de Real-Time Intelligence</a></li>
+        <li><a href="https://learn.microsoft.com/kusto/query/">Referencia del lenguaje KQL</a></li>
+      </ul>
+      <h3 style="margin-top:14px">Para discutir en equipo (30 min)</h3>
+      <ul>
+        <li>¿Qué decisiones del Banco hoy se toman con datos de ayer y ganarían con datos en minutos?</li>
+        <li>¿Qué métricas de control de la plataforma (cargas, calidad, modelos) deberían tener alertas con Activator?</li>
+        <li>¿Quién recibe cada alerta y qué debe hacer cuando le llega?</li>
+      </ul>
+    </div>
+    <div class="card"><h3>Glosario rápido</h3><dl class="glos" id="glos"></dl></div>
+  </div>
+</div></section>
+
+<footer class="band"><div class="wrap">DACD · Banco Popular · Ruta de conocimiento Microsoft Fabric, fase 1, módulo F1-07. Los contenidos resumen la documentación pública de Microsoft Learn; ante cualquier diferencia, manda la fuente oficial.</div></footer>
+<script src="lab-f107.js?v=1"></script>
+<script src="labvis.js?v=3"></script>
+<script>
+{
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const KEY='f107';
+let S={};try{S=JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){S={}}
+['les','lab','qa','lq'].forEach(k=>{S[k]=S[k]||{}});S.sims=S.sims||{};['s1','s2','s3','s4'].forEach(k=>{S.sims[k]=S.sims[k]||{}});
+if(!S.intentos)S.intentos={};['qz'].forEach(k=>{S.intentos[k]=S.intentos[k]||[]});['lq','sim'].forEach(k=>{S.intentos[k]=S.intentos[k]||{}});
+const bump=(o,k)=>{o[k]=(o[k]||0)+1};
+const bumpSim=(s,i)=>{const m=S.intentos.sim;m[s]=m[s]||{};bump(m[s],i)};
+let pushRemote=()=>{},remoteT=null;
+const cnt=o=>Object.values(o||{}).filter(Boolean).length;
+const N={les:7,sim:4,qz:10,lab:10};
+function simsDone(sm){sm=sm||{};let n=0;if(cnt(sm.s1)>=6)n++;if(cnt(sm.s2)>=5)n++;if(cnt(sm.s3)>=6)n++;if(cnt(sm.s4)>=5)n++;return n}
+function summary(d){d=d||{};const les=cnt(d.les),sim=simsDone(d.sims),qn=Object.keys(d.qa||{}).length,qs=Object.keys(d.qa||{}).filter(k=>QZ[k]&&d.qa[k]===QZ[k][2]).length,lb=cnt(d.lab);return{les,sim,qn,qs,lb,pct:Math.round((les+sim+qn+lb)/(N.les+N.sim+N.qz+N.lab)*100)}}
+const pbar=(v,t)=>`<div class="bar"><i style="width:${Math.min(100,v/t*100)}%"></i></div>`;
+function myProg(){const s=summary(S);
+  $('meParts').innerHTML=[['Lecciones',s.les,N.les],['Simuladores',s.sim,N.sim],['Preguntas respondidas',s.qn,N.qz],['Laboratorio',s.lb,N.lab]].map(p=>`<div class="mp"><small>${p[0]}</small><strong>${p[1]} / ${p[2]}</strong>${pbar(p[1],p[2])}</div>`).join('')+`<div class="mp tot"><small>Avance del módulo</small><strong>${s.pct}%</strong>${pbar(s.pct,100)}</div>`}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}myProg();clearTimeout(remoteT);remoteT=setTimeout(()=>pushRemote(),900)};
+const sync=t=>{$('meSync').textContent=t};
+
+/* ===== Simulador 1: solución de monitoreo ===== */
+const RTOPT=['Real-Time hub','Eventstream','Eventhouse (base KQL)','KQL queryset','Real-Time Dashboard','Activator'];
+const RTST=[
+ ['Descubrir qué flujos de eventos existen en la organización','Real-Time hub','El Real-Time hub es el catálogo central de flujos de datos en movimiento.'],
+ ['Capturar las transacciones de los cajeros mientras ocurren y limpiarlas','Eventstream','Eventstream captura, transforma y enruta eventos sin escribir código.'],
+ ['Guardar millones de eventos con su hora y consultarlos en segundos','Eventhouse (base KQL)','El eventhouse, con sus bases KQL, está optimizado para datos con marca de tiempo.'],
+ ['Guardar y compartir las consultas de rechazos por cajero','KQL queryset','El KQL queryset guarda y organiza consultas KQL.'],
+ ['Mostrar a la gerencia un tablero que se actualiza solo','Real-Time Dashboard','El Real-Time Dashboard muestra consultas KQL que se refrescan automáticamente.'],
+ ['Avisar por Teams cuando un cajero rechaza dos transacciones seguidas','Activator','Activator vigila condiciones en los datos y ejecuta acciones.']];
+const RTEV=`2026-11-24T08:02:00Z,ATM-02,Oficina Central,Retiro,10000,Rechazada
+2026-11-24T08:09:00Z,ATM-01,Oficina Central,Retiro,10000,Aprobada
+2026-11-24T08:11:00Z,ATM-01,Oficina Central,Retiro,50000,Rechazada
+2026-11-24T08:15:00Z,ATM-04,Alajuela Centro,Retiro,100000,Aprobada
+2026-11-24T08:21:00Z,ATM-01,Oficina Central,Consulta,0,Aprobada
+2026-11-24T08:26:00Z,ATM-01,Oficina Central,Consulta,0,Aprobada
+2026-11-24T08:33:00Z,ATM-02,Oficina Central,Retiro,100000,Aprobada
+2026-11-24T08:36:00Z,ATM-01,Oficina Central,Consulta,0,Aprobada
+2026-11-24T08:42:00Z,ATM-01,Oficina Central,Consulta,0,Rechazada
+2026-11-24T08:45:00Z,ATM-02,Oficina Central,Retiro,100000,Aprobada
+2026-11-24T08:52:00Z,ATM-04,Alajuela Centro,Consulta,0,Aprobada
+2026-11-24T08:57:00Z,ATM-02,Oficina Central,Consulta,0,Aprobada
+2026-11-24T09:01:00Z,ATM-01,Oficina Central,Consulta,0,Aprobada
+2026-11-24T09:07:00Z,ATM-04,Alajuela Centro,Retiro,10000,Aprobada
+2026-11-24T09:13:00Z,ATM-02,Oficina Central,Consulta,0,Aprobada
+2026-11-24T09:18:00Z,ATM-04,Alajuela Centro,Retiro,150000,Rechazada
+2026-11-24T09:24:00Z,ATM-03,Heredia Centro,Retiro,40000,Rechazada
+2026-11-24T09:29:00Z,ATM-04,Alajuela Centro,Consulta,0,Aprobada
+2026-11-24T09:30:00Z,ATM-03,Heredia Centro,Retiro,150000,Rechazada
+2026-11-24T09:35:00Z,ATM-01,Oficina Central,Consulta,0,Aprobada
+2026-11-24T09:44:00Z,ATM-04,Alajuela Centro,Retiro,50000,Aprobada
+2026-11-24T09:47:00Z,ATM-01,Oficina Central,Depósito,40000,Aprobada
+2026-11-24T09:50:00Z,ATM-04,Alajuela Centro,Retiro,40000,Aprobada
+2026-11-24T09:56:00Z,ATM-04,Alajuela Centro,Retiro,50000,Aprobada`.split('\n').map(l=>l.split(','));
+let rtTimer=null,rtI=0;
+function rtStop(){if(rtTimer){clearInterval(rtTimer);rtTimer=null}}
+function drawRt(){const st=S.sims.s1;
+  $('rtList').innerHTML=RTST.map((r,i)=>`<div class="relrow ${st[i]?'ok':''}"><b>${i+1}. ${esc(r[0])}</b>${st[i]?`<span class="pill">${esc(r[1])}</span>`:`<div class="relopt">${RTOPT.map(o=>`<button class="mini" data-t="${i}" data-o="${o}">${o}</button>`).join('')}</div>`}</div>`).join('');
+  const ok=RTST.filter((r,i)=>st[i]).length;
+  if(ok<RTST.length){rtStop();$('rtLive').innerHTML=`<pre>Eventstream ─► Eventhouse ─► KQL ─► Dashboard ─► Activator\n\n${ok} de ${RTST.length} etapas listas.\nComplete las etapas para encender el monitor.</pre>`;return}
+  if(!$('rtGo'))$('rtLive').innerHTML=`<div class="relopt"><button class="btn" id="rtGo">Iniciar transmisión</button><span class="note" id="rtClock">08:00</span></div><div class="kpis" id="rtK" style="margin:10px 0"></div><div class="scroll"><table class="runs"><thead><tr><th>Hora</th><th>Cajero</th><th>Tipo</th><th>Resultado</th></tr></thead><tbody id="rtRows"></tbody></table></div><p class="fb" id="rtAlert"></p>`;
+  rtDraw()}
+function rtDraw(){const seen=RTEV.slice(0,rtI),rech=seen.filter(r=>r[5]==='Rechazada').length;
+  const by={};seen.forEach(r=>{by[r[1]]=by[r[1]]||[];by[r[1]].push(r[5])});
+  $('rtK').innerHTML=[['Transacciones',seen.length],['Rechazadas',rech],['% rechazo',seen.length?Math.round(rech/seen.length*100)+'%':'—']].map(k=>`<div class="kpi"><small>${k[0]}</small><strong>${k[1]}</strong></div>`).join('');
+  $('rtRows').innerHTML=seen.slice(-6).reverse().map(r=>`<tr${r[5]==='Rechazada'?' style="color:var(--rd)"':''}><td class="tnum">${r[0].slice(11,16)}</td><td>${r[1]}</td><td>${r[3]}</td><td>${r[5]}</td></tr>`).join('');
+  if(seen.length)$('rtClock').textContent='Hora simulada: '+seen[seen.length-1][0].slice(11,16);
+  const bad=Object.keys(by).find(k=>{const a=by[k];return a.length>=2&&a[a.length-1]==='Rechazada'&&a[a.length-2]==='Rechazada'});
+  const al=$('rtAlert');
+  if(bad){al.className='fb show bad';al.textContent='Activator disparó la alerta: '+bad+' (Heredia Centro) rechazó dos transacciones seguidas. Se envió un aviso al canal de Teams de Operaciones.';rtStop()}
+  else if(rtI>=RTEV.length){al.className='fb show good';al.textContent='Fin del día simulado.';}
+  else{al.className='fb';al.textContent=''}}
+$('rtList').addEventListener('click',e=>{const b=e.target.closest('[data-t]');if(!b)return;const i=+b.dataset.t,f=$('rtFb');
+  if(b.dataset.o===RTST[i][1]){S.sims.s1[i]=1;f.className='fb show good';f.textContent=RTST[i][2];save();drawRt()}
+  else{f.className='fb show bad';f.textContent='Ese componente no resuelve esta etapa. Revise las pistas de la lección 2.';bumpSim('s1',i);save()}});
+$('rtLive').addEventListener('click',e=>{if(e.target.id!=='rtGo')return;rtStop();rtI=0;rtDraw();rtTimer=setInterval(()=>{rtI++;rtDraw();if(rtI>=RTEV.length)rtStop()},700)});
+drawRt();
+
+/* ===== Simuladores 2 a 4 (motor de opciones) ===== */
+const SIMS={
+ s2:{opts:['Por lotes','En tiempo real'],items:[
+  ['El informe mensual de captación para la Junta Directiva.','Por lotes','Se consulta una vez al mes: no necesita tiempo real.'],
+  ['Detectar en minutos un cajero que empezó a rechazar transacciones.','En tiempo real','Cada minuto con el cajero fallando afecta a los clientes.'],
+  ['Recalcular cada noche el modelo de fuga de clientes.','Por lotes','Un proceso programado por la noche es procesamiento por lotes.'],
+  ['Alertar de inmediato una ráfaga de intentos de inicio de sesión fallidos en la banca en línea.','En tiempo real','La seguridad requiere reaccionar mientras ocurre.'],
+  ['Vigilar durante el cierre de mes que las cargas de datos terminen a tiempo.','En tiempo real','Es monitoreo de control con alertas: en tiempo real.']]},
+ s3:{opts:['take','where','project','summarize','bin()','render'],items:[
+  ['Ver 10 filas de la tabla para conocer su estructura.','take','take devuelve unas cuantas filas.'],
+  ['Quedarse solo con las transacciones rechazadas.','where','where filtra filas con una condición.'],
+  ['Mostrar solo las columnas hora, cajero y monto.','project','project elige y renombra columnas.'],
+  ['Contar las transacciones por oficina.','summarize','summarize agrupa y calcula (count, sum, avg…).'],
+  ['Agrupar las transacciones en intervalos de 30 minutos.','bin()','bin() redondea el tiempo a intervalos fijos.'],
+  ['Dibujar la serie como un gráfico de líneas en el tiempo.','render','render timechart dibuja la consulta.']]},
+ s4:{opts:['Real-Time hub','Eventstream','Eventhouse','Real-Time Dashboard','Activator'],items:[
+  ['Encontrar el flujo de eventos que publicó otro equipo.','Real-Time hub','El Real-Time hub es el catálogo de flujos.'],
+  ['Descartar los eventos de prueba antes de guardarlos.','Eventstream','Eventstream transforma (filtra, agrega) los eventos en movimiento.'],
+  ['Conservar dos años de eventos y consultarlos con KQL.','Eventhouse','El eventhouse guarda los eventos en bases KQL.'],
+  ['Mostrar en una pantalla de operaciones las transacciones de la última hora, actualizadas solas.','Real-Time Dashboard','Los tableros en tiempo real se refrescan automáticamente.'],
+  ['Enviar un correo cuando la tasa de rechazo supere el 20 %.','Activator','Activator ejecuta acciones cuando se cumple una condición.']]}
+};
+function drawSim(k){const sm=SIMS[k],done=S.sims[k];
+  $(k).innerHTML=sm.items.map((it,i)=>`<div class="white"><h3>${esc(it[0])}</h3><div class="choices" data-s="${k}" data-i="${i}">${sm.opts.map(o=>`<button data-o="${esc(o)}" class="${done[i]&&o===it[1]?'right':''}" ${done[i]&&o!==it[1]?'disabled':''}>${esc(o)}</button>`).join('')}</div><div class="fb ${done[i]?'show good':''}" id="${k}f${i}">${done[i]?'Correcto. '+esc(it[2]):''}</div></div>`).join('');
+  simProg(k)}
+function simProg(k){const n=cnt(S.sims[k]),t=SIMS[k].items.length;$(k+'Bar').style.width=(n/t*100)+'%';$(k+'Score').textContent=n+' de '+t+' correctas'+(n===t?'. ¡Completo!':'')}
+['s2','s3','s4'].forEach(k=>{drawSim(k);$(k).addEventListener('click',e=>{const b=e.target.closest('button[data-o]');if(!b)return;const g=b.parentElement,i=+g.dataset.i,it=SIMS[k].items[i],ok=b.dataset.o===it[1],f=$(k+'f'+i);
+  if(ok){g.querySelectorAll('button').forEach(x=>{x.className=x===b?'right':'';x.disabled=x!==b});S.sims[k][i]=1;f.className='fb show good';f.textContent='Correcto. '+it[2];save();simProg(k)}
+  else{b.className='wrong';f.className='fb show bad';f.textContent='No es la mejor opción. Revise las pistas e intente de nuevo.';bumpSim(k,i);save()}})});
+
+/* ===== Lecciones ===== */
+const LES=[
+ {t:'Qué es el análisis en tiempo real',g:'Entender eventos, flujos y la diferencia con los lotes.',
+  p:['Un <b>evento</b> es algo que ocurre en un momento: una transacción, un inicio de sesión, una lectura de un sensor. Un <b>flujo</b> (stream) es la secuencia continua de esos eventos.',
+     'En el procesamiento <b>por lotes</b>, los datos se acumulan y se procesan cada cierto tiempo (cada noche). En el procesamiento <b>en tiempo real</b>, cada evento se procesa mientras llega, con segundos o minutos de retraso.',
+     'Tiempo real no es mejor siempre: cuesta más y solo se justifica cuando la decisión no puede esperar.'],
+  an:'Los lotes son como revisar el buzón una vez al día; el tiempo real es recibir la notificación en el celular cuando llega el mensaje.',
+  dacd:'Los reportes mensuales seguirán siendo por lotes; el monitoreo de cargas, cajeros o fraude se beneficia del tiempo real.',
+  k:['Evento: algo que ocurre en un momento.','Flujo: secuencia continua de eventos.','Lotes vs. tiempo real: según qué tan rápido hay que decidir.'],
+  q:['¿Cuándo se justifica el procesamiento en tiempo real?',['Siempre, porque es más moderno','Cuando la decisión no puede esperar al siguiente lote','Solo para reportes mensuales'],1,'Correcto: el tiempo real tiene costo y se usa cuando cada minuto cuenta.']},
+ {t:'Los componentes de Real-Time Intelligence',g:'Conocer las piezas y cómo se conectan.',
+  p:['El <b>Real-Time hub</b> es el catálogo de los flujos de datos en movimiento de la organización. <b>Eventstream</b> captura, transforma y enruta eventos.',
+     'El <b>eventhouse</b> guarda los eventos en <b>bases de datos KQL</b>, optimizadas para datos con marca de tiempo. Un <b>KQL queryset</b> guarda consultas.',
+     'El <b>Real-Time Dashboard</b> muestra consultas que se actualizan solas y <b>Activator</b> vigila condiciones y ejecuta acciones automáticas.'],
+  an:'Es una cadena de noticias: el hub es la agenda de fuentes, Eventstream los reporteros, el eventhouse el archivo, KQL el investigador, el dashboard la transmisión en vivo y Activator la alerta de última hora.',
+  dacd:'Encaja con el monitoreo preventivo de la arquitectura de la DACD: métricas de control y alertas.',
+  k:['Hub: catálogo de flujos.','Eventstream: captura y transforma.','Eventhouse + KQL: guarda y consulta.','Dashboard y Activator: ver y actuar.'],
+  q:['¿Qué componente guarda los eventos para consultarlos con KQL?',['Activator','Eventhouse','Real-Time hub'],1,'Correcto: el eventhouse contiene las bases KQL.']},
+ {t:'Ingerir y transformar en movimiento',g:'Usar Eventstream.',
+  p:['Un <b>eventstream</b> tiene <b>orígenes</b> (por ejemplo, Azure Event Hubs, bases de datos con captura de cambios o datos de ejemplo), <b>transformaciones</b> y <b>destinos</b>.',
+     'Las transformaciones se arman en un lienzo visual, sin código: filtrar eventos, elegir y renombrar campos, agregar por ventanas de tiempo o dividir el flujo.',
+     'Los destinos más comunes son un eventhouse, un lakehouse o Activator. Un mismo flujo puede ir a varios destinos a la vez.'],
+  an:'Eventstream es una planta de tratamiento de agua: recibe agua de varias fuentes, la filtra y la manda por distintas tuberías.',
+  dacd:'Un flujo de eventos de las cargas de datos podría ir a la vez a un eventhouse (análisis) y a Activator (alertas).',
+  k:['Orígenes, transformaciones y destinos.','Lienzo visual sin código.','Un flujo, varios destinos.'],
+  q:['¿Qué hace la transformación “filtrar” en un eventstream?',['Descarta los eventos que no cumplen una condición antes de guardarlos','Borra el eventhouse','Crea un reporte'],0,'Correcto: limpia el flujo mientras se mueve.']},
+ {t:'Guardar en el eventhouse',g:'Entender dónde viven los eventos.',
+  p:['Un <b>eventhouse</b> agrupa una o más <b>bases de datos KQL</b>. Al crear un eventhouse se crea también una base KQL con el mismo nombre.',
+     'Las tablas KQL están optimizadas para grandes volúmenes de datos con marca de tiempo: registros, telemetría, transacciones. Se pueden cargar desde un flujo o desde archivos.',
+     'Con la <b>disponibilidad en OneLake</b>, los datos del eventhouse también pueden leerse desde OneLake, así otros motores (Spark, SQL, Power BI) los usan sin copiarlos.'],
+  an:'El eventhouse es una bodega con estantes ordenados por fecha y hora: encontrar lo que pasó a las 9:30 es inmediato.',
+  dacd:'Los registros de ejecución de los procesos de la DACD podrían guardarse en un eventhouse para analizarlos por hora.',
+  k:['Eventhouse = una o más bases KQL.','Optimizado para datos con marca de tiempo.','Disponible en OneLake sin copias.'],
+  q:['Al crear un eventhouse, ¿qué se crea automáticamente?',['Un reporte de Power BI','Una base de datos KQL con el mismo nombre','Un lakehouse'],1,'Correcto: el eventhouse incluye su primera base KQL.']},
+ {t:'Consultar con KQL',g:'Escribir las primeras consultas.',
+  p:['KQL (Kusto Query Language) empieza por el nombre de la tabla y encadena pasos con la barra <code>|</code>: <code>TransaccionesCajero | where resultado == "Rechazada" | summarize count() by cajero_id</code>.',
+     'Operadores básicos: <code>take</code> (algunas filas), <code>where</code> (filtrar), <code>project</code> (columnas), <code>summarize</code> (agrupar y calcular), <code>bin()</code> (intervalos de tiempo), <code>ago()</code> (tiempo relativo) y <code>render</code> (gráfico).',
+     'Si viene de SQL, la lógica es la misma pero en orden de lectura natural: primero la tabla, luego el filtro, luego el cálculo.'],
+  an:'KQL es como una línea de producción: la materia prima (tabla) pasa por estaciones (|) y al final sale el producto (resultado).',
+  dacd:'Una consulta KQL puede responder en segundos “¿cuántas cargas fallaron por hora esta semana?”.',
+  k:['Tabla | paso | paso.','where, project, summarize.','bin() y ago() para el tiempo.','render para graficar.'],
+  q:['¿Con qué símbolo se encadenan los pasos en KQL?',['Punto y coma (;)','Barra vertical (|)','Coma (,)'],1,'Correcto: cada | pasa el resultado al siguiente paso.']},
+ {t:'Visualizar en tiempo real',g:'Construir un Real-Time Dashboard.',
+  p:['Un <b>Real-Time Dashboard</b> está hecho de <b>mosaicos</b> (tiles); cada mosaico es una consulta KQL con su visual: tabla, línea, barras, mapa o indicador.',
+     'El tablero se puede configurar con <b>actualización automática</b> y con <b>parámetros</b> (por ejemplo, rango de tiempo u oficina) que filtran todos los mosaicos a la vez.',
+     'También se puede crear un reporte de Power BI sobre la base KQL cuando se necesitan las funciones de Power BI.'],
+  an:'Es la pantalla de salidas y llegadas de un aeropuerto: se actualiza sola y todos la entienden de un vistazo.',
+  dacd:'Una pantalla para el equipo de operaciones con cargas en curso, fallas de la última hora y tiempos de ejecución.',
+  k:['Mosaico = consulta KQL + visual.','Actualización automática.','Parámetros para filtrar.'],
+  q:['¿De qué está hecho cada mosaico de un Real-Time Dashboard?',['De una consulta KQL y su visual','De una hoja de Excel','De un notebook'],0,'Correcto: cada mosaico ejecuta una consulta KQL.']},
+ {t:'Actuar con Activator',g:'Automatizar respuestas.',
+  p:['<b>Activator</b> vigila datos (de un eventstream, un tablero en tiempo real o un reporte de Power BI) y evalúa <b>reglas</b>: una condición sobre un objeto, como “si un cajero rechaza dos transacciones seguidas”.',
+     'Cuando la condición se cumple, ejecuta una <b>acción</b>: enviar un correo, un mensaje de Teams o iniciar un proceso de Fabric, como un pipeline o un notebook.',
+     'Así las personas no tienen que estar mirando el tablero: la alerta llega a quien debe actuar.'],
+  an:'Activator es el detector de humo: nadie lo vigila, pero suena cuando hace falta.',
+  dacd:'Una regla que avise al equipo cuando una carga de datos crítica no termine antes de cierta hora.',
+  k:['Regla = condición sobre un objeto.','Acción: correo, Teams o un proceso de Fabric.','La alerta va a quien debe actuar.'],
+  q:['¿Qué hace Activator cuando se cumple una regla?',['Borra los datos','Ejecuta una acción, como enviar un mensaje de Teams o iniciar un pipeline','Cambia el color del tablero'],1,'Correcto: convierte la detección en acción.']}
+];
+const done=S.les;
+function lesProg(){const n=cnt(done);$('lesBar').style.width=(n/LES.length*100)+'%';$('lesScore').textContent=n+' de '+LES.length+' lecciones leídas';
+  $('lesIdx').innerHTML=LES.map((l,i)=>`<a href="#leccion-${i+1}" class="${done[i]?'done':''}">${done[i]?'✓ ':''}${i+1}. ${esc(l.t.split(':')[0])}</a>`).join('')}
+function drawLessons(){$('lessons').innerHTML=LES.map((l,i)=>`<article class="les" id="leccion-${i+1}"><header><div class="num">${i+1}</div><div><h3 style="font-size:clamp(19px,2.2vw,24px);font-weight:800">${esc(l.t)}</h3><p class="goal"><b>Objetivo:</b> ${esc(l.g)}</p></div></header>
+ <div class="lbody"><div>${l.p.map(x=>`<p>${x}</p>`).join('')}</div>
+ <div><div class="box an"><b>Para entenderlo</b>${esc(l.an)}</div><div class="box dacd"><b>En la DACD</b>${esc(l.dacd)}</div><div class="box err"><b>Puntos clave</b><ul class="keys">${l.k.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div></div></div>
+ <div class="mc"><p>Compruebe su comprensión: ${esc(l.q[0])}</p><div class="choices" data-l="${i}">${l.q[1].map((o,j)=>`<button data-j="${j}" class="${S.lq[i]&&j===l.q[2]?'right':''}">${esc(o)}</button>`).join('')}</div><div class="fb ${S.lq[i]?'show good':''}" id="lf${i}">${S.lq[i]?esc(l.q[3]):''}</div>
+ <label style="display:flex;gap:10px;align-items:center;margin-top:12px;cursor:pointer;min-height:44px"><input type="checkbox" data-done="${i}" ${done[i]?'checked':''} style="width:22px;height:22px;accent-color:var(--or)"> Marcar la lección como leída</label></div></article>`).join('');lesProg()}
+$('lessons').addEventListener('click',ev=>{const b=ev.target.closest('.choices button');if(!b)return;const g=b.parentElement,i=+g.dataset.l,q=LES[i].q,ok=+b.dataset.j===q[2],f=$('lf'+i);
+  if(ok){g.querySelectorAll('button').forEach(x=>{x.className=x===b?'right':''});f.className='fb show good';f.textContent=q[3];S.lq[i]=1;save()}else{bump(S.intentos.lq,i);save();b.className='wrong';f.className='fb show bad';f.textContent='No es la respuesta correcta. Vuelva a leer los párrafos de la izquierda e intente de nuevo.'}});
+$('lessons').addEventListener('change',ev=>{const c=ev.target;if(c.dataset.done===undefined)return;done[c.dataset.done]=c.checked;save();lesProg()});
+drawLessons();
+
+/* ===== Autoevaluación ===== */
+const QZ=[
+ ['¿Qué es un flujo (stream) de datos?',['Una secuencia continua de eventos','Un archivo de Excel','Un reporte mensual','Una tabla de dimensiones'],0,'Los eventos llegan uno tras otro de forma continua.'],
+ ['¿Qué componente es el catálogo de los flujos de datos en movimiento?',['Activator','Real-Time hub','KQL queryset','Lakehouse'],1,'El Real-Time hub centraliza los flujos.'],
+ ['¿Qué componente captura, transforma y enruta eventos sin código?',['Eventstream','Eventhouse','Real-Time Dashboard','Warehouse'],0,'Eventstream tiene orígenes, transformaciones y destinos.'],
+ ['¿Dónde se guardan los eventos para consultarlos con KQL?',['En un eventhouse (bases KQL)','En Activator','En el Real-Time hub','En un dataflow'],0,'El eventhouse está optimizado para datos con marca de tiempo.'],
+ ['¿Qué consulta cuenta las transacciones rechazadas por cajero?',['TransaccionesCajero | where resultado == "Rechazada" | summarize count() by cajero_id','SELECT * FROM cajero','TransaccionesCajero | render','count() | TransaccionesCajero'],0,'Primero la tabla, luego el filtro y luego el cálculo.'],
+ ['¿Para qué sirve bin(Timestamp, 30m)?',['Para agrupar el tiempo en intervalos de 30 minutos','Para borrar datos de 30 minutos','Para esperar 30 minutos','Para crear una alerta'],0,'Redondea cada hora a su intervalo.'],
+ ['¿Qué hace render timechart?',['Dibuja la consulta como gráfico de líneas en el tiempo','Exporta a CSV','Crea una tabla','Envía un correo'],0,'render dibuja el resultado.'],
+ ['¿De qué está hecho un mosaico de un Real-Time Dashboard?',['Una consulta KQL y su visual','Un notebook de Spark','Una medida DAX','Un pipeline'],0,'Cada mosaico ejecuta una consulta KQL.'],
+ ['¿Qué componente envía un aviso cuando se cumple una condición?',['Activator','Eventhouse','Real-Time hub','KQL queryset'],0,'Activator convierte condiciones en acciones.'],
+ ['¿Cuál necesidad se resuelve mejor por lotes?',['El informe mensual para la Junta Directiva','Detectar fraude mientras ocurre','Alertar un cajero fuera de servicio','Vigilar inicios de sesión sospechosos'],0,'Puede esperar al proceso programado.']
+];
+let qi=0;const qa=S.qa;
+function drawQ(){const q=QZ[qi],ans=qa[qi];
+  $('qNum').textContent='Pregunta '+(qi+1)+' de '+QZ.length;
+  const pts=Object.keys(qa).filter(k=>qa[k]===QZ[k][2]).length,dn=Object.keys(qa).length;
+  $('qPts').textContent=pts+' correctas de '+dn+' respondidas';$('qBar').style.width=(dn/QZ.length*100)+'%';
+  $('qBox').innerHTML=`<p style="font-size:18px;font-weight:600;margin-top:12px">${esc(q[0])}</p><div class="choices" id="qCh">${q[1].map((o,i)=>`<button data-i="${i}" class="${ans===undefined?'':(i===q[2]?'right':(i===ans?'wrong':''))}" ${ans===undefined?'':'disabled'}>${esc(o)}</button>`).join('')}</div><div class="fb ${ans===undefined?'':'show '+(ans===q[2]?'good':'bad')}">${ans===undefined?'':esc((ans===q[2]?'Correcto. ':'Repase este punto. ')+q[3])}</div>`+(dn===QZ.length?`<p class="fb show ${pts>=8?'good':'bad'}" style="margin-top:12px"><b>Resultado: ${pts}/10.</b> ${pts>=8?'Listo para pasar al siguiente módulo.':'Repase las lecciones antes de seguir; la meta es 8 o más.'}</p>`:'');
+  $('qPrev').disabled=qi===0;$('qNext').disabled=qi===QZ.length-1}
+$('qBox').addEventListener('click',ev=>{const b=ev.target.closest('#qCh button');if(!b||qa[qi]!==undefined)return;qa[qi]=+b.dataset.i;save();drawQ()});
+$('qPrev').onclick=()=>{if(qi>0){qi--;drawQ()}};$('qNext').onclick=()=>{if(qi<QZ.length-1){qi++;drawQ()}};
+$('qReset').onclick=()=>{const n=Object.keys(qa).length;if(n){S.intentos.qz.push({t:Date.now(),ok:Object.keys(qa).filter(k=>QZ[k]&&qa[k]===QZ[k][2]).length,resp:n,ans:JSON.parse(JSON.stringify(qa))})}for(const k in qa)delete qa[k];save();qi=0;drawQ()};
+drawQ();
+
+/* ===== Laboratorio ===== */
+const LAB=[
+ ['Explore el Real-Time hub','El catálogo de flujos.',['En la barra izquierda elija Real-Time.','Revise las pestañas de flujos de datos y de eventos de Fabric.','Qué observar: los flujos que ya existen en la organización (puede estar vacío).']],
+ ['Cree un eventhouse','Con su base KQL.',['En su workspace: New item › Eventhouse, nombre eh_f107_demo.','Qué observar: se crea también la base KQL eh_f107_demo.']],
+ ['Cargue las transacciones de cajero','Desde un archivo.',['Copie los datos de práctica y guárdelos como transacciones_cajero.csv (UTF-8).','En la base KQL elija Get data › Local file, cree la tabla nueva TransaccionesCajero y suba el archivo.','Revise que Timestamp quede como datetime y finalice. Qué observar: 24 filas.']],
+ ['Consulte con KQL','Y guarde un queryset.',['En la base KQL abra el editor de consultas (Explore your data o el queryset de la base).','Ejecute: TransaccionesCajero | take 10','Luego: TransaccionesCajero | summarize transacciones = count() by oficina','Guarde las consultas en un KQL queryset llamado qs_cajeros.']],
+ ['Analice en el tiempo','Con bin() y render.',['Ejecute: TransaccionesCajero | summarize transacciones = count() by bin(Timestamp, 30m) | render timechart','Luego: TransaccionesCajero | where resultado == "Rechazada" | summarize rechazos = count() by cajero_id','Qué observar: ATM-03 tiene 2 transacciones y las 2 fueron rechazadas.']],
+ ['Cree un eventstream','Con datos de ejemplo en vivo.',['New item › Eventstream, nombre es_f107_demo.','Elija Use sample data y seleccione el conjunto de ejemplo Bicycles.','Agregue el destino Eventhouse › eh_f107_demo, tabla nueva bicis, y publique (Publish).']],
+ ['Consulte el flujo en vivo','Los datos llegan solos.',['En la base KQL ejecute: bicis | count','Espere un minuto y vuelva a ejecutarla: el número crece.','Luego: bicis | summarize promedio = avg(No_Bikes) by Neighbourhood | top 5 by promedio desc']],
+ ['Cree un Real-Time Dashboard','Que se actualice solo.',['New item › Real-Time Dashboard, nombre rtd_f107_demo.','Agregue un mosaico (New tile) con la consulta de transacciones por intervalo de 30 minutos, visual de líneas.','Agregue otro con bicis | count y active la actualización automática.']],
+ ['Cree una alerta con Activator','Que avise por usted.',['En el mosaico de bicis elija Set alert (o cree un Activator desde el eventstream).','Condición: cuando el valor cambie o supere un umbral; acción: enviarle un correo a usted mismo.','Qué observar: el Activator aparece en el workspace con su regla; revise que llegue el correo.']],
+ ['Registre la evidencia','Es la evidencia del módulo F1-07.',['Detenga el eventstream si no lo va a seguir usando (consume capacidad).','Complete el módulo en Microsoft Learn y obtenga el trofeo.','Pegue el enlace o la captura en la hoja Seguimiento y cambie el estado a Completado.']]
+];
+const lab=S.lab;
+function labProg(){const n=cnt(lab);$('lBar').style.width=(n/LAB.length*100)+'%';$('lScore').textContent=n+' de '+LAB.length+' pasos completados'}
+function drawLab(){$('labList').innerHTML=LAB.map((l,i)=>`<li><label for="lab${i}"><input type="checkbox" id="lab${i}" data-i="${i}" ${lab[i]?'checked':''}><div><b>${i+1}. ${esc(l[0])}</b><span>${esc(l[1])}</span></div></label><details class="sub" style="padding:0 12px 4px 50px"><summary>Ver el paso a paso y cómo se ve en Fabric</summary><ol>${l[2].map(x=>`<li><code style="font-family:inherit">${esc(x)}</code></li>`).join('')}</ol>${window.LabVis?LabVis.step(i):''}</details></li>`).join('');labProg()}
+$('labList').addEventListener('change',ev=>{const c=ev.target;if(c.dataset.i===undefined)return;lab[c.dataset.i]=c.checked;save();labProg()});
+$('lReset').onclick=()=>{for(const k in lab)delete lab[k];save();drawLab()};
+drawLab();
+$('csvCopy').onclick=()=>{try{navigator.clipboard.writeText($('csv').textContent).then(()=>{$('csvMsg').textContent='Datos copiados. Péguelos en el Bloc de notas y guárdelos como transacciones_cajero.csv (UTF-8).'},()=>{$('csvMsg').textContent='Seleccione el texto y cópielo manualmente.'})}catch(e){$('csvMsg').textContent='Seleccione el texto y cópielo manualmente.'}};
+
+/* ===== Glosario ===== */
+const GL=[['Evento','Algo que ocurre en un momento: una transacción, una lectura, un inicio de sesión.'],['Stream','Secuencia continua de eventos.'],['Real-Time hub','Catálogo central de flujos de datos en movimiento.'],['Eventstream','Captura, transforma y enruta eventos sin código.'],['Eventhouse','Contenedor de bases de datos KQL para datos con marca de tiempo.'],['KQL','Lenguaje de consulta de las bases KQL; encadena pasos con |.'],['Real-Time Dashboard','Tablero de consultas KQL que se actualiza solo.'],['Activator','Vigila condiciones en los datos y ejecuta acciones automáticas.']];
+$('glos').innerHTML=GL.map(g=>`<dt>${esc(g[0])}</dt><dd>${esc(g[1])}</dd>`).join('');
+
+/* ===== Restaurar y exponer ===== */
+function mergeTries(T,src){if(!src||typeof src!=='object')return;const seen=new Set((T.qz||[]).map(a=>a.t));(src.qz||[]).forEach(a=>{if(a&&!seen.has(a.t)){T.qz.push(a);seen.add(a.t)}});T.qz.sort((a,b)=>a.t-b.t);
+  Object.entries(src.lq||{}).forEach(([k,v])=>{T.lq[k]=Math.max(T.lq[k]||0,+v||0)});Object.entries(src.sim||{}).forEach(([s,m])=>{T.sim[s]=T.sim[s]||{};Object.entries(m||{}).forEach(([k,v])=>{T.sim[s][k]=Math.max(T.sim[s][k]||0,+v||0)})})}
+function mergeIn(r){r=r||{};mergeTries(S.intentos,r.intentos);['les','lab','qa','lq'].forEach(k=>{const src=r[k];if(src&&typeof src==='object')Object.keys(src).forEach(x=>{if(S[k][x]===undefined||S[k][x]===false)S[k][x]=src[x]})});
+  const rs=r.sims||{};['s1','s2','s3','s4'].forEach(k=>{if(rs[k]&&typeof rs[k]==='object')Object.assign(S.sims[k],rs[k])})}
+function restoreAll(){drawLessons();drawLab();drawQ();drawRt();['s2','s3','s4'].forEach(drawSim);myProg()}
+function resetLocal(){S.intentos={qz:[],lq:{},sim:{}};['les','lab','qa','lq'].forEach(k=>{for(const x in S[k])delete S[k][x]});['s1','s2','s3','s4'].forEach(k=>{for(const x in S.sims[k])delete S.sims[k][x]});restoreAll()}
+function payload(){const s=summary(S);return JSON.parse(JSON.stringify({les:S.les,lab:S.lab,qa:S.qa,lq:S.lq,sims:S.sims,intentos:S.intentos,pct:s.pct,qn:s.qn,qs:s.qs,lecciones:s.les,simuladores:s.sim,laboratorio:s.lb}))}
+myProg();
+window.F107={S,save,sync,mergeIn,restoreAll,resetLocal,payload,LES,QZ,LAB,setPush:f=>{pushRemote=f}};
+}
+</script>
+<script>
+{
+/* Navegación por pestañas: cada opción del menú muestra solo su sección */
+const $$=s=>[...document.querySelectorAll(s)];
+const secs=$$('[data-tab]');
+const names=[...new Set(secs.map(t=>t.dataset.tab))];
+const links=$$('.navbar .nav a[href^="#"]');
+const label=n=>{const a=links.find(x=>x.getAttribute('href')==='#'+n);return a?a.textContent.trim():n};
+/* botones Anterior / Siguiente al pie de cada pestaña */
+const subsOf=n=>secs.filter(s=>s.dataset.tab===n&&s.dataset.sub);
+if(!document.body.hasAttribute('data-notabnext'))names.forEach((n,i)=>{const ss=subsOf(n);
+  if(ss.length){ss.forEach((s,j)=>{const w=s.querySelector('.wrap')||s;const d=document.createElement('div');d.className='tabnext';
+    const prev=j>0?`<a href="#simuladores-${ss[j-1].dataset.sub}">← ${ss[j-1].dataset.label}</a>`:(i>0?`<a href="#${names[i-1]}">← ${label(names[i-1])}</a>`:'');
+    const next=j<ss.length-1?`<a class="nx" href="#simuladores-${ss[j+1].dataset.sub}">Siguiente simulador: ${ss[j+1].dataset.label} →</a>`:(i<names.length-1?`<a class="nx" href="#${names[i+1]}">Siguiente: ${label(names[i+1])} →</a>`:'');
+    d.innerHTML=prev+next;w.appendChild(d)});return}
+  const last=secs.filter(s=>s.dataset.tab===n).pop();const w=last.querySelector('.wrap')||last;
+  const d=document.createElement('div');d.className='tabnext';
+  d.innerHTML=(i>0?`<a href="#${names[i-1]}">← ${label(names[i-1])}</a>`:'')+(i<names.length-1?`<a class="nx" href="#${names[i+1]}">Siguiente: ${label(names[i+1])} →</a>`:'');
+  if(d.innerHTML)w.appendChild(d)});
+/* sub-pestañas de simuladores */
+const subs=secs.filter(s=>s.dataset.sub);
+const subnav=document.getElementById('simNav');
+if(subnav)subnav.innerHTML=subs.map(s=>`<a href="#simuladores-${s.dataset.sub}" data-s="${s.dataset.sub}">${s.dataset.label||s.dataset.sub}</a>`).join('');
+/* lecciones: una a la vez */
+const lesBox=document.getElementById('lessons');
+let curLes=1;
+function applyLessons(){if(!lesBox)return;const arts=[...lesBox.querySelectorAll('.les')];if(!arts.length)return;curLes=Math.min(Math.max(1,curLes),arts.length);
+  arts.forEach((a,i)=>{a.hidden=i+1!==curLes});
+  let pg=document.getElementById('lesPager');if(!pg){pg=document.createElement('div');pg.id='lesPager';pg.className='pager';lesBox.after(pg)}
+  pg.innerHTML=(curLes>1?`<a class="btn sec" href="#lecciones-${curLes-1}">← Lección ${curLes-1}</a>`:'<span></span>')+`<span class="note" style="align-self:center">Lección ${curLes} de ${arts.length}</span>`+(curLes<arts.length?`<a class="btn" href="#lecciones-${curLes+1}">Lección ${curLes+1} →</a>`:'<span></span>');
+  $$('#lesIdx a').forEach((a,i)=>{a.setAttribute('href','#lecciones-'+(i+1));a.classList.toggle('cur',i+1===curLes)})}
+if(lesBox)new MutationObserver(()=>applyLessons()).observe(lesBox,{childList:true});
+const idx=document.getElementById('lesIdx');if(idx)new MutationObserver(()=>applyLessons()).observe(idx,{childList:true});
+function show(){const h=decodeURIComponent((location.hash||'').slice(1));let tab=names[0],sub=null,m;
+  if(m=h.match(/^lecciones?-(\d+)$/)){tab='lecciones';curLes=+m[1]}
+  else if(m=h.match(/^simuladores-(s\d)$/)){tab='simuladores';sub=m[1]}
+  else if(names.includes(h))tab=h;
+  else if(h){const el=document.getElementById(h);const host=el&&el.closest('[data-tab]');if(host){tab=host.dataset.tab;sub=host.dataset.sub||null}}
+  if(tab==='admin'&&!document.body.classList.contains('is-admin'))tab=names[0];
+  if(tab==='simuladores'&&!sub)sub=(subs[0]&&subs[0].dataset.sub)||null;
+  secs.forEach(s=>{s.hidden=s.dataset.tab!==tab||(s.dataset.sub&&s.dataset.sub!==sub)});
+  links.forEach(a=>a.classList.toggle('act',a.getAttribute('href')==='#'+tab));
+  if(subnav)subnav.querySelectorAll('a').forEach(a=>a.classList.toggle('act',a.dataset.s===sub));
+  const hd=document.querySelector('header.top');if(hd)hd.classList.toggle('compact',tab!==names[0]);
+  applyLessons();
+  window.dispatchEvent(new Event('resize'));
+  window.scrollTo({top:0})}
+window.addEventListener('hashchange',show);show();
+window.TABS={show};
+}
+
+</script>
+<script type="module">
+const firebaseConfig = {
+  apiKey: "AIzaSyA05zxFVcJzqLF859hDAiscdX5d4owti4E",
+  authDomain: "curso-fabric-dacd.firebaseapp.com",
+  projectId: "curso-fabric-dacd",
+  storageBucket: "curso-fabric-dacd.firebasestorage.app",
+  messagingSenderId: "710076720357",
+  appId: "1:710076720357:web:3533bf72aadd41ea42e00c"
+};
+import {initializeApp} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+import {getAuth,onAuthStateChanged,signInWithEmailAndPassword,signOut} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+import {getFirestore,doc,getDoc,setDoc,updateDoc,onSnapshot,serverTimestamp,FieldPath} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+const F=window.F107,$=id=>document.getElementById(id);
+const gm=(t,k)=>{const m=$('gMsg');m.textContent=t||'';m.className='lmsg'+(k?' '+k:'')};
+const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app);auth.languageCode='es';
+const errTxt=e=>({'auth/invalid-credential':'Correo o contraseña incorrectos.','auth/wrong-password':'Correo o contraseña incorrectos.','auth/user-not-found':'No encontramos ese correo. Regístrese en la página principal.','auth/too-many-requests':'Demasiados intentos. Espere unos minutos.','auth/invalid-email':'El correo no es válido.','auth/network-request-failed':'No hay conexión con el registro del curso.'}[e&&e.code]||'No se pudo ingresar. Intente de nuevo.');
+$('gForm').addEventListener('submit',async ev=>{ev.preventDefault();$('gBtn').disabled=true;gm('Ingresando…');
+  try{await signInWithEmailAndPassword(auth,$('gEmail').value.trim().toLowerCase(),$('gPass').value)}catch(e){gm(errTxt(e),'err')}finally{$('gBtn').disabled=false}});
+const out=()=>{try{localStorage.removeItem('fabSession')}catch(e){}return signOut(auth).then(()=>location.reload())};$('meOut').onclick=out;$('gOther').onclick=out;
+let entered=false,unsub=null;
+const unboot=()=>document.body.classList.remove('booting');
+const sess=on=>{try{on?localStorage.setItem('fabSession','1'):localStorage.removeItem('fabSession')}catch(e){}};
+onAuthStateChanged(auth,async u=>{
+  if(unsub){unsub();unsub=null}entered=false;
+  if(!u){sess(0);document.body.classList.add('locked');$('gForm').hidden=false;$('gWait').hidden=true;unboot();return}
+  sess(1);
+  const email=(u.email||'').toLowerCase();
+  let owner=null;try{owner=localStorage.getItem('f101owner')}catch(e){}
+  if(owner!==u.uid){try{localStorage.removeItem('f101');localStorage.removeItem('f102');localStorage.removeItem('f103');localStorage.removeItem('f104');localStorage.removeItem('f105');localStorage.removeItem('f106');localStorage.removeItem('f107');localStorage.setItem('f101owner',u.uid)}catch(e){}if(owner!==null){location.reload();return}F.resetLocal()}
+  let admin=false;try{admin=(await getDoc(doc(db,'admins',u.uid))).exists()}catch(e){}
+  try{if(sessionStorage.getItem('fabIn')!==u.uid){await updateDoc(doc(db,'participants',email),{ultimoIngreso:serverTimestamp()});sessionStorage.setItem('fabIn',u.uid)}}catch(e){}
+  unsub=onSnapshot(doc(db,'participants',email),s=>{const p=s.data()||{};
+    if(admin||p.estado==='Aprobado'){if(!entered){entered=true;enter(u,email,p,admin)}}
+    else{document.body.classList.add('locked');unboot();$('gForm').hidden=true;$('gWait').hidden=false;
+      if(!s.exists()){$('gWaitT').textContent='No encontramos su registro';$('gWaitP').textContent='Regístrese primero en la página principal del curso.'}
+      else if(p.estado==='Rechazado'){$('gWaitT').textContent='Solicitud no aprobada';$('gWaitP').textContent='Su solicitud no fue aprobada. Comuníquese con la jefatura de la DACD.'}}},()=>{});
+});
+async function enter(u,email,p,admin){
+  document.body.classList.remove('locked');unboot();
+  const nombre=p.nombre||email,perfil=p.perfil||'';
+  $('meName').textContent='Avance de '+nombre+' en el F1-07';$('mePerfilTxt').textContent=perfil||(admin?'Administración':'—');
+  const ref=doc(db,'progress',u.uid);
+  try{const sn=await getDoc(ref);const m=sn.exists()&&sn.data().mods&&sn.data().mods.f107;if(m){F.mergeIn(m);F.restoreAll()}}catch(e){}
+  let writing=false,pending=false;
+  F.setPush(async()=>{pending=true;if(writing)return;writing=true;
+    while(pending){pending=false;F.sync('Guardando…');
+      try{await setDoc(ref,{email,nombre,perfil,updatedAt:serverTimestamp(),mods:{f107:F.payload()}},{mergeFields:['email','nombre','perfil','updatedAt',new FieldPath('mods','f107')]});F.sync('Avance guardado en el registro del curso.')}
+      catch(e){F.sync(e&&e.code==='permission-denied'?'No tiene permiso para guardar: su inscripción no está aprobada.':'No se pudo guardar ahora; se volverá a intentar con su próximo avance.')}}
+    writing=false});
+  F.save();F.sync('Conectado. Su avance se guarda automáticamente.');
+}
+</script>
+</body>
+</html>

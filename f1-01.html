@@ -436,7 +436,7 @@ footer{border-top:6px solid var(--or);color:var(--soft);font-size:14px}
 <footer class="band"><div class="wrap">DACD · Banco Popular · Ruta de conocimiento Microsoft Fabric, fase 1, módulo F1-01. Los contenidos resumen la documentación pública de Microsoft Learn; ante cualquier diferencia, manda la fuente oficial.</div></footer>
 
 <script src="lab-f101.js?v=1"></script>
-<script src="labvis.js?v=2"></script>
+<script src="labvis.js?v=3"></script>
 <script>
 {
 const $=id=>document.getElementById(id);
@@ -679,7 +679,7 @@ const LAB=[
  ['Busque su lakehouse en el catálogo de OneLake','Filtre por tipo de elemento y por workspace.',['En el menú izquierdo, abra OneLake (el catálogo).','Filtre por el tipo Lakehouse y luego por su workspace, o busque "captacion".','Qué observar: solo ve elementos compartidos con usted. Pídale a un compañero que haga la búsqueda y compare resultados.']],
  ['Pruebe Copilot en el notebook o en el editor SQL','Pídale una consulta y valide el resultado antes de confiar en ella.',['Abra el panel de Copilot en el notebook o en el editor SQL (si su capacidad lo permite).','Pídale: "Calcula el crecimiento del saldo por segmento entre octubre y noviembre".','Ejecute el código sugerido y revise el resultado a mano con los datos del CSV.','Qué observar: Copilot acelera el trabajo, pero usted sigue siendo responsable de validar la lógica.']],
  ['Asigne el rol Viewer a un compañero y verifique qué puede hacer','Compare con lo que vio en el simulador de roles.',['En el workspace, use Manage access y agregue a un compañero con el rol Viewer.','Pídale que intente consultar la tabla desde el SQL endpoint y luego desde un notebook.','Qué observar: debería poder leer con T-SQL, pero no leer el lakehouse con Spark ni modificar elementos.']],
- ['Registre la evidencia en la hoja Seguimiento','Es la evidencia del módulo F1-01.',['Complete el módulo en Microsoft Learn y obtenga el trofeo.','Pegue el enlace o la captura en la columna Evidencia de la hoja Seguimiento y cambie el estado a Completado.','Opcional: elimine el workspace de laboratorio para liberar la capacidad de prueba.']]
+ ['Registre la evidencia en la hoja Seguimiento','Es la evidencia del módulo F1-01.',['Complete el módulo en Microsoft Learn y obtenga el trofeo.','Pegue el enlace o la captura en la columna Evidencia de la hoja Seguimiento y cambie el estado a Completado.','No elimine el workspace de laboratorio: lo usará en los módulos siguientes.']]
 ];
 const lab=store.lab=store.lab||{};
 function drawLab(){
@@ -716,7 +716,7 @@ function code(){const s=summary(store),i=store.id||{};return 'AVANCE F1-01 | '+(
 $('meReport').onclick=()=>{const c=code();$('meCode').textContent=c;$('meCodeBox').hidden=false;try{navigator.clipboard.writeText(c).then(()=>{$('meCodeMsg').textContent='Resumen copiado.'},()=>{$('meCodeMsg').textContent='Copie el texto manualmente.'})}catch(e){$('meCodeMsg').textContent='Copie el texto manualmente.'}};
 /* ===== Ruta según perfil ===== */
 const RUTA=[
- {f:'1. Fundamentos',p:['Analista','Científico','Jefatura','Otro'],m:[['F1-01','Introducción a la analítica de punta a punta con Fabric',1],['F1-02','Lakehouses en Fabric (disponible)'],['F1-03','Data warehouses en Fabric'],['F1-04','Ciencia de datos en Fabric'],['F1-05','Modelos semánticos a escala'],['F1-06','Fundamentos de Fabric IQ'],['F1-07','Real-Time Intelligence (opcional)'],['F1-08','SQL Database en Fabric (opcional)']]},
+ {f:'1. Fundamentos',p:['Analista','Científico','Jefatura','Otro'],m:[['F1-01','Introducción a la analítica de punta a punta con Fabric'],['F1-02','Lakehouses en Fabric'],['F1-03','Data warehouses en Fabric'],['F1-04','Ciencia de datos en Fabric'],['F1-05','Modelos semánticos a escala'],['F1-06','Fundamentos de Fabric IQ'],['F1-07','Real-Time Intelligence'],['F1-08','SQL Database en Fabric']]},
  {f:'2A. Analistas (ruta DP-600)',p:['Analista','Jefatura'],m:[['F2A-01','Ingesta con Dataflows Gen2 y pipelines'],['F2A-02','Arquitectura medallion en el lakehouse'],['F2A-03','Consultas T-SQL en el warehouse'],['F2A-04','Seguridad: permisos, RLS y etiquetas'],['F2A-05','Modelos semánticos: DAX y Direct Lake'],['F2A-06','Git y deployment pipelines']]},
  {f:'2B. Científicos (data science y ML)',p:['Científico','Jefatura'],m:[['F2B-01','Exploración de datos con notebooks'],['F2B-02','Preprocesamiento con Data Wrangler'],['F2B-03','Entrenamiento y seguimiento con MLflow'],['F2B-04','Predicciones por lotes con un modelo desplegado']]},
  {f:'3. Caso aplicado DACD',p:['Analista','Científico','Jefatura'],m:[['F3-01','Modelo semántico de Captación',0,'Analista'],['F3-02','Modelo de clasificación con MLflow sobre Crédito',0,'Científico'],['F3-03','Demo interna al equipo']]},
@@ -816,7 +816,7 @@ onAuthStateChanged(auth,async u=>{
   sess(1);
   const email=(u.email||'').toLowerCase();
   let owner=null;try{owner=localStorage.getItem('f101owner')}catch(e){}
-  if(owner!==u.uid){try{localStorage.removeItem('f101');localStorage.removeItem('f102');localStorage.removeItem('f103');localStorage.removeItem('f104');localStorage.removeItem('f105');localStorage.removeItem('f106');localStorage.setItem('f101owner',u.uid)}catch(e){}if(owner!==null){location.reload();return}F.resetLocal()}
+  if(owner!==u.uid){try{localStorage.removeItem('f101');localStorage.removeItem('f102');localStorage.removeItem('f103');localStorage.removeItem('f104');localStorage.removeItem('f105');localStorage.removeItem('f106');localStorage.removeItem('f107');localStorage.setItem('f101owner',u.uid)}catch(e){}if(owner!==null){location.reload();return}F.resetLocal()}
   let admin=false;try{admin=(await getDoc(doc(db,'admins',u.uid))).exists()}catch(e){}
   try{if(sessionStorage.getItem('fabIn')!==u.uid){await updateDoc(doc(db,'participants',email),{ultimoIngreso:serverTimestamp()});sessionStorage.setItem('fabIn',u.uid)}}catch(e){}
   unsub=onSnapshot(doc(db,'participants',email),s=>{const p=s.data()||{};

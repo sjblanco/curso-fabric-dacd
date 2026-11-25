@@ -422,7 +422,7 @@ table.runs tr.win{background:var(--grbg)}
 
 <footer class="band"><div class="wrap">DACD · Banco Popular · Ruta de conocimiento Microsoft Fabric, fase 1, módulo F1-04. Los contenidos resumen la documentación pública de Microsoft Learn; ante cualquier diferencia, manda la fuente oficial.</div></footer>
 <script src="lab-f104.js?v=1"></script>
-<script src="labvis.js?v=2"></script>
+<script src="labvis.js?v=3"></script>
 <script>
 {
 const $=id=>document.getElementById(id);
@@ -599,7 +599,7 @@ const LAB=[
  ['Entrene un segundo modelo y compare','Bosque aleatorio.',['Ejecute: from sklearn.ensemble import RandomForestClassifier','Luego: with mlflow.start_run(run_name="bosque"): m2 = RandomForestClassifier(n_estimators=100, max_depth=4, random_state=42).fit(X_tr, y_tr); print(m2.score(X_te, y_te))','Abra el elemento exp-fuga-demo en el workspace y compare las dos ejecuciones.','Qué observar: con tan pocos datos las métricas varían mucho; lo importante es el procedimiento.']],
  ['Registre el mejor modelo','Como modelo de ML.',['En el experimento, abra la mejor ejecución y elija Save as ML model (o Guardar como modelo de ML).','Nómbrelo modelo_fuga.','Qué observar: aparece el elemento modelo_fuga con la versión 1.']],
  ['Puntúe con PREDICT','Y guarde las predicciones.',['Ejecute: from synapse.ml.predict import MLFlowTransformer','Luego: modelo = MLFlowTransformer(inputCols=["antiguedad_meses","saldo_promedio","num_productos","transacciones_mes","reclamos"], outputCol="prediccion", modelName="modelo_fuga", modelVersion=1)','Después: pred = modelo.transform(spark.read.table("fuga_demo")); pred.write.format("delta").mode("overwrite").saveAsTable("fuga_predicciones")','Qué observar: la tabla fuga_predicciones aparece en el lakehouse.']],
- ['Vea las predicciones','Con SQL o Power BI.',['Abra el SQL analytics endpoint y ejecute: SELECT id_cliente, fuga, prediccion FROM fuga_predicciones;','Opcional: cree un reporte rápido sobre la tabla.','Qué observar: las predicciones están disponibles sin exportar archivos.']],
+ ['Vea las predicciones','Con SQL o Power BI.',['Abra el SQL analytics endpoint y ejecute: SELECT id_cliente, fuga, prediccion FROM fuga_predicciones;','Cree un reporte rápido sobre la tabla.','Qué observar: las predicciones están disponibles sin exportar archivos.']],
  ['Registre la evidencia','Es la evidencia del módulo F1-04.',['Complete el módulo en Microsoft Learn y obtenga el trofeo.','Pegue el enlace o la captura en la hoja Seguimiento y cambie el estado a Completado.']]
 ];
 const lab=S.lab;
@@ -706,7 +706,7 @@ onAuthStateChanged(auth,async u=>{
   sess(1);
   const email=(u.email||'').toLowerCase();
   let owner=null;try{owner=localStorage.getItem('f101owner')}catch(e){}
-  if(owner!==u.uid){try{localStorage.removeItem('f101');localStorage.removeItem('f102');localStorage.removeItem('f103');localStorage.removeItem('f104');localStorage.removeItem('f105');localStorage.removeItem('f106');localStorage.setItem('f101owner',u.uid)}catch(e){}if(owner!==null){location.reload();return}F.resetLocal()}
+  if(owner!==u.uid){try{localStorage.removeItem('f101');localStorage.removeItem('f102');localStorage.removeItem('f103');localStorage.removeItem('f104');localStorage.removeItem('f105');localStorage.removeItem('f106');localStorage.removeItem('f107');localStorage.setItem('f101owner',u.uid)}catch(e){}if(owner!==null){location.reload();return}F.resetLocal()}
   let admin=false;try{admin=(await getDoc(doc(db,'admins',u.uid))).exists()}catch(e){}
   try{if(sessionStorage.getItem('fabIn')!==u.uid){await updateDoc(doc(db,'participants',email),{ultimoIngreso:serverTimestamp()});sessionStorage.setItem('fabIn',u.uid)}}catch(e){}
   unsub=onSnapshot(doc(db,'participants',email),s=>{const p=s.data()||{};

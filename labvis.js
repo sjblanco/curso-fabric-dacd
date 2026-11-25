@@ -91,8 +91,8 @@ const btn=(s,cls)=>{const p=P(s);return `<span class="fx-b ${cls||''} ${p.n?'hi'
 const cell=s=>{const p=P(s);return `${E(p.t)}${p.n?' '+N(p.n):''}`};
 const hiw=(s,inner)=>{const p=P(s);return [p.n?'hi':'',p.t,p.n]};
 const table=(cols,rows,num)=>`<div class="fx-scroll"><table><thead><tr>${cols.map((c,i)=>`<th class="${num&&num.includes(i)?'r':''}">${cell(c)}</th>`).join('')}</tr></thead><tbody>${rows.map(r=>`<tr>${r.map((c,i)=>`<td class="${num&&num.includes(i)?'r':''}${P(c).n?' hi':''}">${cell(c)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
-const NAV=['Inicio','Workspaces','OneLake','Monitor','Crear'];
-const navOn={home:'Inicio',ws:'Workspaces',onelake:'OneLake',monitor:'Monitor',create:'Crear'};
+const NAV=['Inicio','Workspaces','OneLake','Real-Time','Monitor','Crear'];
+const navOn={home:'Inicio',ws:'Workspaces',onelake:'OneLake',rt:'Real-Time',monitor:'Monitor',create:'Crear'};
 
 const V={
  home:v=>`<div class="fx-h">${E(v.title||'Le damos la bienvenida a Fabric')}</div><div class="fx-tiles">${(v.tiles||[]).map(x=>{const p=P(x);return `<div class="fx-tile ${p.n?'hi':''}">${E(p.t)}${N(p.n)}</div>`}).join('')}</div>${v.badge?`<div style="justify-self:end">${btn(v.badge)}</div>`:''}`,
