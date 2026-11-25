@@ -70,6 +70,16 @@ const css=`
 .lvx details{margin-top:6px}.lvx summary{cursor:pointer;font-weight:700;font-size:14px;color:var(--pu)}
 .lvh{margin:14px 0 2px;font:700 13px/1.2 Montserrat,system-ui,sans-serif;color:var(--soft);text-transform:uppercase;letter-spacing:.04em}
 .lvnote{font-size:12px;color:var(--soft);margin:4px 0 0}
+.check .fx span,.check .lvx span{font-size:inherit;color:inherit}
+.check .fx b,.check .lvx b{display:inline}
+.check .fx .fx-tree b,.check .fx .fx-pane b{display:block}
+.check .fx label{display:block;padding:0;cursor:default;font-size:12px;color:var(--soft)}
+.check .fx .fx-ty{font-size:11px;color:var(--soft)}
+.check .fx .fx-crumb,.check .fx .fx-arr,.check .fx .fx-node small{color:var(--soft)}
+.check .fx .fx-b.pri,.check .fx .fx-me,.check .fx .fx-n,.check .fx .fx-cop .q{color:#fff}
+.check .fx-nav span{font-size:11px}
+.fx-tree .fx-menu{display:grid;padding:0;margin-left:10px}.fx-tree .fx-menu div{display:block;padding:5px 10px}
+.fx-tree .fx-menu div+div{border-top:1px solid var(--line)}
 `;
 const st=document.createElement('style');st.textContent=css;document.head.appendChild(st);
 
