@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Ruta Fabric DACD</title>
+<script>try{if(localStorage.getItem("fabSession"))document.documentElement.classList.add("hasSession")}catch(e){}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;800&family=Source+Sans+3:wght@400;600;700&display=swap">
 <style>
@@ -144,9 +145,13 @@ td.num{white-space:nowrap;font-variant-numeric:tabular-nums}
 .fl{display:block;font-weight:600;margin:10px 0 4px}
 .in{width:100%;font:inherit;font-size:16px;min-height:44px;padding:8px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink)}
 .idrow{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,14em),1fr));gap:0 14px}
-body.locked>:not(#gate):not(script){display:none!important}
+body.locked:not(.booting)>:not(#gate):not(script){display:none!important}
+body.booting #gate{display:none!important}
+html:not(.hasSession) body.booting>:not(#bootMsg):not(script){display:none!important}
+#bootMsg{display:none}
+html:not(.hasSession) body.booting #bootMsg{display:grid;place-items:center;min-height:100svh;color:var(--soft);font:600 17px "Source Sans 3",sans-serif;background:linear-gradient(160deg,var(--orbg),var(--pubg))}
 #gate{display:none}
-body.locked #gate{display:grid;min-height:100svh;place-items:center;padding:24px 16px;background:linear-gradient(160deg,var(--orbg),var(--pubg))}
+body.locked:not(.booting) #gate{display:grid;min-height:100svh;place-items:center;padding:24px 16px;background:linear-gradient(160deg,var(--orbg),var(--pubg))}
 .gcard{width:min(460px,100%);background:var(--bg);border-radius:18px;padding:clamp(20px,4vw,32px);border-top:8px solid var(--or);box-shadow:0 10px 30px rgba(60,30,90,.12)}
 .gtop{margin-bottom:16px}
 .gmark{display:inline-block;background:var(--pu);color:#fff;font:800 14px Montserrat,sans-serif;padding:4px 10px;border-radius:8px;margin-bottom:10px}
@@ -193,7 +198,8 @@ footer{border-top:6px solid var(--or);color:var(--soft);font-size:14px}
 
 </style>
 </head>
-<body class="locked" data-notabnext>
+<body class="locked booting" data-notabnext>
+<div id="bootMsg" role="status">Cargando…</div>
 <div id="gate">
   <div class="gcard">
     <div class="gtop"><span class="gmark">DACD</span><h1 style="font-size:clamp(26px,4vw,36px)">Ruta de conocimiento Microsoft Fabric</h1><p class="note" style="margin:6px 0 0">Módulo F1-01 · Guía práctica para el equipo de analistas y científicos</p></div>
@@ -378,7 +384,7 @@ const setG=m=>{mode=m;$('gReg').setAttribute('aria-pressed',m==='reg');$('gChk')
   $('gPass').autocomplete=m==='reg'?'new-password':'current-password';$('gBtn').textContent=m==='reg'?'Enviar solicitud':'Ingresar';gm('gMsg','')};
 $('gReg').onclick=()=>setG('reg');$('gChk').onclick=()=>setG('chk');setG('reg');
 const lockUI=()=>{document.body.classList.add('locked');$('gForm').hidden=false;$('gWait').hidden=true;$('gReg').parentElement.hidden=false};
-function waiting(est){document.body.classList.add('locked');$('gForm').hidden=true;$('gWait').hidden=false;$('gReg').parentElement.hidden=true;
+function waiting(est){document.body.classList.add('locked');document.body.classList.remove('booting');$('gForm').hidden=true;$('gWait').hidden=false;$('gReg').parentElement.hidden=true;
   if(est==='Rechazado'){$('gWaitT').textContent='Solicitud no aprobada';$('gWaitP').textContent='Su solicitud no fue aprobada. Si cree que es un error, comuníquese con la jefatura de la DACD.'}
   else{$('gWaitT').textContent='Solicitud pendiente';$('gWaitP').textContent='Su registro está pendiente de aprobación por la administración del curso. Esta pantalla se actualiza sola cuando lo aprueben; también puede volver más tarde e ingresar con su correo y contraseña.'}}
 if(firebaseConfig.apiKey==='REEMPLAZAR'){gm('gMsg','El registro del curso todavía no está configurado.','err');$('gBtn').disabled=true}
@@ -395,24 +401,27 @@ $('gForm').addEventListener('submit',async ev=>{ev.preventDefault();const em=$('
   try{mode==='reg'?await createUserWithEmailAndPassword(auth,em,pw):await signInWithEmailAndPassword(auth,em,pw)}catch(e){pendingReg=null;gm('gMsg',errTxt(e),'err')}finally{$('gBtn').disabled=false}});
 $('gForgot').onclick=async()=>{const em=$('gEmail').value.trim().toLowerCase();if(!em){gm('gMsg','Escriba su correo y vuelva a tocar "Olvidé mi contraseña".','err');return}
   try{await sendPasswordResetEmail(auth,em);gm('gMsg','Le enviamos un correo para restablecer la contraseña. Revise también el correo no deseado.','ok')}catch(e){gm('gMsg',errTxt(e),'err')}};
-const out=()=>signOut(auth).then(()=>location.reload());
+const out=()=>{try{localStorage.removeItem('fabSession')}catch(e){}return signOut(auth).then(()=>location.reload())};
 $('meChange').onclick=out;$('gOther').onclick=out;$('gAgain').onclick=()=>location.reload();
 let unsub=[],entered=false;
+const unboot=()=>document.body.classList.remove('booting');
+const sess=on=>{try{on?localStorage.setItem('fabSession','1'):localStorage.removeItem('fabSession')}catch(e){}};
 onAuthStateChanged(auth,async u=>{
   unsub.forEach(f=>f());unsub=[];entered=false;
-  if(!u){lockUI();return}
+  if(!u){sess(0);lockUI();unboot();return}
+  sess(1);
   const email=(u.email||'').toLowerCase();
   const pRef=doc(db,'participants',email);
   let admin=false;try{admin=(await getDoc(doc(db,'admins',u.uid))).exists()}catch(e){}
   try{const ps=await getDoc(pRef);
     if(!ps.exists()){const r=pendingReg||{nombre:u.displayName||email,perfil:'Otro',area:''};await setDoc(pRef,{nombre:r.nombre,perfil:r.perfil,area:r.area,estado:'Pendiente',uid:u.uid,solicitado:serverTimestamp()});pendingReg=null}}
-  catch(e){gm('gMsg','No se pudo leer su registro. Intente de nuevo.','err');return}
+  catch(e){document.body.classList.remove('booting');gm('gMsg','No se pudo leer su registro. Intente de nuevo.','err');return}
   unsub.push(onSnapshot(pRef,s=>{const p=s.data()||{};
     if(admin||p.estado==='Aprobado'){if(!entered){entered=true;enter(u,email,p,admin)}}
     else{entered=false;waiting(p.estado||'Pendiente')}},()=>{}));
 });
 async function enter(u,email,p,admin){
-  document.body.classList.remove('locked');
+  document.body.classList.remove('locked');unboot();
   const nombre=p.nombre||email,perfil=p.perfil||'';
   $('welcome').textContent='Hola, '+nombre.split(' ')[0]+'. Elija un módulo para empezar o continuar donde lo dejó.';
   $('perfilTxt').textContent=perfil||(admin?'Administración':'—');

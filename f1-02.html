@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Fabric F1-02 lakehouses</title>
+<script>try{if(localStorage.getItem("fabSession"))document.documentElement.classList.add("hasSession")}catch(e){}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;800&family=Source+Sans+3:wght@400;600;700&display=swap">
 <style>
@@ -144,9 +145,13 @@ td.num{white-space:nowrap;font-variant-numeric:tabular-nums}
 .fl{display:block;font-weight:600;margin:10px 0 4px}
 .in{width:100%;font:inherit;font-size:16px;min-height:44px;padding:8px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink)}
 .idrow{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,14em),1fr));gap:0 14px}
-body.locked>:not(#gate):not(script){display:none!important}
+body.locked:not(.booting)>:not(#gate):not(script){display:none!important}
+body.booting #gate{display:none!important}
+html:not(.hasSession) body.booting>:not(#bootMsg):not(script){display:none!important}
+#bootMsg{display:none}
+html:not(.hasSession) body.booting #bootMsg{display:grid;place-items:center;min-height:100svh;color:var(--soft);font:600 17px "Source Sans 3",sans-serif;background:linear-gradient(160deg,var(--orbg),var(--pubg))}
 #gate{display:none}
-body.locked #gate{display:grid;min-height:100svh;place-items:center;padding:24px 16px;background:linear-gradient(160deg,var(--orbg),var(--pubg))}
+body.locked:not(.booting) #gate{display:grid;min-height:100svh;place-items:center;padding:24px 16px;background:linear-gradient(160deg,var(--orbg),var(--pubg))}
 .gcard{width:min(460px,100%);background:var(--bg);border-radius:18px;padding:clamp(20px,4vw,32px);border-top:8px solid var(--or);box-shadow:0 10px 30px rgba(60,30,90,.12)}
 .gtop{margin-bottom:16px}
 .gmark{display:inline-block;background:var(--pu);color:#fff;font:800 14px Montserrat,sans-serif;padding:4px 10px;border-radius:8px;margin-bottom:10px}
@@ -197,7 +202,8 @@ button.lhi{cursor:pointer}.lhi.on{border-color:var(--or);background:var(--orbg)}
 
 </style>
 </head>
-<body class="locked">
+<body class="locked booting">
+<div id="bootMsg" role="status">Cargando…</div>
 <div id="gate">
   <div class="gcard">
     <div class="gtop"><span class="gmark">DACD</span><h1 style="font-size:clamp(26px,4vw,36px)">Ruta de conocimiento Microsoft Fabric</h1><p class="note" style="margin:6px 0 0">Módulo F1-02 · Lakehouses en Microsoft Fabric</p></div>
@@ -658,23 +664,26 @@ const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app);a
 const errTxt=e=>({'auth/invalid-credential':'Correo o contraseña incorrectos.','auth/wrong-password':'Correo o contraseña incorrectos.','auth/user-not-found':'No encontramos ese correo. Regístrese en la página principal.','auth/too-many-requests':'Demasiados intentos. Espere unos minutos.','auth/invalid-email':'El correo no es válido.','auth/network-request-failed':'No hay conexión con el registro del curso.'}[e&&e.code]||'No se pudo ingresar. Intente de nuevo.');
 $('gForm').addEventListener('submit',async ev=>{ev.preventDefault();$('gBtn').disabled=true;gm('Ingresando…');
   try{await signInWithEmailAndPassword(auth,$('gEmail').value.trim().toLowerCase(),$('gPass').value)}catch(e){gm(errTxt(e),'err')}finally{$('gBtn').disabled=false}});
-const out=()=>signOut(auth).then(()=>location.reload());$('meOut').onclick=out;$('gOther').onclick=out;
+const out=()=>{try{localStorage.removeItem('fabSession')}catch(e){}return signOut(auth).then(()=>location.reload())};$('meOut').onclick=out;$('gOther').onclick=out;
 let entered=false,unsub=null;
+const unboot=()=>document.body.classList.remove('booting');
+const sess=on=>{try{on?localStorage.setItem('fabSession','1'):localStorage.removeItem('fabSession')}catch(e){}};
 onAuthStateChanged(auth,async u=>{
   if(unsub){unsub();unsub=null}entered=false;
-  if(!u){document.body.classList.add('locked');$('gForm').hidden=false;$('gWait').hidden=true;return}
+  if(!u){sess(0);document.body.classList.add('locked');$('gForm').hidden=false;$('gWait').hidden=true;unboot();return}
+  sess(1);
   const email=(u.email||'').toLowerCase();
   let owner=null;try{owner=localStorage.getItem('f101owner')}catch(e){}
   if(owner!==u.uid){try{localStorage.removeItem('f101');localStorage.removeItem('f102');localStorage.setItem('f101owner',u.uid)}catch(e){}if(owner!==null){location.reload();return}F.resetLocal()}
   let admin=false;try{admin=(await getDoc(doc(db,'admins',u.uid))).exists()}catch(e){}
   unsub=onSnapshot(doc(db,'participants',email),s=>{const p=s.data()||{};
     if(admin||p.estado==='Aprobado'){if(!entered){entered=true;enter(u,email,p,admin)}}
-    else{document.body.classList.add('locked');$('gForm').hidden=true;$('gWait').hidden=false;
+    else{document.body.classList.add('locked');unboot();$('gForm').hidden=true;$('gWait').hidden=false;
       if(!s.exists()){$('gWaitT').textContent='No encontramos su registro';$('gWaitP').textContent='Regístrese primero en la página principal del curso.'}
       else if(p.estado==='Rechazado'){$('gWaitT').textContent='Solicitud no aprobada';$('gWaitP').textContent='Su solicitud no fue aprobada. Comuníquese con la jefatura de la DACD.'}}},()=>{});
 });
 async function enter(u,email,p,admin){
-  document.body.classList.remove('locked');
+  document.body.classList.remove('locked');unboot();
   const nombre=p.nombre||email,perfil=p.perfil||'';
   $('meName').textContent='Avance de '+nombre+' en el F1-02';$('mePerfilTxt').textContent=perfil||(admin?'Administración':'—');
   const ref=doc(db,'progress',u.uid);
