@@ -40,9 +40,11 @@ service cloud.firestore {
         && request.resource.data.nombre is string && request.resource.data.nombre.size() <= 120
         && request.resource.data.perfil in ['Analista', 'Científico', 'Jefatura', 'Otro'];
 
-      // solo la administración cambia el estado
-      allow update: if isAdmin()
-        && request.resource.data.estado in ['Pendiente', 'Aprobado', 'Rechazado'];
+      // la administración cambia el estado; cada persona solo actualiza su fecha de último ingreso
+      allow update: if (isAdmin()
+          && request.resource.data.estado in ['Pendiente', 'Aprobado', 'Rechazado'])
+        || (signedIn() && myEmail() == email
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['ultimoIngreso']));
 
       allow delete: if isAdmin();
     }

@@ -591,7 +591,7 @@ function restoreAll(){drawLessons();drawLab();drawQ();drawLh();['s2','s3','s4'].
 function resetLocal(){['les','lab','qa','lq'].forEach(k=>{for(const x in S[k])delete S[k][x]});['s1','s2','s3','s4'].forEach(k=>{for(const x in S.sims[k])delete S.sims[k][x]});restoreAll()}
 function payload(){const s=summary(S);return JSON.parse(JSON.stringify({les:S.les,lab:S.lab,qa:S.qa,lq:S.lq,sims:S.sims,pct:s.pct,qn:s.qn,qs:s.qs,lecciones:s.les,simuladores:s.sim,laboratorio:s.lb}))}
 myProg();
-window.F102={S,save,sync,mergeIn,restoreAll,resetLocal,payload,setPush:f=>{pushRemote=f}};
+window.F102={S,save,sync,mergeIn,restoreAll,resetLocal,payload,LES,QZ,LAB,setPush:f=>{pushRemote=f}};
 }
 </script>
 <script>
@@ -657,7 +657,7 @@ const firebaseConfig = {
 };
 import {initializeApp} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
 import {getAuth,onAuthStateChanged,signInWithEmailAndPassword,signOut} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
-import {getFirestore,doc,getDoc,setDoc,onSnapshot,serverTimestamp,FieldPath} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+import {getFirestore,doc,getDoc,setDoc,updateDoc,onSnapshot,serverTimestamp,FieldPath} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 const F=window.F102,$=id=>document.getElementById(id);
 const gm=(t,k)=>{const m=$('gMsg');m.textContent=t||'';m.className='lmsg'+(k?' '+k:'')};
 const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app);auth.languageCode='es';
@@ -676,6 +676,7 @@ onAuthStateChanged(auth,async u=>{
   let owner=null;try{owner=localStorage.getItem('f101owner')}catch(e){}
   if(owner!==u.uid){try{localStorage.removeItem('f101');localStorage.removeItem('f102');localStorage.setItem('f101owner',u.uid)}catch(e){}if(owner!==null){location.reload();return}F.resetLocal()}
   let admin=false;try{admin=(await getDoc(doc(db,'admins',u.uid))).exists()}catch(e){}
+  try{if(sessionStorage.getItem('fabIn')!==u.uid){await updateDoc(doc(db,'participants',email),{ultimoIngreso:serverTimestamp()});sessionStorage.setItem('fabIn',u.uid)}}catch(e){}
   unsub=onSnapshot(doc(db,'participants',email),s=>{const p=s.data()||{};
     if(admin||p.estado==='Aprobado'){if(!entered){entered=true;enter(u,email,p,admin)}}
     else{document.body.classList.add('locked');unboot();$('gForm').hidden=true;$('gWait').hidden=false;
