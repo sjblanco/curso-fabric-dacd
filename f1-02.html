@@ -177,6 +177,24 @@ footer{border-top:6px solid var(--or);color:var(--soft);font-size:14px}
 button.lhi{cursor:pointer}.lhi.on{border-color:var(--or);background:var(--orbg)}.lhi.tb{border-color:var(--gr);background:var(--grbg)}
 .ft{flex:none;font-size:12px;font-weight:700;background:var(--pubg);color:var(--pu);border-radius:6px;padding:1px 6px}
 #sqlOut{min-height:120px;white-space:pre-wrap}
+/* pestañas */
+[data-tab][hidden]{display:none!important}
+.navbar .nav a.act{background:var(--or);color:#fff}
+.navbar .nav a.ext{color:var(--pu)}
+.top.compact{padding-block:18px}
+.top.compact h1{font-size:clamp(24px,3vw,32px)}
+.top.compact .lead{display:none}
+.subnav{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 4px}
+.subnav a{flex:none;text-decoration:none;color:var(--ink);background:var(--bg);border:2px solid var(--line);border-radius:999px;padding:9px 16px;min-height:44px;display:inline-flex;align-items:center;font-weight:600;font-size:15px}
+.subnav a.act{border-color:var(--or);background:var(--orbg)}
+.subnav a .ok{color:var(--gr)}
+.pager{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:18px}
+.pager a{text-decoration:none}
+.pager .btn{display:inline-flex;align-items:center}
+.tabnext{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:28px;padding-top:18px;border-top:1px solid var(--line)}
+.tabnext a{text-decoration:none;font-weight:700;color:var(--pu);padding:10px 0;min-height:44px}
+.tabnext a.nx{margin-left:auto;background:var(--pu);color:#fff;border-radius:10px;padding:10px 18px}
+
 </style>
 </head>
 <body class="locked">
@@ -198,15 +216,62 @@ button.lhi{cursor:pointer}.lhi.on{border-color:var(--or);background:var(--orbg)}
   </div>
 </div>
 
-<nav class="navbar" aria-label="Menú del curso"><div class="navin">
-  <a class="brand" href="./#miruta"><i>DACD</i><span>Fabric · F1-02</span></a>
-  <div class="nav">
-  <a href="./#miruta">Mis módulos</a><a href="#como">Cómo estudiar</a><a href="#guia">Lecciones</a><a href="#carga">Cargar datos</a><a href="#consulta">Consultar</a><a href="#elegir">Lakehouse o warehouse</a><a href="#quiz">Autoevaluación</a><a href="#lab">Laboratorio</a><a href="#insumos">Insumos</a>
-  </div>
+<nav class="navbar" aria-label="Menú del módulo"><div class="navin">
+  <a class="brand" href="./"><i>DACD</i><span>Fabric · F1-02</span></a>
+  <div class="nav"><a class="ext" href="./">← Mis módulos</a><a href="#inicio">Inicio</a><a href="#lecciones">Lecciones</a><a href="#simuladores">Simuladores</a><a href="#autoevaluacion">Autoevaluación</a><a href="#laboratorio">Laboratorio</a><a href="#insumos">Insumos</a></div>
 </div></nav>
 <header class="band top"><div class="wrap">
   <h1>Lakehouses en Fabric: guía práctica del módulo F1-02</h1>
   <p class="lead">Material de apoyo para el módulo <i>Get started with lakehouses in Microsoft Fabric</i>. Aprenderá qué es un lakehouse, cómo se cargan y transforman los datos y cómo se consultan con Spark, con SQL y con Power BI.</p>
+</div></header>
+
+
+<section class="band me" aria-label="Su avance"><div class="wrap mebox">
+  <div class="mehead"><div><h3 id="meName">Su avance en el F1-02</h3><p class="note" id="meSync">Conectando…</p></div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center"><span class="perf">Perfil: <b class="pill" id="mePerfilTxt">—</b></span><button class="btn sec" id="meOut">Salir</button></div></div>
+  <div class="meparts" id="meParts"></div>
+</div></section>
+
+<section class="band" id="como" data-tab="inicio"><div class="wrap">
+  <h2>Cómo usar este material</h2>
+  <div class="sim" style="grid-template-columns:repeat(auto-fit,minmax(min(100%,20em),1fr));margin-top:10px">
+    <div class="card">
+      <h3>Lo que debe dominar al terminar</h3>
+      <ol class="obj">
+        <li><span>Describir las características y capacidades de un lakehouse en Fabric.</span></li>
+        <li><span>Crear un lakehouse.</span></li>
+        <li><span>Cargar y transformar datos en un lakehouse.</span></li>
+        <li><span>Consultar y analizar los datos con SQL y con Spark.</span></li>
+      </ol>
+      <p class="note">Objetivos oficiales del módulo en Microsoft Learn (nivel principiante, unos 60 minutos).</p>
+    </div>
+    <div class="card">
+      <h3>Ruta sugerida (unas 4 horas en total)</h3>
+      <ol class="steps">
+        <li><b>Lea el módulo oficial en Learn</b> (60 min), incluido su ejercicio.</li>
+        <li><b>Recorra las 7 lecciones guiadas</b> (60 min) y responda la pregunta de cada una.</li>
+        <li><b>Haga los 4 simuladores</b> (30 min).</li>
+        <li><b>Responda la autoevaluación</b> (15 min). Meta: 8 de 10.</li>
+        <li><b>Haga el laboratorio</b> (90 min) en su workspace de prueba del F1-01.</li>
+      </ol>
+    </div>
+  </div>
+</div></section>
+
+<section class="band alt" id="guia" data-tab="lecciones"><div class="wrap">
+  <div class="qhead"><h2>Lecciones guiadas</h2><span class="note" id="lesScore"></span></div>
+  <div class="bar" aria-hidden="true"><i id="lesBar"></i></div>
+  <p>Cada lección explica un concepto en lenguaje sencillo y lo conecta con el trabajo de la DACD. Lea en orden.</p>
+  <div class="lesidx" id="lesIdx"></div>
+  <div id="lessons"></div>
+</div></section>
+
+<section class="band" data-tab="simuladores"><div class="wrap">
+  <h2>Simuladores</h2>
+  <p>Practique cada concepto con las manos. Haga los cuatro simuladores en orden; cada uno trae instrucciones y la conclusión a la que debe llegar.</p>
+  <div class="subnav" id="simNav"></div>
+</div></section>
+<section class="band alt" id="sim1" data-tab="simuladores" data-sub="s1" data-label="Explorador del lakehouse"><div class="wrap">
   <div class="sim">
     <div class="panel">
       <h3>Simulador 1. Explorador del lakehouse</h3>
@@ -235,50 +300,9 @@ button.lhi{cursor:pointer}.lhi.on{border-color:var(--or);background:var(--orbg)}
     </ol>
     <p class="end"><b>Conclusión:</b> en Files cabe cualquier archivo; solo lo que está como tabla Delta en Tables se puede consultar con SQL, y el SQL analytics endpoint es de solo lectura.</p>
   </div>
-</div></header>
-
-
-<section class="band me" aria-label="Su avance"><div class="wrap mebox">
-  <div class="mehead"><div><h3 id="meName">Su avance en el F1-02</h3><p class="note" id="meSync">Conectando…</p></div>
-    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center"><span class="perf">Perfil: <b class="pill" id="mePerfilTxt">—</b></span><button class="btn sec" id="meOut">Salir</button></div></div>
-  <div class="meparts" id="meParts"></div>
 </div></section>
 
-<section class="band" id="como"><div class="wrap">
-  <h2>Cómo usar este material</h2>
-  <div class="sim" style="grid-template-columns:repeat(auto-fit,minmax(min(100%,20em),1fr));margin-top:10px">
-    <div class="card">
-      <h3>Lo que debe dominar al terminar</h3>
-      <ol class="obj">
-        <li><span>Describir las características y capacidades de un lakehouse en Fabric.</span></li>
-        <li><span>Crear un lakehouse.</span></li>
-        <li><span>Cargar y transformar datos en un lakehouse.</span></li>
-        <li><span>Consultar y analizar los datos con SQL y con Spark.</span></li>
-      </ol>
-      <p class="note">Objetivos oficiales del módulo en Microsoft Learn (nivel principiante, unos 60 minutos).</p>
-    </div>
-    <div class="card">
-      <h3>Ruta sugerida (unas 4 horas en total)</h3>
-      <ol class="steps">
-        <li><b>Lea el módulo oficial en Learn</b> (60 min), incluido su ejercicio.</li>
-        <li><b>Recorra las 7 lecciones guiadas</b> (60 min) y responda la pregunta de cada una.</li>
-        <li><b>Haga los 4 simuladores</b> (30 min).</li>
-        <li><b>Responda la autoevaluación</b> (15 min). Meta: 8 de 10.</li>
-        <li><b>Haga el laboratorio</b> (90 min) en su workspace de prueba del F1-01.</li>
-      </ol>
-    </div>
-  </div>
-</div></section>
-
-<section class="band alt" id="guia"><div class="wrap">
-  <div class="qhead"><h2>Lecciones guiadas</h2><span class="note" id="lesScore"></span></div>
-  <div class="bar" aria-hidden="true"><i id="lesBar"></i></div>
-  <p>Cada lección explica un concepto en lenguaje sencillo y lo conecta con el trabajo de la DACD. Lea en orden.</p>
-  <div class="lesidx" id="lesIdx"></div>
-  <div id="lessons"></div>
-</div></section>
-
-<section class="band" id="carga"><div class="wrap">
+<section class="band" id="carga" data-tab="simuladores" data-sub="s2" data-label="Cargar datos"><div class="wrap">
   <h2>Simulador 2. ¿Cómo cargo estos datos?</h2>
   <p>Cinco situaciones reales. Elija la forma de carga que mejor encaja.</p>
   <div class="howto"><h3>Pistas para elegir</h3><ol>
@@ -292,7 +316,7 @@ button.lhi{cursor:pointer}.lhi.on{border-color:var(--or);background:var(--orbg)}
   <div class="scen" id="s2"></div>
 </div></section>
 
-<section class="band alt" id="consulta"><div class="wrap">
+<section class="band alt" id="consulta" data-tab="simuladores" data-sub="s3" data-label="Consultar"><div class="wrap">
   <h2>Simulador 3. ¿Desde dónde lo consulto?</h2>
   <p>El mismo lakehouse se consulta desde varias herramientas. Elija la adecuada para cada necesidad.</p>
   <div class="howto"><h3>Pistas para elegir</h3><ol>
@@ -305,7 +329,7 @@ button.lhi{cursor:pointer}.lhi.on{border-color:var(--or);background:var(--orbg)}
   <div class="scen" id="s3"></div>
 </div></section>
 
-<section class="band" id="elegir"><div class="wrap">
+<section class="band" id="elegir" data-tab="simuladores" data-sub="s4" data-label="Lakehouse o warehouse"><div class="wrap">
   <h2>Simulador 4. ¿Lakehouse o warehouse?</h2>
   <p>Los dos guardan sus tablas en formato Delta dentro de OneLake. La diferencia está en cómo se trabaja con ellos. Decida en cada caso.</p>
   <div class="bar" aria-hidden="true"><i id="s4Bar"></i></div><p class="note" id="s4Score"></p>
@@ -313,7 +337,7 @@ button.lhi{cursor:pointer}.lhi.on{border-color:var(--or);background:var(--orbg)}
   <p class="note">En la práctica muchos equipos combinan ambos: ingeniería y ciencia de datos en el lakehouse, y un warehouse para el modelo que el equipo de SQL mantiene.</p>
 </div></section>
 
-<section class="band alt" id="quiz"><div class="wrap">
+<section class="band alt" id="quiz" data-tab="autoevaluacion"><div class="wrap">
   <h2>Autoevaluación: 10 preguntas</h2>
   <div class="white">
     <div class="qhead"><h3 id="qNum"></h3><span class="note" id="qPts"></span></div>
@@ -325,7 +349,7 @@ button.lhi{cursor:pointer}.lhi.on{border-color:var(--or);background:var(--orbg)}
   </div>
 </div></section>
 
-<section class="band" id="lab"><div class="wrap">
+<section class="band" id="lab" data-tab="laboratorio"><div class="wrap">
   <h2>Laboratorio guiado: su primer lakehouse</h2>
   <p>Use el workspace de prueba que creó en el F1-01 y solo los datos ficticios de esta página. Abra el detalle de cada paso para ver dónde hacer clic y qué debe observar.</p>
   <div class="bar" aria-hidden="true"><i id="lBar"></i></div><p class="note" id="lScore"></p>
@@ -346,7 +370,7 @@ button.lhi{cursor:pointer}.lhi.on{border-color:var(--or);background:var(--orbg)}
   <button class="btn sec" id="lReset" style="margin-top:14px">Reiniciar checklist</button>
 </div></section>
 
-<section class="band alt" id="insumos"><div class="wrap">
+<section class="band alt" id="insumos" data-tab="insumos"><div class="wrap">
   <h2>Insumos adicionales</h2>
   <div class="sim" style="grid-template-columns:repeat(auto-fit,minmax(min(100%,22em),1fr))">
     <div class="card">
@@ -563,6 +587,58 @@ function payload(){const s=summary(S);return JSON.parse(JSON.stringify({les:S.le
 myProg();
 window.F102={S,save,sync,mergeIn,restoreAll,resetLocal,payload,setPush:f=>{pushRemote=f}};
 }
+</script>
+<script>
+{
+/* Navegación por pestañas: cada opción del menú muestra solo su sección */
+const $$=s=>[...document.querySelectorAll(s)];
+const secs=$$('[data-tab]');
+const names=[...new Set(secs.map(t=>t.dataset.tab))];
+const links=$$('.navbar .nav a[href^="#"]');
+const label=n=>{const a=links.find(x=>x.getAttribute('href')==='#'+n);return a?a.textContent.trim():n};
+/* botones Anterior / Siguiente al pie de cada pestaña */
+const subsOf=n=>secs.filter(s=>s.dataset.tab===n&&s.dataset.sub);
+if(!document.body.hasAttribute('data-notabnext'))names.forEach((n,i)=>{const ss=subsOf(n);
+  if(ss.length){ss.forEach((s,j)=>{const w=s.querySelector('.wrap')||s;const d=document.createElement('div');d.className='tabnext';
+    const prev=j>0?`<a href="#simuladores-${ss[j-1].dataset.sub}">← ${ss[j-1].dataset.label}</a>`:(i>0?`<a href="#${names[i-1]}">← ${label(names[i-1])}</a>`:'');
+    const next=j<ss.length-1?`<a class="nx" href="#simuladores-${ss[j+1].dataset.sub}">Siguiente simulador: ${ss[j+1].dataset.label} →</a>`:(i<names.length-1?`<a class="nx" href="#${names[i+1]}">Siguiente: ${label(names[i+1])} →</a>`:'');
+    d.innerHTML=prev+next;w.appendChild(d)});return}
+  const last=secs.filter(s=>s.dataset.tab===n).pop();const w=last.querySelector('.wrap')||last;
+  const d=document.createElement('div');d.className='tabnext';
+  d.innerHTML=(i>0?`<a href="#${names[i-1]}">← ${label(names[i-1])}</a>`:'')+(i<names.length-1?`<a class="nx" href="#${names[i+1]}">Siguiente: ${label(names[i+1])} →</a>`:'');
+  if(d.innerHTML)w.appendChild(d)});
+/* sub-pestañas de simuladores */
+const subs=secs.filter(s=>s.dataset.sub);
+const subnav=document.getElementById('simNav');
+if(subnav)subnav.innerHTML=subs.map(s=>`<a href="#simuladores-${s.dataset.sub}" data-s="${s.dataset.sub}">${s.dataset.label||s.dataset.sub}</a>`).join('');
+/* lecciones: una a la vez */
+const lesBox=document.getElementById('lessons');
+let curLes=1;
+function applyLessons(){if(!lesBox)return;const arts=[...lesBox.querySelectorAll('.les')];if(!arts.length)return;curLes=Math.min(Math.max(1,curLes),arts.length);
+  arts.forEach((a,i)=>{a.hidden=i+1!==curLes});
+  let pg=document.getElementById('lesPager');if(!pg){pg=document.createElement('div');pg.id='lesPager';pg.className='pager';lesBox.after(pg)}
+  pg.innerHTML=(curLes>1?`<a class="btn sec" href="#lecciones-${curLes-1}">← Lección ${curLes-1}</a>`:'<span></span>')+`<span class="note" style="align-self:center">Lección ${curLes} de ${arts.length}</span>`+(curLes<arts.length?`<a class="btn" href="#lecciones-${curLes+1}">Lección ${curLes+1} →</a>`:'<span></span>');
+  $$('#lesIdx a').forEach((a,i)=>{a.setAttribute('href','#lecciones-'+(i+1));a.classList.toggle('cur',i+1===curLes)})}
+if(lesBox)new MutationObserver(()=>applyLessons()).observe(lesBox,{childList:true});
+const idx=document.getElementById('lesIdx');if(idx)new MutationObserver(()=>applyLessons()).observe(idx,{childList:true});
+function show(){const h=decodeURIComponent((location.hash||'').slice(1));let tab=names[0],sub=null,m;
+  if(m=h.match(/^lecciones?-(\d+)$/)){tab='lecciones';curLes=+m[1]}
+  else if(m=h.match(/^simuladores-(s\d)$/)){tab='simuladores';sub=m[1]}
+  else if(names.includes(h))tab=h;
+  else if(h){const el=document.getElementById(h);const host=el&&el.closest('[data-tab]');if(host){tab=host.dataset.tab;sub=host.dataset.sub||null}}
+  if(tab==='admin'&&!document.body.classList.contains('is-admin'))tab=names[0];
+  if(tab==='simuladores'&&!sub)sub=(subs[0]&&subs[0].dataset.sub)||null;
+  secs.forEach(s=>{s.hidden=s.dataset.tab!==tab||(s.dataset.sub&&s.dataset.sub!==sub)});
+  links.forEach(a=>a.classList.toggle('act',a.getAttribute('href')==='#'+tab));
+  if(subnav)subnav.querySelectorAll('a').forEach(a=>a.classList.toggle('act',a.dataset.s===sub));
+  const hd=document.querySelector('header.top');if(hd)hd.classList.toggle('compact',tab!==names[0]);
+  applyLessons();
+  window.dispatchEvent(new Event('resize'));
+  window.scrollTo({top:0})}
+window.addEventListener('hashchange',show);show();
+window.TABS={show};
+}
+
 </script>
 <script type="module">
 const firebaseConfig = {

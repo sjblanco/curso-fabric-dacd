@@ -4,8 +4,11 @@ Material de estudio interactivo para el equipo de analistas y científicos de da
 
 | Módulo | Página |
 |---|---|
-| F1-01 · Introducción a la analítica de punta a punta | `index.html` (también es la página principal, con registro y administración) |
+| Portada: registro, ingreso, Mis módulos, Mi ruta y Administración | `index.html` |
+| F1-01 · Introducción a la analítica de punta a punta | `f1-01.html` |
 | F1-02 · Lakehouses en Fabric | `f1-02.html` |
+
+Cada página de módulo se navega por pestañas (Inicio, Lecciones, Simuladores, Autoevaluación, Laboratorio, Insumos). Las pestañas se controlan con el atributo `data-tab` de cada sección; los simuladores usan `data-sub`.
 
 - **Página:** GitHub Pages, en https://sjblanco.github.io/curso-fabric-dacd/
 - **Registro, inicio de sesión y avance:** Firebase (proyecto `curso-fabric-dacd`, plan gratuito Spark). Firebase solo guarda los datos; no aloja la página.

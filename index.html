@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Fabric F1-01 práctico</title>
+<title>Ruta Fabric DACD</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;800&family=Source+Sans+3:wght@400;600;700&display=swap">
 <style>
@@ -173,9 +173,27 @@ footer{border-top:6px solid var(--or);color:var(--soft);font-size:14px}
 @media(prefers-reduced-motion:reduce){.bar i{transition:none}.pulse{animation:none!important}}
 .pulse{animation:flow 1.4s linear infinite}
 @keyframes flow{to{stroke-dashoffset:-24}}
+/* pestañas */
+[data-tab][hidden]{display:none!important}
+.navbar .nav a.act{background:var(--or);color:#fff}
+.navbar .nav a.ext{color:var(--pu)}
+.top.compact{padding-block:18px}
+.top.compact h1{font-size:clamp(24px,3vw,32px)}
+.top.compact .lead{display:none}
+.subnav{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 4px}
+.subnav a{flex:none;text-decoration:none;color:var(--ink);background:var(--bg);border:2px solid var(--line);border-radius:999px;padding:9px 16px;min-height:44px;display:inline-flex;align-items:center;font-weight:600;font-size:15px}
+.subnav a.act{border-color:var(--or);background:var(--orbg)}
+.subnav a .ok{color:var(--gr)}
+.pager{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:18px}
+.pager a{text-decoration:none}
+.pager .btn{display:inline-flex;align-items:center}
+.tabnext{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:28px;padding-top:18px;border-top:1px solid var(--line)}
+.tabnext a{text-decoration:none;font-weight:700;color:var(--pu);padding:10px 0;min-height:44px}
+.tabnext a.nx{margin-left:auto;background:var(--pu);color:#fff;border-radius:10px;padding:10px 18px}
+
 </style>
 </head>
-<body class="locked">
+<body class="locked" data-notabnext>
 <div id="gate">
   <div class="gcard">
     <div class="gtop"><span class="gmark">DACD</span><h1 style="font-size:clamp(26px,4vw,36px)">Ruta de conocimiento Microsoft Fabric</h1><p class="note" style="margin:6px 0 0">Módulo F1-01 · Guía práctica para el equipo de analistas y científicos</p></div>
@@ -203,219 +221,35 @@ footer{border-top:6px solid var(--or);color:var(--soft);font-size:14px}
   </div>
 </div>
 <nav class="navbar" aria-label="Menú del curso"><div class="navin">
-  <a class="brand" href="#miruta"><i>DACD</i><span>Fabric · F1-01</span></a>
-  <div class="nav">
-  <a href="#miruta">Mis módulos</a><a href="#como">Cómo estudiar</a><a href="#guia">Lecciones</a><a href="#roles">Roles</a><a href="#acceso">Shortcut o copia</a><a href="#cargas">Cargas de trabajo</a><a href="#quiz">Autoevaluación</a><a href="#lab">Laboratorio</a><a href="#insumos">Insumos</a><a href="#admin" id="navAdmin" hidden>Administración</a>
-  </div>
+  <a class="brand" href="#inicio"><i>DACD</i><span>Ruta Fabric</span></a>
+  <div class="nav"><a href="#inicio">Mis módulos</a><a href="#miruta">Mi ruta</a><a href="#admin" id="navAdmin" hidden>Administración</a></div>
+  <button class="btn sec" id="meChange" style="flex:none;min-height:40px;padding:8px 14px">Salir</button>
 </div></nav>
 <header class="band top"><div class="wrap">
-  <h1>Fabric de punta a punta: guía práctica del módulo F1-01</h1>
-  <p class="lead">Material de apoyo para analistas y científicos de la DACD que acompaña el módulo <i>Introduction to end-to-end analytics using Microsoft Fabric</i>. Lea la guía, practique con los simuladores y cierre con la autoevaluación y el laboratorio.</p>
-  <div class="sim">
-    <div class="panel">
-      <h3>Simulador 1. Un lago, muchos motores</h3>
-      <p style="font-size:16px">Compare cómo se reparte una misma tabla entre equipos. Elija la arquitectura y luego un motor para ver cómo lee el dato.</p>
-      <div class="seg" role="group" aria-label="Arquitectura">
-        <button id="aOne" aria-pressed="true">Con OneLake</button>
-        <button id="aOld" aria-pressed="false">Silos tradicionales</button>
-      </div>
-      <div class="engines" id="engines"></div>
-      <div class="kpis">
-        <div class="kpi"><small>Copias del dato</small><strong id="kCopies">1</strong></div>
-        <div class="kpi"><small>Procesos de copia</small><strong id="kEtl">0</strong></div>
-        <div class="kpi"><small>Versiones de la verdad</small><strong id="kTruth">1</strong></div>
-      </div>
-    </div>
-    <div>
-      <div class="lake" id="lakeFig" role="img" aria-label="Diagrama de motores leyendo datos"><svg id="lake"></svg></div>
-      <pre id="code"></pre>
-      <p class="note" id="codeNote"></p>
-    </div>
-  </div>
-  <div class="howto">
-    <h3>Cómo usar este simulador</h3>
-    <ol>
-      <li>Deje seleccionado <b>Con OneLake</b> y toque cada motor: los cuatro se conectan al mismo lago y leen la misma tabla <i>captacion_saldos</i>.</li>
-      <li>Lea el código que aparece debajo: cambia el lenguaje (T-SQL, PySpark, DAX, KQL), pero el nombre de la tabla es siempre el mismo.</li>
-      <li>Cambie a <b>Silos tradicionales</b> y fíjese en los indicadores: aparecen cuatro copias, cuatro procesos de copia y hasta cuatro versiones distintas del dato.</li>
-    </ol>
-    <p class="end"><b>Conclusión:</b> en Fabric cada equipo usa su herramienta preferida sin duplicar datos. Menos copias significa menos procesos que mantener y una sola cifra oficial de saldos.</p>
-  </div>
+  <h1>Ruta de conocimiento Microsoft Fabric</h1>
+  <p class="lead" id="welcome">Equipo de analistas y científicos de datos de la DACD.</p>
 </div></header>
 
-<section class="band me" aria-label="Su avance"><div class="wrap mebox">
-  <div class="mehead"><div><h3 id="meName">Su avance</h3><p class="note" id="meSync">Su avance se guarda en este navegador.</p></div>
-    <span class="perf">Perfil: <b class="pill" id="mePerfilTxt">—</b><select id="mePerfil" hidden aria-hidden="true"><option value=""></option><option>Analista</option><option>Científico</option><option>Jefatura</option><option>Otro</option></select></span>
-    <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" id="meReport">Reportar mi avance</button><button class="btn sec" id="meChange">Salir</button></div></div>
-  <div class="meparts" id="meParts"></div>
-  <div class="white" id="meCodeBox" hidden style="margin-top:10px"><b>Resumen de su avance</b><pre id="meCode" style="white-space:pre-wrap"></pre><p class="note" id="meCodeMsg"></p></div>
-
+<section class="band" id="inicio" data-tab="inicio"><div class="wrap">
+  <div class="qhead"><h2>Mis módulos</h2><span class="note">Perfil: <b class="pill" id="perfilTxt">—</b></span></div>
+  <p>Cada módulo se abre en su propia página, con pestañas para las lecciones, los simuladores, la autoevaluación y el laboratorio. Su avance se guarda solo y puede continuar desde cualquier computadora.</p>
+  <div class="kpis" id="totKpis"></div>
+  <div class="mods" id="modList"></div>
+  <div class="howto" style="margin-top:22px"><h3>Cómo avanzar en cada módulo</h3><ol>
+    <li><b>Inicio:</b> lea los objetivos y la ruta sugerida.</li>
+    <li><b>Lecciones:</b> una a la vez, con su pregunta de comprobación.</li>
+    <li><b>Simuladores:</b> practique cada concepto.</li>
+    <li><b>Autoevaluación:</b> la meta es 8 de 10.</li>
+    <li><b>Laboratorio:</b> hágalo en su workspace de prueba y registre la evidencia.</li></ol></div>
 </div></section>
 
-<section class="band" id="miruta"><div class="wrap">
-  <div class="qhead"><h2>Mis módulos</h2><span class="note" id="rutaPerfil"></span></div>
-  <div class="mods" id="modList"></div>
-  <h3 style="margin-top:22px">Ruta completa de su perfil</h3>
-  <p id="rutaIntro">Estos son los módulos que le corresponden en la ruta de conocimiento de la DACD. Este material cubre el módulo marcado como <b>actual</b>.</p>
+<section class="band" id="miruta" data-tab="miruta"><div class="wrap">
+  <div class="qhead"><h2>Mi ruta según mi perfil</h2><span class="note" id="rutaPerfil"></span></div>
+  <p id="rutaIntro"></p>
   <div class="rutas" id="rutaList"></div>
 </div></section>
 
-<section class="band" id="como"><div class="wrap">
-  <h2>Cómo usar este material</h2>
-  <div class="sim" style="grid-template-columns:repeat(auto-fit,minmax(min(100%,20em),1fr));margin-top:10px">
-    <div class="card">
-      <h3>Lo que debe dominar al terminar</h3>
-      <ol class="obj">
-        <li><span>Identificar las capacidades de Microsoft Fabric.</span></li>
-        <li><span>Implementar Fabric para cubrir las necesidades de analítica de la organización.</span></li>
-        <li><span>Describir cómo Fabric aporta capacidades de IA mediante Copilot, agentes de datos y Fabric IQ.</span></li>
-      </ol>
-      <p class="note">Objetivos oficiales del módulo en Microsoft Learn (nivel principiante, 6 unidades).</p>
-    </div>
-    <div class="card">
-      <h3>Ruta sugerida (unas 4 horas en total)</h3>
-      <ol class="steps">
-        <li><b>Lea el módulo oficial en Learn</b> (45 min). Haga primero la lectura completa, sin detenerse en los detalles.</li>
-        <li><b>Recorra aquí las 8 lecciones guiadas</b> (60 min). Al final de cada una, responda la pregunta de comprobación y márquela como leída.</li>
-        <li><b>Haga los 4 simuladores</b> (30 min). Cada uno trae instrucciones y la conclusión a la que debe llegar.</li>
-        <li><b>Responda la autoevaluación</b> (15 min). La meta es 8 de 10; si no la alcanza, vuelva a las lecciones donde falló.</li>
-        <li><b>Haga el laboratorio</b> (90 min) en un workspace de prueba, siguiendo el paso a paso.</li>
-      </ol>
-    </div>
-  </div>
-</div></section>
-
-<section class="band alt" id="guia"><div class="wrap">
-  <div class="qhead"><h2>Lecciones guiadas</h2><span class="note" id="lesScore"></span></div>
-  <div class="bar" aria-hidden="true"><i id="lesBar"></i></div>
-  <p>Cada lección explica un concepto en lenguaje sencillo y lo conecta con el trabajo de la DACD. Lea en orden: cada una se apoya en la anterior.</p>
-  <div class="lesidx" id="lesIdx"></div>
-  <div id="lessons"></div>
-</div></section>
-
-<section class="band alt" id="roles"><div class="wrap">
-  <h2>Simulador 2. ¿Qué puede hacer cada rol del workspace?</h2>
-  <p>Fabric controla el acceso al workspace con cuatro roles que aplican a todos sus elementos. Elija un rol y vea qué acciones quedan permitidas.</p>
-  <div class="howto">
-    <h3>Cómo usar este simulador</h3>
-    <ol>
-      <li>Antes de tocar nada, escriba en un papel qué cree que puede hacer un <b>Contributor</b>: ¿puede borrar el workspace? ¿puede ejecutar un pipeline?</li>
-      <li>Revise la tabla de Contributor y compare con lo que anotó.</li>
-      <li>Recorra los roles de mayor a menor (Admin → Viewer) y observe en qué punto se pierde cada permiso.</li>
-      <li>Fíjese en la diferencia más sutil: el Viewer puede leer con T-SQL, pero no puede leer el lakehouse desde Spark.</li>
-    </ol>
-    <p class="end"><b>Conclusión:</b> Admin administra el workspace y a su gente, Member además invita, Contributor construye y ejecuta, y Viewer consulta. En la DACD, quien desarrolla modelos suele ser Contributor y quien solo consume resultados, Viewer.</p>
-  </div>
-  <div class="seg" role="group" aria-label="Rol" id="roleSeg"></div>
-  <div class="white" style="margin-top:14px"><div class="scroll"><table><thead><tr><th>Acción</th><th style="width:9em">Resultado</th></tr></thead><tbody id="roleBody"></tbody></table></div></div>
-  <p class="note">Basado en la tabla de capacidades por rol de la documentación de Fabric. Para un control más fino, Microsoft recomienda permisos por elemento.</p>
-</div></section>
-
-<section class="band" id="acceso"><div class="wrap">
-  <h2>Simulador 3. ¿Shortcut, mirroring o copia?</h2>
-  <p>Escenarios de la DACD con datos que viven en otro lugar. Elija cómo los traería a OneLake.</p>
-  <div class="howto">
-    <h3>Cómo decidir</h3>
-    <ol>
-      <li><b>¿El dato ya está en formato abierto y solo hay que leerlo tal cual?</b> Use un shortcut: no se copia nada y el origen manda.</li>
-      <li><b>¿Es una base operacional que cambia constantemente?</b> Use mirroring: Fabric la replica de forma continua como tablas Delta.</li>
-      <li><b>¿Hay que limpiar, unir o aplicar reglas de negocio?</b> Copie y transforme con un pipeline, un dataflow o un notebook; el resultado es una tabla nueva.</li>
-    </ol>
-    <p class="end"><b>Conclusión:</b> la pregunta clave es si necesita el dato <i>tal como está</i> (shortcut o mirroring) o un dato <i>nuevo y transformado</i> (copia).</p>
-  </div>
-  <div class="scen" id="scen"></div>
-  <p class="note">Escenarios ilustrativos. Antes de diseñar, confirme que la fuente de origen sea compatible con shortcuts o mirroring.</p>
-</div></section>
-
-<section class="band alt" id="cargas"><div class="wrap">
-  <h2>Simulador 4. Cada tarea a su carga de trabajo</h2>
-  <p>Fabric reúne en una sola plataforma capacidades de Power BI, Azure Synapse Analytics y Azure Data Factory. Asigne cada tarea a la carga de trabajo correcta.</p>
-  <div class="howto">
-    <h3>Pistas para elegir</h3>
-    <ol>
-      <li><b>Mover y orquestar</b> datos es Data Factory. <b>Procesar con Spark</b> en un lakehouse es Data Engineering. <b>T-SQL y modelo en estrella</b> es Data Warehouse.</li>
-      <li><b>Datos en movimiento</b> (eventos, streaming, alertas) es Real-Time Intelligence. <b>Machine learning</b> es Data Science. <b>Reportes y tableros</b> es Power BI.</li>
-      <li><b>Definir el significado de negocio</b> (qué es un cliente, cómo se relaciona con una cuenta) es IQ.</li>
-    </ol>
-    <p class="end">Si se equivoca, el botón se marca en rojo y puede intentarlo de nuevo.</p>
-  </div>
-  <div class="bar" aria-hidden="true"><i id="wBar"></i></div>
-  <p class="note" id="wScore">0 de 7 correctas</p>
-  <div class="scen" id="works"></div>
-</div></section>
-
-<section class="band" id="quiz"><div class="wrap">
-  <h2>Autoevaluación: 10 preguntas</h2>
-  <div class="white">
-    <div class="qhead"><h3 id="qNum"></h3><span class="note" id="qPts"></span></div>
-    <div class="bar" aria-hidden="true"><i id="qBar"></i></div>
-    <div id="qBox"></div>
-    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px">
-      <button class="btn sec" id="qPrev">Anterior</button>
-      <button class="btn" id="qNext">Siguiente</button>
-      <button class="btn sec" id="qReset">Reiniciar</button>
-    </div>
-  </div>
-</div></section>
-
-<section class="band alt" id="lab"><div class="wrap">
-  <h2>Laboratorio guiado en un workspace de prueba</h2>
-  <p>Hágalo en una capacidad de prueba (trial) o en un workspace sandbox, nunca con datos productivos. Su avance se guarda en este navegador. Abra el detalle de cada paso para ver dónde hacer clic y qué debe observar.</p>
-  <div class="howto">
-    <h3>Antes de empezar</h3>
-    <ol>
-      <li>Necesita una cuenta con Fabric habilitado. Si su organización todavía no lo tiene activo, existe una prueba gratuita de Fabric.</li>
-      <li>Copie los datos ficticios de abajo y guárdelos en un archivo llamado <b>captacion_demo.csv</b> (en el Bloc de notas, use "Guardar como" con codificación UTF-8).</li>
-      <li>Tenga a mano el simulador de roles: en el paso 11 va a comprobar en la realidad lo que vio ahí.</li>
-    </ol>
-  </div>
-  <div class="copyrow"><h3>Datos de práctica: captacion_demo.csv (ficticios)</h3><button class="btn sec" id="csvCopy">Copiar datos</button></div>
-  <pre id="csv">fecha,segmento,producto,saldo,clientes
-2026-10-31,Personas,Ahorro a la vista,1520000000,48210
-2026-10-31,Personas,Plazo fijo,2875000000,12904
-2026-10-31,Pymes,Ahorro a la vista,640000000,3120
-2026-10-31,Pymes,Plazo fijo,910000000,845
-2026-10-31,Corporativo,Plazo fijo,3350000000,212
-2026-11-30,Personas,Ahorro a la vista,1588000000,48977
-2026-11-30,Personas,Plazo fijo,2910000000,13088
-2026-11-30,Pymes,Ahorro a la vista,655000000,3164
-2026-11-30,Pymes,Plazo fijo,948000000,861
-2026-11-30,Corporativo,Plazo fijo,3290000000,209</pre>
-  <p class="note" id="csvMsg">Cifras inventadas para practicar; no corresponden a datos del Banco.</p>
-  <div class="bar" aria-hidden="true"><i id="lBar"></i></div>
-  <p class="note" id="lScore"></p>
-  <ul class="check" id="labList"></ul>
-  <button class="btn sec" id="lReset" style="margin-top:14px">Reiniciar checklist</button>
-</div></section>
-
-<section class="band" id="insumos"><div class="wrap">
-  <h2>Insumos adicionales</h2>
-  <div class="sim" style="grid-template-columns:repeat(auto-fit,minmax(min(100%,22em),1fr))">
-    <div class="card">
-      <h3>Lecturas oficiales</h3>
-      <ul>
-        <li><a href="https://learn.microsoft.com/training/modules/introduction-end-analytics-use-microsoft-fabric/">Módulo F1-01 en Microsoft Learn</a></li>
-        <li><a href="https://learn.microsoft.com/training/paths/get-started-fabric">Ruta completa: Get started with Microsoft Fabric</a></li>
-        <li><a href="https://learn.microsoft.com/fabric/onelake/onelake-overview">OneLake, el OneDrive de los datos</a></li>
-        <li><a href="https://learn.microsoft.com/fabric/fundamentals/roles-workspaces">Roles en workspaces</a></li>
-      </ul>
-      <h3 style="margin-top:14px">Para discutir en equipo (30 min)</h3>
-      <ul>
-        <li>¿Qué tablas de Clientes, Captación y Crédito hoy se copian entre áreas y podrían pasar a shortcuts?</li>
-        <li>¿Qué rol de workspace debería tener cada perfil de la DACD en desarrollo y en producción?</li>
-        <li>¿Qué conceptos de negocio tendría que definir una ontología de Fabric IQ para que un agente responda sobre Captación?</li>
-      </ul>
-    </div>
-    <div class="card">
-      <h3>Glosario rápido</h3>
-      <dl class="glos" id="glos"></dl>
-    </div>
-  </div>
-</div></section>
-
-
-
-<section class="band alt" id="admin" hidden><div class="wrap">
+<section class="band" id="admin" data-tab="admin" hidden><div class="wrap">
   <div class="qhead"><h2>Administración del curso</h2><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn sec" id="aRefresh">Actualizar</button><button class="btn sec" id="aCsv">Descargar CSV</button></div></div>
   <p class="note" id="aMode"></p>
   <div class="kpis" id="aKpis"></div>
@@ -424,207 +258,14 @@ footer{border-top:6px solid var(--or);color:var(--soft);font-size:14px}
   <p class="note" id="aMsg"></p>
 </div></section>
 
-<footer class="band"><div class="wrap">DACD · Banco Popular · Ruta de conocimiento Microsoft Fabric, fase 1, módulo F1-01. Los contenidos resumen la documentación pública de Microsoft Learn; ante cualquier diferencia, manda la fuente oficial.</div></footer>
-
+<footer class="band"><div class="wrap">DACD · Banco Popular · Ruta de conocimiento Microsoft Fabric. Los contenidos resumen la documentación pública de Microsoft Learn; ante cualquier diferencia, manda la fuente oficial.</div></footer>
 <script>
 {
 const $=id=>document.getElementById(id);
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-let store={};
-try{store=JSON.parse(localStorage.getItem('f101')||'{}')}catch(e){store={}}
-store.sims=store.sims||{};['s1e','s2','s3','s4'].forEach(k=>{store.sims[k]=store.sims[k]||{}});
-let remoteTimer=null,pushRemote=()=>{};
-const save=()=>{try{localStorage.setItem('f101',JSON.stringify(store))}catch(e){}try{const c=document.querySelector('#modList .mod.cur');if(c&&typeof summary==='function'){const p=summary(store).pct;c.querySelector('.bar i').style.width=p+'%';c.querySelector('span').textContent=p+'% de avance'}}catch(e){}clearTimeout(remoteTimer);remoteTimer=setTimeout(()=>pushRemote(),900);if(typeof myProg==='function')myProg()};
-
-/* Simulador 1 */
-const ENG=[
- {id:'sql',n:'Warehouse T-SQL',d:'Equipo SQL',lang:'T-SQL',code:"SELECT segmento, SUM(saldo) AS saldo_total\nFROM dbo.captacion_saldos\nGROUP BY segmento;",note:'Escribe y consulta la tabla con T-SQL.'},
- {id:'spark',n:'Notebook Spark',d:'Científicos',lang:'PySpark',code:"df = spark.read.table(\"captacion_saldos\")\ndf.groupBy(\"segmento\").sum(\"saldo\").show()",note:'Lee las mismas tablas Delta desde un notebook, sin copiarlas.'},
- {id:'pbi',n:'Power BI Direct Lake',d:'Analistas',lang:'DAX',code:"Saldo total =\nSUM ( captacion_saldos[saldo] )",note:'Power BI lee la tabla en modo Direct Lake, sin importar una copia.'},
- {id:'kql',n:'Eventhouse KQL',d:'Monitoreo',lang:'KQL',code:"captacion_saldos\n| summarize saldo_total = sum(saldo) by segmento",note:'Motor de tiempo real; también trabaja sobre datos en OneLake.'}
-];
-let arch='one',eng='spark';
-const engBox=$('engines');
-engBox.innerHTML=ENG.map(e=>`<button class="eng" data-e="${e.id}" aria-pressed="${e.id===eng}"><b>${esc(e.n)}</b><span>${esc(e.d)}</span></button>`).join('');
-engBox.addEventListener('click',ev=>{const b=ev.target.closest('.eng');if(!b)return;eng=b.dataset.e;store.sims.s1e[eng]=1;save();upd()});
-$('aOne').onclick=()=>{arch='one';upd()};$('aOld').onclick=()=>{arch='old';store.sims.s1o=1;save();upd()};
-const s=$('lake');
-const draw=()=>{
-  const W=s.clientWidth,H=s.clientHeight;if(!W||!H)return;
-  const narrow=W<520,cx=W/2,lakeY=H*.66,lw=Math.min(W*.6,360),lh=narrow?70:84;
-  const xs=ENG.map((e,i)=>W*(i+.5)/ENG.length),ey=H*.17,bw=Math.min(W/ENG.length-12,150),bh=46;
-  const label=e=>narrow?e.lang:e.n;
-  let o='<defs><linearGradient id="wa" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7C51A1" stop-opacity=".9"/><stop offset="1" stop-color="#4b2d6b"/></linearGradient></defs>';
-  if(arch==='one'){
-    ENG.forEach((e,i)=>{const on=e.id===eng;o+=`<path d="M${xs[i]} ${ey+bh/2} C ${xs[i]} ${lakeY-60}, ${cx} ${lakeY-80}, ${cx} ${lakeY-lh/2}" fill="none" stroke="${on?'#F47920':'var(--line)'}" stroke-width="${on?4:2}" stroke-dasharray="${on?'8 4':'0'}" class="${on?'pulse':''}"/>`});
-    o+=`<ellipse cx="${cx}" cy="${lakeY+6}" rx="${lw/2}" ry="${lh/2}" fill="#000" opacity=".08"/><ellipse cx="${cx}" cy="${lakeY}" rx="${lw/2}" ry="${lh/2}" fill="url(#wa)"/><ellipse cx="${cx}" cy="${lakeY-lh*.18}" rx="${lw*.36}" ry="${lh*.16}" fill="#fff" opacity=".14"/>`;
-    o+=`<text x="${cx}" y="${lakeY-6}" text-anchor="middle" fill="#fff" font-family="Montserrat" font-weight="800" font-size="16">OneLake</text><text x="${cx}" y="${lakeY+16}" text-anchor="middle" fill="#fff" font-size="14">captacion_saldos (Delta)</text>`;
-  }else{
-    ENG.forEach((e,i)=>{const on=e.id===eng,y=lakeY-14,w=Math.min(bw,120);o+=`<line x1="${xs[i]}" y1="${ey+bh/2}" x2="${xs[i]}" y2="${y-18}" stroke="${on?'#F47920':'var(--line)'}" stroke-width="${on?4:2}"/><rect x="${xs[i]-w/2}" y="${y-18}" width="${w}" height="52" rx="10" fill="${on?'#F47920':'#9a8fa6'}"/><text x="${xs[i]}" y="${y+4}" text-anchor="middle" fill="#fff" font-size="14" font-weight="700">Copia ${i+1}</text><text x="${xs[i]}" y="${y+22}" text-anchor="middle" fill="#fff" font-size="13">${narrow?'ETL':'ETL propio'}</text>`});
-    o+=`<text x="${cx}" y="${H-14}" text-anchor="middle" fill="var(--soft)" font-size="14">Cada equipo mantiene su propia copia</text>`;
-  }
-  ENG.forEach((e,i)=>{const on=e.id===eng;o+=`<rect x="${xs[i]-bw/2}" y="${ey-bh/2}" width="${bw}" height="${bh}" rx="10" fill="${on?'#F47920':'var(--bg)'}" stroke="${on?'#F47920':'var(--line)'}" stroke-width="2"/><text x="${xs[i]}" y="${ey+5}" text-anchor="middle" font-size="14" font-weight="700" fill="${on?'#fff':'var(--ink)'}">${esc(label(e))}</text>`});
-  s.innerHTML=o;
-};
-const roLake=new ResizeObserver(draw);roLake.observe($('lakeFig'));
-function upd(){
-  $('aOne').setAttribute('aria-pressed',arch==='one');$('aOld').setAttribute('aria-pressed',arch==='old');
-  engBox.querySelectorAll('.eng').forEach(b=>b.setAttribute('aria-pressed',b.dataset.e===eng));
-  const e=ENG.find(x=>x.id===eng);
-  $('kCopies').textContent=arch==='one'?'1':String(ENG.length);
-  $('kEtl').textContent=arch==='one'?'0':String(ENG.length);
-  $('kTruth').textContent=arch==='one'?'1':'hasta '+ENG.length;
-  $('code').textContent=`-- ${e.lang} · ${e.n}\n`+e.code;
-  $('codeNote').textContent=arch==='one'?e.note+' Todos los motores trabajan sobre la misma copia en OneLake.':'En silos, este equipo consulta su propia copia, que puede estar desfasada respecto de las demás.';
-  draw();
-}
-upd();
-
-/* Lecciones guiadas */
-const LES=[
- {t:'¿Qué problema resuelve Fabric?',g:'Entender por qué existe Fabric antes de aprender sus piezas.',
-  p:['En muchas organizaciones, la analítica está repartida en herramientas que no se hablan entre sí: una para mover datos, otra para almacenarlos, otra para el machine learning y otra para los reportes. Cada herramienta tiene su propia seguridad, su propia copia del dato y su propio equipo que la mantiene.',
-     'Microsoft Fabric es una plataforma SaaS que junta todo ese recorrido, de la ingesta al reporte, en un solo lugar. Integra capacidades que antes estaban en productos separados: Power BI, Azure Synapse Analytics y Azure Data Factory. Al ser SaaS, nadie del equipo tiene que instalar servidores ni administrar recursos de Azure directamente.',
-     'Fabric también está pensado para un modelo de <i>data mesh</i>: cada área es dueña de sus datos, pero el gobierno (seguridad, catálogo, linaje) es central.'],
-  an:'Antes cada equipo tenía su propia bodega y su propio camión. Fabric es un centro logístico compartido: una sola bodega, con zonas para cada equipo y un mismo sistema de control de inventario.',
-  dacd:'Hoy un analista puede bajar datos a Excel, un científico copiarlos a su entorno y Fábrica mantener otra versión. Con Fabric, los dominios Clientes → Captación → Crédito se publican una vez y cada perfil los consume desde ahí.',
-  k:['Fabric es una plataforma SaaS de analítica de punta a punta.','Une ingesta, almacenamiento, ciencia de datos, tiempo real y Power BI.','Permite propiedad descentralizada (dominios) con gobierno centralizado.'],
-  q:['¿Qué significa que Fabric sea SaaS?',['Que el equipo debe instalar y mantener los servidores','Que se consume como servicio, sin administrar infraestructura','Que solo funciona sin conexión'],1,'Exacto: Microsoft administra la plataforma y el equipo se enfoca en los datos y el análisis.']},
- {t:'OneLake: el OneDrive de los datos',g:'Ubicar dónde viven los datos en Fabric y cómo se organizan.',
-  p:['Todo lo que se guarda en Fabric termina en <b>OneLake</b>. Cada tenant (la organización completa en Microsoft 365) tiene un único OneLake: no se crea, no se aprovisiona y no se puede borrar ni duplicar. Por eso se le llama "el OneDrive de los datos".',
-     'OneLake se organiza en tres niveles: <b>tenant → workspace → elemento</b>. El tenant aplica políticas a todo lo que entra. Los workspaces son carpetas de trabajo que se crean según cómo quiera repartir la propiedad y el acceso; cada uno pertenece a una capacidad de una región. Dentro de los workspaces están los elementos: lakehouses, warehouses, eventhouses, bases KQL, etc.',
-     'OneLake es compatible con las APIs de Azure Data Lake Storage Gen2: cada workspace se ve como un contenedor y cada elemento como una carpeta. Así, herramientas que ya leen ADLS Gen2 se pueden conectar sin cambios.'],
-  an:'Igual que en OneDrive todos los documentos de la empresa viven en un mismo servicio organizado por carpetas, en OneLake todos los datos analíticos viven en un solo lago organizado por workspaces.',
-  dacd:'Un esquema posible: un workspace por dominio y ambiente (por ejemplo DACD-Captacion-Dev y DACD-Captacion-Prod), con lakehouses por capa. La estructura definitiva la fija el modelo de gobierno de datos.',
-  k:['Un solo OneLake por tenant, sin infraestructura que administrar.','Jerarquía: tenant → workspace → elemento.','El workspace pertenece a una capacidad de una región.'],
-  q:['Un compañero propone crear un segundo OneLake para el área de Crédito. ¿Qué le responde?',['Que es buena idea para separar datos','Que no se puede: hay un solo OneLake por tenant; la separación se hace con workspaces y permisos','Que hay que pedirlo a Microsoft'],1,'Correcto. La separación se logra con workspaces, dominios y permisos, no con otro lago.']},
- {t:'Formatos abiertos y una sola copia',g:'Comprender por qué varios motores pueden usar el mismo dato sin duplicarlo.',
-  p:['OneLake guarda las tablas en formatos abiertos: <b>Delta Parquet</b> o <b>Iceberg</b>. Son estándares públicos, no formatos cerrados de Microsoft, así que cualquier herramienta compatible puede leerlos. Fabric incluso permite leer tablas Iceberg como Delta y al revés.',
-     'Como todos los motores de Fabric entienden ese mismo formato, todos trabajan directo sobre los datos en OneLake. El ejemplo clásico: el equipo SQL escribe una tabla con T-SQL en un warehouse, un científico la lee desde un notebook de Spark y Power BI la consulta en modo <b>Direct Lake</b>. Los tres usan la misma copia.',
-     'Esto cambia la forma de trabajar: en lugar de "copiar el dato a mi herramienta", cada perfil "lleva su herramienta al dato".'],
-  an:'Un PDF lo abre cualquier lector de PDF, sin importar quién lo creó. Delta Parquet es el "PDF" de las tablas analíticas: cada motor lo abre sin convertirlo.',
-  dacd:'La tabla de saldos de Captación se construye una vez. El analista la usa en Power BI, el científico la usa para entrenar un modelo de fuga de clientes y ambos ven las mismas cifras.',
-  k:['Tablas en Delta Parquet o Iceberg (formatos abiertos).','Todos los motores leen la misma copia.','Direct Lake: Power BI lee de OneLake sin importar una copia.'],
-  q:['¿Por qué Power BI puede consultar una tabla del lakehouse sin importar una copia?',['Porque usa el modo Direct Lake sobre las tablas Delta de OneLake','Porque convierte la tabla a Excel','Porque el lakehouse envía los datos por correo'],0,'Así es: Direct Lake lee directamente las tablas Delta de OneLake.']},
- {t:'Traer datos sin copiarlos: shortcuts y mirroring',g:'Saber qué opción usar cuando el dato vive fuera de su workspace.',
-  p:['Un <b>shortcut</b> es una referencia a datos que están en otro lugar: otro workspace, otro elemento de OneLake o una fuente externa como ADLS Gen2, Azure Blob Storage, Amazon S3, Dataverse o sistemas on-premises. Los archivos remotos se ven como si fueran locales y los cambios del origen se ven al instante. Para leer por un shortcut también se necesitan permisos sobre el destino.',
-     'El <b>mirroring</b> hace disponibles en OneLake bases de datos o catálogos externos sin construir pipelines. El mirroring de bases replica de forma continua una base operacional como tablas Delta; el mirroring de metadatos sincroniza un catálogo externo y usa shortcuts para leer el dato en su lugar.',
-     'Cuando hay que limpiar, unir o aplicar reglas, ya no se trata de "traer" el dato: hay que transformarlo con un pipeline, un dataflow o un notebook. El resultado es una tabla nueva.'],
-  an:'Un shortcut es como un acceso directo en el escritorio: abre el archivo original, que sigue en su carpeta. El mirroring es como una cámara en vivo que replica lo que pasa en la base de origen.',
-  dacd:'Si Fábrica publica la tabla de clientes en su workspace, la DACD no la copia: crea un shortcut. Si se necesita una base operacional casi en tiempo real, se evalúa el mirroring. La capa limpia para modelos de crédito sí se construye con transformaciones.',
-  k:['Shortcut: referencia sin copia; el origen conserva el control.','Mirroring: réplica continua de bases externas, sin pipelines.','Transformar: crea tablas nuevas cuando hay reglas de negocio.'],
-  q:['Necesita leer, tal cual, archivos que un proveedor deja en Amazon S3. ¿Qué usa?',['Mirroring de base de datos','Un shortcut','Un reporte de Power BI'],1,'Correcto: los shortcuts admiten fuentes externas como Amazon S3 sin copiar los archivos.']},
- {t:'Workspaces, roles y seguridad',g:'Saber quién puede hacer qué y en qué niveles se protege el dato.',
-  p:['Un <b>workspace</b> es el espacio colaborativo donde se crean lakehouses, warehouses, notebooks y reportes. Además ofrece una vista de linaje (de dónde viene cada dato y qué depende de él) y una configuración propia: tipo de licencia, conexión a ADLS Gen2, integración con Git y ajustes de Spark.',
-     'El acceso se maneja con cuatro roles que aplican a todo el workspace: <b>Admin, Member, Contributor y Viewer</b>. Para un control más fino, se recomiendan permisos por elemento.',
-     'La seguridad baja más allá del workspace: los <b>roles de seguridad de OneLake</b> permiten restringir carpetas, tablas, filas y columnas, y se aplican igual en SQL, Spark o Power BI. Las etiquetas de sensibilidad siguen protegiendo el dato incluso después de exportarlo.'],
-  an:'El workspace es una oficina: el Admin tiene la llave maestra, el Member puede traer gente, el Contributor trabaja en los escritorios y el Viewer entra a consultar los archivos.',
-  dacd:'Con datos de clientes bajo supervisión de SUGEF, conviene pensar en roles mínimos necesarios: Contributor en desarrollo, Viewer en producción para la mayoría y seguridad por fila o columna para datos sensibles.',
-  k:['Cuatro roles: Admin, Member, Contributor, Viewer.','Permisos por elemento para control más fino.','Seguridad de OneLake hasta filas y columnas, aplicada en todos los motores.'],
-  q:['Un analista solo debe ver resultados, sin modificar nada. ¿Qué rol le asigna?',['Admin','Contributor','Viewer'],2,'Correcto. Viewer consulta, pero no crea ni modifica elementos.']},
- {t:'Las cargas de trabajo y quién usa cada una',g:'Reconocer cada carga de trabajo de Fabric y qué perfil la aprovecha.',
-  p:['Dentro de un workspace se crean elementos de distintas <b>cargas de trabajo</b>. Cada una resuelve una parte del ciclo de vida del dato:',
-     '<b>Data Factory</b> ingesta, transforma y orquesta. <b>Data Engineering</b> crea lakehouses y procesa con Spark. <b>Data Warehouse</b> ofrece un almacén con T-SQL. <b>Real-Time Intelligence</b> procesa y monitorea datos en streaming. <b>Data Science</b> detecta tendencias, valores atípicos y predice con machine learning. <b>Databases</b> crea bases transaccionales. <b>Power BI</b> genera reportes y tableros. <b>IQ</b> (en preview) unifica y organiza los datos con ontologías, grafos y modelos semánticos. También hay soluciones por industria.',
-     'Lo importante es que todas comparten OneLake: lo que produce una carga lo consume la siguiente sin moverlo.'],
-  an:'Es una cocina profesional: cada estación (fríos, parrilla, repostería) tiene su especialista, pero todas usan la misma despensa.',
-  dacd:'Los ingenieros de Fábrica trabajan sobre todo en Data Factory y Data Engineering. Los analistas de la DACD, en Warehouse y Power BI. Los científicos, en Data Science. La definición de conceptos de negocio para agentes corresponde a IQ.',
-  k:['Cada carga cubre una etapa: ingerir, procesar, almacenar, predecir, visualizar.','Todas comparten OneLake.','IQ está en preview: revise su estado antes de planificar producción.'],
-  q:['¿Qué carga de trabajo usaría para entrenar un modelo de probabilidad de mora?',['Data Science','Data Factory','Real-Time Intelligence'],0,'Correcto: Data Science cubre el entrenamiento y la gestión de modelos de machine learning.']},
- {t:'Habilitar Fabric y encontrar los datos',g:'Saber cómo se activa Fabric y cómo se descubre lo que ya existe.',
-  p:['Fabric tiene que estar habilitado para la organización. Lo hace un <b>administrador de Fabric</b>, un <b>administrador de Power Platform</b> o un <b>administrador global</b>, en <b>Admin portal > Tenant settings</b> del servicio de Power BI. Se puede habilitar para toda la organización o solo para grupos de seguridad, y también delegar esa decisión a nivel de capacidad. Para organizaciones que aún no lo usan existe una prueba gratuita.',
-     'Para encontrar datos se usa el <b>catálogo de OneLake</b>. Solo muestra los elementos que alguien compartió con usted, y permite filtrar por workspace, por dominio (si están implementados), por palabra clave o por tipo de elemento.',
-     'La <b>vista de linaje</b> del workspace complementa el catálogo: muestra cómo fluye el dato entre elementos y qué se rompería si algo cambia.'],
-  an:'El catálogo es el buscador de la biblioteca: le muestra los libros a los que tiene acceso. El linaje es la ficha que dice de qué fuentes salió cada libro.',
-  dacd:'Antes de crear una tabla nueva, busque en el catálogo si otro equipo ya la publicó. Así evita duplicar el trabajo y respeta el principio de una sola fuente de verdad.',
-  k:['Se habilita en Admin portal > Tenant settings (organización o grupos).','Catálogo de OneLake: descubre solo lo compartido con usted.','Linaje: flujo y dependencias entre elementos.'],
-  q:['Usted no ve en el catálogo una tabla que sabe que existe. ¿Qué es lo más probable?',['Que la tabla se borró','Que no se la han compartido: el catálogo solo muestra lo que usted puede ver','Que el catálogo está caído'],1,'Correcto. El catálogo solo lista elementos compartidos con usted; pida acceso al dueño.']},
- {t:'IA en Fabric: Copilot, agentes de datos y Fabric IQ',g:'Distinguir las tres capacidades de IA y para qué sirve cada una.',
-  p:['<b>Copilot</b> es un asistente de IA generativa disponible en todas las cargas de trabajo. Sugiere y genera código en notebooks, convierte preguntas en SQL o KQL, explica transformaciones en Data Factory y crea reportes y resúmenes en Power BI. Viene habilitado por defecto; el administrador puede deshabilitarlo o limitarlo a grupos o capacidades.',
-     'Los <b>agentes de datos</b> son interfaces conversacionales: el usuario pregunta en lenguaje natural y el agente traduce la pregunta a consultas sobre lakehouses, warehouses y modelos semánticos.',
-     '<b>Fabric IQ</b> (preview) organiza los datos con lenguaje de negocio. Su elemento central es la <b>ontología</b>: define conceptos, relaciones y reglas para que los agentes razonen con términos como "cliente" o "cuenta" en lugar de nombres técnicos de tablas. Microsoft ofrece además Foundry IQ (conocimiento empresarial de Azure, SharePoint, OneLake y la web) y Work IQ (señales de colaboración como documentos, reuniones y chats).'],
-  an:'Copilot es un compañero que le ayuda a escribir. El agente de datos es un colega al que le hace preguntas. La ontología es el diccionario del Banco que ese colega necesita para entenderle.',
-  dacd:'Un agente que responda "¿cuál fue el saldo de plazo fijo de Pymes en noviembre?" necesita que la ontología defina qué es segmento, producto y saldo. Esto se conecta con los contratos de datos y los dominios del modelo de gobierno.',
-  k:['Copilot: ayuda a crear código, consultas y reportes.','Agentes de datos: preguntas en lenguaje natural sobre los datos.','Fabric IQ: ontologías con conceptos de negocio para los agentes.'],
-  q:['¿Qué le da a un agente de datos el contexto para entender términos de negocio?',['La ontología de Fabric IQ','Un pipeline de Data Factory','El rol Viewer'],0,'Correcto: con la ontología como fuente, el agente entiende los conceptos de negocio al responder.']}
-];
-const done=store.les=store.les||{};store.lq=store.lq||{};
-function lesProg(){const n=Object.values(done).filter(Boolean).length;$('lesBar').style.width=(n/LES.length*100)+'%';$('lesScore').textContent=n+' de '+LES.length+' lecciones leídas';
-  $('lesIdx').innerHTML=LES.map((l,i)=>`<a href="#leccion-${i+1}" class="${done[i]?'done':''}">${done[i]?'✓ ':''}${i+1}. ${esc(l.t.split(':')[0])}</a>`).join('')}
-$('lessons').innerHTML=LES.map((l,i)=>`<article class="les" id="leccion-${i+1}"><header><div class="num">${i+1}</div><div><h3 style="font-size:clamp(19px,2.2vw,24px);font-weight:800">${esc(l.t)}</h3><p class="goal"><b>Objetivo:</b> ${esc(l.g)}</p></div></header>
- <div class="lbody"><div>${l.p.map(x=>`<p>${x}</p>`).join('')}</div>
- <div><div class="box an"><b>Para entenderlo</b>${esc(l.an)}</div><div class="box dacd"><b>En la DACD</b>${esc(l.dacd)}</div><div class="box err"><b>Puntos clave</b><ul class="keys">${l.k.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div></div></div>
- <div class="mc"><p>Compruebe su comprensión: ${esc(l.q[0])}</p><div class="choices" data-l="${i}">${l.q[1].map((o,j)=>`<button data-j="${j}">${esc(o)}</button>`).join('')}</div><div class="fb" id="lf${i}"></div>
- <label style="display:flex;gap:10px;align-items:center;margin-top:12px;cursor:pointer;min-height:44px"><input type="checkbox" data-done="${i}" ${done[i]?'checked':''} style="width:22px;height:22px;accent-color:var(--or)"> Marcar la lección como leída</label></div></article>`).join('');
-$('lessons').addEventListener('click',ev=>{const b=ev.target.closest('.choices button');if(!b)return;const g=b.parentElement,i=+g.dataset.l,q=LES[i].q,ok=+b.dataset.j===q[2];
-  g.querySelectorAll('button').forEach(x=>{x.className=+x.dataset.j===q[2]?(ok||x===b?'right':''):(x===b?'wrong':'')});
-  if(!ok)g.querySelectorAll('button').forEach(x=>{if(+x.dataset.j===q[2])x.className=''});
-  const f=$('lf'+i);f.className='fb show '+(ok?'good':'bad');f.textContent=ok?q[3]:'No es la respuesta correcta. Vuelva a leer los párrafos de la izquierda e intente de nuevo.';if(ok){store.lq[i]=1;save()}});
-$('lessons').addEventListener('change',ev=>{const c=ev.target;if(c.dataset.done===undefined)return;done[c.dataset.done]=c.checked;store.les=done;save();lesProg()});
-lesProg();
-$('csvCopy').onclick=()=>{try{navigator.clipboard.writeText($('csv').textContent).then(()=>{$('csvMsg').textContent='Datos copiados. Péguelos en el Bloc de notas y guarde como captacion_demo.csv.'},()=>{$('csvMsg').textContent='No se pudo copiar automáticamente: seleccione el texto y cópielo manualmente.'})}catch(e){$('csvMsg').textContent='No se pudo copiar automáticamente: seleccione el texto y cópielo manualmente.'}};
-
-/* Simulador 2: roles */
-const ROLES=['Admin','Member','Contributor','Viewer'];
-const ACT=[
- ['Actualizar y eliminar el workspace','A'],
- ['Agregar o quitar personas, incluidos otros admins','A'],
- ['Conectar el workspace a un repositorio Git','A'],
- ['Crear la identidad del workspace','A'],
- ['Agregar miembros u otros con permisos menores','AM'],
- ['Permitir que otros vuelvan a compartir elementos','AM'],
- ['Crear o modificar warehouses y bases de datos','AMC'],
- ['Escribir o eliminar notebooks, pipelines y modelos de ML','AMC'],
- ['Ejecutar o cancelar pipelines y notebooks','AMC'],
- ['Leer datos del lakehouse con Spark o APIs de OneLake','AMC'],
- ['Leer datos con T-SQL por el SQL analytics endpoint','AMCV'],
- ['Ver resultados de ejecución de pipelines y notebooks','AMCV']
-];
-let role='Contributor';
-const roleSeg=$('roleSeg');
-roleSeg.innerHTML=ROLES.map(r=>`<button data-r="${r}" aria-pressed="${r===role}">${r}</button>`).join('');
-roleSeg.addEventListener('click',ev=>{const b=ev.target.closest('button');if(!b)return;role=b.dataset.r;store.sims.s2[role]=1;save();drawRoles()});
-function drawRoles(){
-  roleSeg.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.r===role));
-  const k=role[0];
-  $('roleBody').innerHTML=ACT.map(a=>{const ok=a[1].includes(k);return `<tr><td>${esc(a[0])}</td><td class="${ok?'ok':'no'}">${ok?'✓ Permitido':'✕ No permitido'}</td></tr>`}).join('');
-}
-drawRoles();
-
-/* Simulador 3 */
-const SC=[
- {t:'La tabla de clientes ya existe en un lakehouse de otro workspace',d:'La DACD solo necesita leerla para un modelo de segmentación.',a:'Shortcut',why:'Un shortcut apunta al otro workspace sin copiar. Los cambios del origen se ven al instante y el dueño conserva el control del acceso.'},
- {t:'Archivos diarios de un proveedor en Amazon S3',d:'Se usan tal cual para enriquecer reportes.',a:'Shortcut',why:'Los shortcuts admiten fuentes externas como Amazon S3 o ADLS Gen2, y los archivos remotos se ven como locales.'},
- {t:'Base operacional que cambia durante todo el día',d:'Se requiere en OneLake casi en tiempo real para análisis de captación.',a:'Mirroring',why:'El mirroring de bases replica de forma continua la base operacional en OneLake como tablas Delta, sin construir pipelines.'},
- {t:'Capa plata limpia y estandarizada para modelos de crédito',d:'Hay que depurar, unir y aplicar reglas de calidad.',a:'Copiar y transformar',why:'Una transformación crea tablas nuevas (pipeline, dataflow o notebook). Shortcut y mirroring dejan el dato como está en el origen.'}
-];
-$('scen').innerHTML=SC.map((c,i)=>`<div class="white"><h3>${esc(c.t)}</h3><p style="margin:0">${esc(c.d)}</p><div class="choices" data-i="${i}">${['Shortcut','Mirroring','Copiar y transformar'].map(o=>`<button data-o="${o}">${o}</button>`).join('')}</div><div class="fb" id="sf${i}"></div></div>`).join('');
-$('scen').addEventListener('click',ev=>{const b=ev.target.closest('button');if(!b)return;const g=b.parentElement,i=+g.dataset.i,c=SC[i],ok=b.dataset.o===c.a;
-  g.querySelectorAll('button').forEach(x=>{x.className=x.dataset.o===c.a?'right':(x===b?'wrong':'')});
-  const f=$('sf'+i);f.className='fb show '+(ok?'good':'bad');f.textContent=(ok?'Correcto. ':'La mejor opción es '+c.a+'. ')+c.why;if(ok){store.sims.s3[i]=1;save()}});
-function restoreScen(){Object.keys(store.sims.s3).forEach(i=>{const g=document.querySelector('#scen .choices[data-i="'+i+'"]'),c=SC[i];if(!g||!c)return;g.querySelectorAll('button').forEach(x=>{x.className=x.dataset.o===c.a?'right':''});const f=$('sf'+i);f.className='fb show good';f.textContent='Correcto. '+c.why})}
-restoreScen();
-
-/* Simulador 4 */
-const WL=['Data Factory','Data Engineering','Data Warehouse','Real-Time Intelligence','Data Science','Power BI','IQ'];
-const WT=[
- ['Orquestar la ingesta diaria de archivos y su transformación','Data Factory'],
- ['Limpiar datos en un lakehouse con un notebook de Spark','Data Engineering'],
- ['Modelo tradicional en estrella consultado con T-SQL','Data Warehouse'],
- ['Monitorear transacciones en streaming y lanzar alertas','Real-Time Intelligence'],
- ['Entrenar un modelo de probabilidad de mora','Data Science'],
- ['Publicar el tablero gerencial de captación','Power BI'],
- ['Definir conceptos de negocio y sus relaciones para los agentes','IQ']
-];
-const wDone=store.sims.s4;
-$('works').innerHTML=WT.map((w,i)=>`<div class="white"><h3>${esc(w[0])}</h3><div class="choices" data-i="${i}">${WL.map(o=>`<button data-o="${o}">${o}</button>`).join('')}</div></div>`).join('');
-$('works').addEventListener('click',ev=>{const b=ev.target.closest('button');if(!b)return;const g=b.parentElement,i=+g.dataset.i,ok=b.dataset.o===WT[i][1];
-  if(ok){g.querySelectorAll('button').forEach(x=>{x.className=x===b?'right':'';x.disabled=x!==b});wDone[i]=1;save()}else b.className='wrong';
-  wProg()});
-function wProg(){const n=Object.keys(wDone).length;$('wBar').style.width=(n/WT.length*100)+'%';$('wScore').textContent=n+' de '+WT.length+' correctas'+(n===WT.length?'. ¡Completo!':'')}
-function restoreWorks(){Object.keys(wDone).forEach(i=>{const g=document.querySelector('#works .choices[data-i="'+i+'"]');if(!g||!WT[i])return;g.querySelectorAll('button').forEach(x=>{const r=x.dataset.o===WT[i][1];x.className=r?'right':'';x.disabled=!r})});wProg()}
-restoreWorks();
-
-/* Quiz */
+const pbar=(v,t)=>`<div class="bar"><i style="width:${Math.min(100,v/t*100)}%"></i></div>`;
+const cnt=o=>Object.values(o||{}).filter(Boolean).length;
+/* clave de respuestas del F1-01, para calcular su avance */
 const QZ=[
  ['¿Cuántas instancias de OneLake tiene un tenant de Fabric?',['Una por workspace','Una por capacidad','Una sola por tenant','Las que cree el administrador'],2,'Cada tenant tiene un único OneLake; no se pueden crear instancias adicionales ni eliminarlo.'],
  ['¿En qué formato abierto guarda OneLake las tablas?',['CSV comprimido','Delta Parquet o Iceberg','Formato propietario de Power BI','JSON'],1,'OneLake se basa en Azure Data Lake Storage y guarda tablas en Delta Parquet o Iceberg.'],
@@ -637,70 +278,11 @@ const QZ=[
  ['¿Cómo viene configurado Copilot en Fabric?',['Deshabilitado; se pide a Microsoft','Habilitado por defecto; el admin puede restringirlo','Solo en Power BI','Solo para administradores'],1,'Copilot viene habilitado por defecto y el admin puede deshabilitarlo o limitarlo por grupos o capacidad.'],
  ['¿Cómo lee Power BI las tablas de OneLake sin crear una copia?',['Modo Import','Modo Direct Lake','Exportación CSV','Gateway on-premises'],1,'En modo Direct Lake, Power BI lee las tablas Delta directamente de OneLake.']
 ];
-let qi=0;const qa=store.qa=store.qa||{};
-function drawQ(){
-  const q=QZ[qi],ans=qa[qi];
-  $('qNum').textContent='Pregunta '+(qi+1)+' de '+QZ.length;
-  const pts=Object.keys(qa).filter(k=>qa[k]===QZ[k][2]).length,done=Object.keys(qa).length;
-  $('qPts').textContent=pts+' correctas de '+done+' respondidas';
-  $('qBar').style.width=(done/QZ.length*100)+'%';
-  $('qBox').innerHTML=`<p style="font-size:18px;font-weight:600;margin-top:12px">${esc(q[0])}</p><div class="choices" id="qCh">${q[1].map((o,i)=>`<button data-i="${i}" class="${ans===undefined?'':(i===q[2]?'right':(i===ans?'wrong':''))}" ${ans===undefined?'':'disabled'}>${esc(o)}</button>`).join('')}</div><div class="fb ${ans===undefined?'':'show '+(ans===q[2]?'good':'bad')}">${ans===undefined?'':esc((ans===q[2]?'Correcto. ':'Repase este punto. ')+q[3])}</div>`+(done===QZ.length?`<p class="fb show ${pts>=8?'good':'bad'}" style="margin-top:12px"><b>Resultado: ${pts}/10.</b> ${pts>=8?'Listo para pasar al módulo F1-02.':'Repase la guía y los simuladores antes de seguir; la meta es 8 o más.'}</p>`:'');
-  $('qPrev').disabled=qi===0;$('qNext').disabled=qi===QZ.length-1;
-}
-$('qBox').addEventListener('click',ev=>{const b=ev.target.closest('#qCh button');if(!b||qa[qi]!==undefined)return;qa[qi]=+b.dataset.i;store.qa=qa;save();drawQ()});
-$('qPrev').onclick=()=>{if(qi>0){qi--;drawQ()}};$('qNext').onclick=()=>{if(qi<QZ.length-1){qi++;drawQ()}};
-$('qReset').onclick=()=>{for(const k in qa)delete qa[k];store.qa=qa;save();qi=0;drawQ()};
-drawQ();
-
-/* Laboratorio */
-const LAB=[
- ['Active una capacidad de prueba o use el sandbox asignado','Confirme con el administrador de Fabric que su usuario tiene Fabric habilitado.',['Entre a app.fabric.microsoft.com con su cuenta institucional.','Si ve la opción de iniciar una prueba de Fabric, actívela; si no, pida al administrador el workspace sandbox asignado a la DACD.','Qué observar: en la esquina superior aparece el estado de su licencia o de la prueba.']],
- ['Cree un workspace llamado DACD-Lab-SuNombre','Asígnelo a la capacidad de prueba y revise la configuración: licencia, Git y Spark.',['En el menú izquierdo, seleccione Workspaces y luego New workspace.','Escriba el nombre DACD-Lab-SuNombre y, en las opciones avanzadas, elija la capacidad de prueba o la asignada.','Abra Workspace settings y recorra las secciones de licencia, Git integration y Spark sin cambiarlas.','Qué observar: usted queda como Admin porque creó el workspace.']],
- ['Cree un lakehouse llamado lh_captacion_demo','Observe que también genera un SQL analytics endpoint.',['Dentro del workspace, seleccione New item y busque Lakehouse.','Nómbrelo lh_captacion_demo y créelo.','Vuelva a la lista del workspace.','Qué observar: junto al lakehouse aparece un SQL analytics endpoint con el mismo nombre. Es la puerta de lectura con T-SQL.']],
- ['Cargue el CSV de práctica y conviértalo en tabla Delta','Use solo los datos ficticios de esta página.',['En el lakehouse, en la sección Files, use Get data o Upload para subir captacion_demo.csv.','Abra el menú del archivo (los tres puntos) y elija Load to Tables.','Nombre la tabla captacion_saldos.','Qué observar: la tabla aparece en la sección Tables. Ya está guardada en formato Delta en OneLake.']],
- ['Consulte la tabla con T-SQL desde el SQL endpoint','Escriba un SELECT con GROUP BY por segmento.',['Abra el SQL analytics endpoint del lakehouse (desde el workspace o con el selector de la esquina superior derecha).','Cree una nueva consulta SQL y ejecute: SELECT segmento, SUM(saldo) AS saldo_total FROM captacion_saldos GROUP BY segmento;','Qué observar: debe obtener tres filas (Personas, Pymes, Corporativo).']],
- ['Lea la misma tabla desde un notebook','Compare: es la misma copia, no un duplicado.',['Desde el lakehouse, elija Open notebook y luego New notebook.','En la primera celda escriba: df = spark.read.table("captacion_saldos") y en la siguiente línea df.groupBy("segmento").sum("saldo").show()','Ejecute la celda (la primera vez Spark tarda un poco en arrancar).','Qué observar: los totales coinciden con los de la consulta SQL. Es la misma tabla.']],
- ['Cree un shortcut a una tabla de otro workspace de laboratorio','Pídale a un compañero acceso de lectura a su lakehouse.',['Pida a un compañero que le comparta su lakehouse de laboratorio.','En su lakehouse, abra el menú de Tables y elija New shortcut.','Seleccione Microsoft OneLake como origen, busque el lakehouse del compañero y elija su tabla.','Qué observar: la tabla aparece con un ícono de enlace. Si su compañero agrega una fila, usted la ve sin copiar nada.']],
- ['Abra la vista de linaje del workspace','Identifique de dónde viene y hacia dónde fluye cada elemento.',['En la vista del workspace, cambie a la vista de linaje (Lineage view).','Siga las flechas: archivo → lakehouse → SQL endpoint → notebook.','Qué observar: el linaje le dice qué elementos se verían afectados si cambia la tabla.']],
- ['Busque su lakehouse en el catálogo de OneLake','Filtre por tipo de elemento y por workspace.',['En el menú izquierdo, abra OneLake (el catálogo).','Filtre por el tipo Lakehouse y luego por su workspace, o busque "captacion".','Qué observar: solo ve elementos compartidos con usted. Pídale a un compañero que haga la búsqueda y compare resultados.']],
- ['Pruebe Copilot en el notebook o en el editor SQL','Pídale una consulta y valide el resultado antes de confiar en ella.',['Abra el panel de Copilot en el notebook o en el editor SQL (si su capacidad lo permite).','Pídale: "Calcula el crecimiento del saldo por segmento entre octubre y noviembre".','Ejecute el código sugerido y revise el resultado a mano con los datos del CSV.','Qué observar: Copilot acelera el trabajo, pero usted sigue siendo responsable de validar la lógica.']],
- ['Asigne el rol Viewer a un compañero y verifique qué puede hacer','Compare con lo que vio en el simulador de roles.',['En el workspace, use Manage access y agregue a un compañero con el rol Viewer.','Pídale que intente consultar la tabla desde el SQL endpoint y luego desde un notebook.','Qué observar: debería poder leer con T-SQL, pero no leer el lakehouse con Spark ni modificar elementos.']],
- ['Registre la evidencia en la hoja Seguimiento','Es la evidencia del módulo F1-01.',['Complete el módulo en Microsoft Learn y obtenga el trofeo.','Pegue el enlace o la captura en la columna Evidencia de la hoja Seguimiento y cambie el estado a Completado.','Opcional: elimine el workspace de laboratorio para liberar la capacidad de prueba.']]
-];
-const lab=store.lab=store.lab||{};
-function drawLab(){
-  $('labList').innerHTML=LAB.map((l,i)=>`<li><label for="lab${i}"><input type="checkbox" id="lab${i}" data-i="${i}" ${lab[i]?'checked':''}><div><b>${i+1}. ${esc(l[0])}</b><span>${esc(l[1])}</span></div></label><details class="sub" style="padding:0 12px 4px 50px"><summary>Ver el paso a paso</summary><ol>${l[2].map(x=>`<li>${esc(x)}</li>`).join('')}</ol></details></li>`).join('');
-  const n=Object.values(lab).filter(Boolean).length;$('lBar').style.width=(n/LAB.length*100)+'%';$('lScore').textContent=n+' de '+LAB.length+' pasos completados';
-}
-$('labList').addEventListener('change',ev=>{const c=ev.target;if(!c.dataset)return;lab[c.dataset.i]=c.checked;store.lab=lab;save();const n=Object.values(lab).filter(Boolean).length;$('lBar').style.width=(n/LAB.length*100)+'%';$('lScore').textContent=n+' de '+LAB.length+' pasos completados'});
-$('lReset').onclick=()=>{for(const k in lab)delete lab[k];store.lab=lab;save();drawLab()};
-drawLab();
-
-/* Glosario */
-const GL=[['Capacidad','Recursos de cómputo a los que se asignan workspaces; cada una pertenece a una región.'],['Lakehouse','Elemento que combina archivos y tablas Delta; se consulta con Spark y con SQL.'],['Warehouse','Almacén con T-SQL transaccional completo.'],['SQL analytics endpoint','Acceso de solo lectura con T-SQL a las tablas de un lakehouse.'],['Direct Lake','Modo de Power BI que lee tablas Delta de OneLake sin importarlas.'],['Data mesh','Propiedad descentralizada de los datos con gobierno centralizado, por ejemplo por dominios.'],['Linaje','Vista del flujo de datos y de las dependencias entre elementos.'],['Roles de seguridad de OneLake','Permisos hasta nivel de carpeta, tabla, fila y columna, aplicados en todos los motores.']];
-$('glos').innerHTML=GL.map(g=>`<dt>${esc(g[0])}</dt><dd>${esc(g[1])}</dd>`).join('');
-
-/* Avance personal y registro compartido */
-const cnt=o=>Object.values(o||{}).filter(Boolean).length;
 function simsDone(sm){sm=sm||{};let n=0;if(cnt(sm.s1e)>=4&&sm.s1o)n++;if(cnt(sm.s2)>=4)n++;if(cnt(sm.s3)>=4)n++;if(cnt(sm.s4)>=7)n++;return n}
-function summary(d){const les=cnt(d.les),sim=simsDone(d.sims),qn=Object.keys(d.qa||{}).length,qs=Object.keys(d.qa||{}).filter(k=>QZ[k]&&d.qa[k]===QZ[k][2]).length,lb=cnt(d.lab);return{les,sim,qn,qs,lb,pct:Math.round((les+sim+qn+lb)/34*100)}}
-const pbar=(v,t)=>`<div class="bar"><i style="width:${Math.min(100,v/t*100)}%"></i></div>`;
-function myProg(){const s=summary(store);
-  $('meParts').innerHTML=[['Lecciones',s.les,8],['Simuladores',s.sim,4],['Preguntas respondidas',s.qn,10],['Laboratorio',s.lb,12]].map(p=>`<div class="mp"><small>${p[0]}</small><strong>${p[1]} / ${p[2]}</strong>${pbar(p[1],p[2])}</div>`).join('')+`<div class="mp tot"><small>Avance total</small><strong>${s.pct}%</strong>${pbar(s.pct,100)}</div>`}
-myProg();
-$('mePerfil').value=store.perfil||'';
-$('mePerfil').onchange=e=>{store.perfil=e.target.value;save()};
-const sync=t=>{$('meSync').textContent=t};
-function mergeIn(r){['les','lab','qa','lq'].forEach(k=>{const src=r[k];if(src&&typeof src==='object')Object.keys(src).forEach(x=>{if(store[k][x]===undefined||store[k][x]===false)store[k][x]=src[x]})});
-  const rs=r.sims||{};['s1e','s2','s3','s4'].forEach(k=>{if(rs[k]&&typeof rs[k]==='object')Object.assign(store.sims[k],rs[k])});if(rs.s1o)store.sims.s1o=1;
-  if(!store.perfil&&typeof r.perfil==='string')store.perfil=r.perfil}
-function restoreAll(){document.querySelectorAll('[data-done]').forEach(c=>{c.checked=!!done[c.dataset.done]});lesProg();drawLab();drawQ();restoreScen();restoreWorks();$('mePerfil').value=store.perfil||'';myProg()}
-/* ===== Resumen para reportar ===== */
-function code(){const s=summary(store),i=store.id||{};return 'AVANCE F1-01 | '+(i.nombre||'')+' | '+(i.email||'')+' | '+(store.perfil||'')+' | Lecciones '+s.les+'/8 | Simuladores '+s.sim+'/4 | Preguntas '+s.qn+'/10 | Nota '+s.qs+'/10 | Laboratorio '+s.lb+'/12 | Avance '+s.pct+'% | '+new Date().toLocaleDateString('es-CR')}
-$('meReport').onclick=()=>{const c=code();$('meCode').textContent=c;$('meCodeBox').hidden=false;try{navigator.clipboard.writeText(c).then(()=>{$('meCodeMsg').textContent='Resumen copiado.'},()=>{$('meCodeMsg').textContent='Copie el texto manualmente.'})}catch(e){$('meCodeMsg').textContent='Copie el texto manualmente.'}};
+function summary(d){d=d||{};const les=cnt(d.les),sim=simsDone(d.sims),qn=Object.keys(d.qa||{}).length,qs=Object.keys(d.qa||{}).filter(k=>QZ[k]&&d.qa[k]===QZ[k][2]).length,lb=cnt(d.lab);return{les,sim,qn,qs,lb,pct:Math.round((les+sim+qn+lb)/34*100)}}
 /* ===== Ruta según perfil ===== */
 const RUTA=[
- {f:'1. Fundamentos',p:['Analista','Científico','Jefatura','Otro'],m:[['F1-01','Introducción a la analítica de punta a punta con Fabric',1],['F1-02','Lakehouses en Fabric (disponible)'],['F1-03','Data warehouses en Fabric'],['F1-04','Ciencia de datos en Fabric'],['F1-05','Modelos semánticos a escala'],['F1-06','Fundamentos de Fabric IQ'],['F1-07','Real-Time Intelligence (opcional)'],['F1-08','SQL Database en Fabric (opcional)']]},
+ {f:'1. Fundamentos',p:['Analista','Científico','Jefatura','Otro'],m:[['F1-01','Introducción a la analítica de punta a punta con Fabric'],['F1-02','Lakehouses en Fabric'],['F1-03','Data warehouses en Fabric'],['F1-04','Ciencia de datos en Fabric'],['F1-05','Modelos semánticos a escala'],['F1-06','Fundamentos de Fabric IQ'],['F1-07','Real-Time Intelligence (opcional)'],['F1-08','SQL Database en Fabric (opcional)']]},
  {f:'2A. Analistas (ruta DP-600)',p:['Analista','Jefatura'],m:[['F2A-01','Ingesta con Dataflows Gen2 y pipelines'],['F2A-02','Arquitectura medallion en el lakehouse'],['F2A-03','Consultas T-SQL en el warehouse'],['F2A-04','Seguridad: permisos, RLS y etiquetas'],['F2A-05','Modelos semánticos: DAX y Direct Lake'],['F2A-06','Git y deployment pipelines']]},
  {f:'2B. Científicos (data science y ML)',p:['Científico','Jefatura'],m:[['F2B-01','Exploración de datos con notebooks'],['F2B-02','Preprocesamiento con Data Wrangler'],['F2B-03','Entrenamiento y seguimiento con MLflow'],['F2B-04','Predicciones por lotes con un modelo desplegado']]},
  {f:'3. Caso aplicado DACD',p:['Analista','Científico','Jefatura'],m:[['F3-01','Modelo semántico de Captación',0,'Analista'],['F3-02','Modelo de clasificación con MLflow sobre Crédito',0,'Científico'],['F3-03','Demo interna al equipo']]},
@@ -708,17 +290,72 @@ const RUTA=[
 ];
 function renderRuta(pf){pf=pf||'Otro';$('rutaPerfil').textContent='Perfil: '+pf;
   const fs=RUTA.filter(x=>x.p.includes(pf));
-  $('rutaIntro').textContent=pf==='Jefatura'?'Como jefatura ve la ruta completa de ambos perfiles. Este material cubre el módulo marcado como actual.':'Estos son los módulos que le corresponden según su perfil. Este material cubre el módulo marcado como actual.';
+  $('rutaIntro').textContent=pf==='Jefatura'?'Como jefatura ve la ruta completa de ambos perfiles. Los módulos disponibles se abren desde Mis módulos.':'Estos son los módulos que le corresponden según su perfil. Los módulos disponibles se abren desde Mis módulos.';
   $('rutaList').innerHTML=fs.map(x=>`<div class="fase"><h3>${esc(x.f)}</h3><ol>${x.m.filter(m=>!m[3]||pf==='Jefatura'||m[3]===pf).map(m=>`<li class="${m[2]?'now':''}">${esc(m[0])} · ${esc(m[1])}</li>`).join('')}</ol></div>`).join('')}
-/* ===== Mis módulos ===== */
-const MODS=[{id:'f101',c:'F1-01',t:'Introducción a la analítica de punta a punta',url:'#como',cur:1},{id:'f102',c:'F1-02',t:'Lakehouses en Fabric',url:'f1-02.html'},{id:'f103',c:'F1-03',t:'Data warehouses en Fabric'},{id:'f104',c:'F1-04',t:'Ciencia de datos en Fabric'}];
-function renderModulos(mods){mods=mods||{};const own=summary(store).pct;
-  $('modList').innerHTML=MODS.map(m=>{const pct=m.id==='f101'?own:(mods[m.id]&&typeof mods[m.id].pct==='number'?mods[m.id].pct:0);
+
+const MODS=[{id:'f101',c:'F1-01',t:'Introducción a la analítica de punta a punta',url:'f1-01.html'},{id:'f102',c:'F1-02',t:'Lakehouses en Fabric',url:'f1-02.html'},{id:'f103',c:'F1-03',t:'Data warehouses en Fabric'},{id:'f104',c:'F1-04',t:'Ciencia de datos en Fabric'}];
+function renderModulos(mods,own){mods=mods||{};const pcts={};
+  $('modList').innerHTML=MODS.map(m=>{const pct=m.id==='f101'?own:(mods[m.id]&&typeof mods[m.id].pct==='number'?mods[m.id].pct:0);pcts[m.id]=pct;
     if(!m.url)return `<div class="mod lock"><small>${m.c} · Próximamente</small><b>${esc(m.t)}</b><span>Se habilitará pronto.</span></div>`;
-    return `<a class="mod ${m.cur?'cur':''}" href="${m.url}"><small>${m.c}${m.cur?' · Está aquí':''}</small><b>${esc(m.t)}</b>${pbar(pct,100)}<span>${pct}% de avance</span></a>`}).join('')}
-function resetLocal(){['les','lab','qa','lq'].forEach(k=>{for(const x in store[k])delete store[k][x]});['s1e','s2','s3','s4'].forEach(k=>{for(const x in store.sims[k])delete store.sims[k][x]});delete store.sims.s1o;store.perfil='';restoreAll()}
-window.F101={store,save,mergeIn,restoreAll,resetLocal,sync,summary,myProg,esc,pbar,cnt,simsDone,QZ,LES,LAB,renderRuta,renderModulos,setPush:f=>{pushRemote=f}};
+    return `<a class="mod" href="${m.url}"><small>${m.c}${pct===100?' · Completado':pct>0?' · En curso':' · Sin iniciar'}</small><b>${esc(m.t)}</b>${pbar(pct,100)}<span>${pct}% de avance · ${pct>0?'Continuar':'Empezar'} →</span></a>`}).join('');
+  const av=MODS.filter(m=>m.url),tot=Math.round(av.reduce((a,m)=>a+pcts[m.id],0)/av.length);
+  $('totKpis').innerHTML=[['Avance general',tot+'%'],['Módulos completados',av.filter(m=>pcts[m.id]===100).length+' de '+av.length],['Módulos disponibles',av.length+' de '+MODS.length]].map(k=>`<div class="kpi"><small>${k[0]}</small><strong>${k[1]}</strong></div>`).join('')}
+/* enlaces antiguos a secciones del F1-01 */
+{const h=(location.hash||'').slice(1);if(/^(como|guia|roles|acceso|cargas|quiz|lab|insumos|leccion-\d+)$/.test(h))location.replace('f1-01.html#'+h)}
+window.PORTAL={esc,pbar,summary,renderRuta,renderModulos};
 }
+</script>
+<script>
+{
+/* Navegación por pestañas: cada opción del menú muestra solo su sección */
+const $$=s=>[...document.querySelectorAll(s)];
+const secs=$$('[data-tab]');
+const names=[...new Set(secs.map(t=>t.dataset.tab))];
+const links=$$('.navbar .nav a[href^="#"]');
+const label=n=>{const a=links.find(x=>x.getAttribute('href')==='#'+n);return a?a.textContent.trim():n};
+/* botones Anterior / Siguiente al pie de cada pestaña */
+const subsOf=n=>secs.filter(s=>s.dataset.tab===n&&s.dataset.sub);
+if(!document.body.hasAttribute('data-notabnext'))names.forEach((n,i)=>{const ss=subsOf(n);
+  if(ss.length){ss.forEach((s,j)=>{const w=s.querySelector('.wrap')||s;const d=document.createElement('div');d.className='tabnext';
+    const prev=j>0?`<a href="#simuladores-${ss[j-1].dataset.sub}">← ${ss[j-1].dataset.label}</a>`:(i>0?`<a href="#${names[i-1]}">← ${label(names[i-1])}</a>`:'');
+    const next=j<ss.length-1?`<a class="nx" href="#simuladores-${ss[j+1].dataset.sub}">Siguiente simulador: ${ss[j+1].dataset.label} →</a>`:(i<names.length-1?`<a class="nx" href="#${names[i+1]}">Siguiente: ${label(names[i+1])} →</a>`:'');
+    d.innerHTML=prev+next;w.appendChild(d)});return}
+  const last=secs.filter(s=>s.dataset.tab===n).pop();const w=last.querySelector('.wrap')||last;
+  const d=document.createElement('div');d.className='tabnext';
+  d.innerHTML=(i>0?`<a href="#${names[i-1]}">← ${label(names[i-1])}</a>`:'')+(i<names.length-1?`<a class="nx" href="#${names[i+1]}">Siguiente: ${label(names[i+1])} →</a>`:'');
+  if(d.innerHTML)w.appendChild(d)});
+/* sub-pestañas de simuladores */
+const subs=secs.filter(s=>s.dataset.sub);
+const subnav=document.getElementById('simNav');
+if(subnav)subnav.innerHTML=subs.map(s=>`<a href="#simuladores-${s.dataset.sub}" data-s="${s.dataset.sub}">${s.dataset.label||s.dataset.sub}</a>`).join('');
+/* lecciones: una a la vez */
+const lesBox=document.getElementById('lessons');
+let curLes=1;
+function applyLessons(){if(!lesBox)return;const arts=[...lesBox.querySelectorAll('.les')];if(!arts.length)return;curLes=Math.min(Math.max(1,curLes),arts.length);
+  arts.forEach((a,i)=>{a.hidden=i+1!==curLes});
+  let pg=document.getElementById('lesPager');if(!pg){pg=document.createElement('div');pg.id='lesPager';pg.className='pager';lesBox.after(pg)}
+  pg.innerHTML=(curLes>1?`<a class="btn sec" href="#lecciones-${curLes-1}">← Lección ${curLes-1}</a>`:'<span></span>')+`<span class="note" style="align-self:center">Lección ${curLes} de ${arts.length}</span>`+(curLes<arts.length?`<a class="btn" href="#lecciones-${curLes+1}">Lección ${curLes+1} →</a>`:'<span></span>');
+  $$('#lesIdx a').forEach((a,i)=>{a.setAttribute('href','#lecciones-'+(i+1));a.classList.toggle('cur',i+1===curLes)})}
+if(lesBox)new MutationObserver(()=>applyLessons()).observe(lesBox,{childList:true});
+const idx=document.getElementById('lesIdx');if(idx)new MutationObserver(()=>applyLessons()).observe(idx,{childList:true});
+function show(){const h=decodeURIComponent((location.hash||'').slice(1));let tab=names[0],sub=null,m;
+  if(m=h.match(/^lecciones?-(\d+)$/)){tab='lecciones';curLes=+m[1]}
+  else if(m=h.match(/^simuladores-(s\d)$/)){tab='simuladores';sub=m[1]}
+  else if(names.includes(h))tab=h;
+  else if(h){const el=document.getElementById(h);const host=el&&el.closest('[data-tab]');if(host){tab=host.dataset.tab;sub=host.dataset.sub||null}}
+  if(tab==='admin'&&!document.body.classList.contains('is-admin'))tab=names[0];
+  if(tab==='simuladores'&&!sub)sub=(subs[0]&&subs[0].dataset.sub)||null;
+  secs.forEach(s=>{s.hidden=s.dataset.tab!==tab||(s.dataset.sub&&s.dataset.sub!==sub)});
+  links.forEach(a=>a.classList.toggle('act',a.getAttribute('href')==='#'+tab));
+  if(subnav)subnav.querySelectorAll('a').forEach(a=>a.classList.toggle('act',a.dataset.s===sub));
+  const hd=document.querySelector('header.top');if(hd)hd.classList.toggle('compact',tab!==names[0]);
+  applyLessons();
+  window.dispatchEvent(new Event('resize'));
+  window.scrollTo({top:0})}
+window.addEventListener('hashchange',show);show();
+window.TABS={show};
+}
+
 </script>
 <script type="module">
 /* ===== Configuración de Firebase (solo almacenamiento e inicio de sesión; la página vive en GitHub Pages) ===== */
@@ -734,7 +371,7 @@ const firebaseConfig = {
 import {initializeApp} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
 import {getAuth,onAuthStateChanged,signInWithEmailAndPassword,createUserWithEmailAndPassword,sendPasswordResetEmail,signOut} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 import {getFirestore,doc,getDoc,setDoc,updateDoc,collection,onSnapshot,serverTimestamp} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
-const F=window.F101,$=id=>document.getElementById(id),esc=F.esc,S=F.store;
+const F=window.PORTAL,$=id=>document.getElementById(id),esc=F.esc;
 const gm=(id,t,k)=>{const m=$(id);m.textContent=t||'';m.className='lmsg'+(k?' '+k:'')};
 let mode='reg';
 const setG=m=>{mode=m;$('gReg').setAttribute('aria-pressed',m==='reg');$('gChk').setAttribute('aria-pressed',m==='chk');$('gRegFields').hidden=m!=='reg';$('gPass2W').hidden=m!=='reg';$('gHint').hidden=m!=='reg';$('gForgot').hidden=m!=='chk';
@@ -765,9 +402,6 @@ onAuthStateChanged(auth,async u=>{
   unsub.forEach(f=>f());unsub=[];entered=false;
   if(!u){lockUI();return}
   const email=(u.email||'').toLowerCase();
-  /* separar el avance de cada persona en una misma computadora */
-  let owner=null;try{owner=localStorage.getItem('f101owner')}catch(e){}
-  if(owner!==u.uid){try{localStorage.removeItem('f101');localStorage.setItem('f101owner',u.uid)}catch(e){}if(owner!==null){location.reload();return}F.resetLocal()}
   const pRef=doc(db,'participants',email);
   let admin=false;try{admin=(await getDoc(doc(db,'admins',u.uid))).exists()}catch(e){}
   try{const ps=await getDoc(pRef);
@@ -779,20 +413,14 @@ onAuthStateChanged(auth,async u=>{
 });
 async function enter(u,email,p,admin){
   document.body.classList.remove('locked');
-  S.id={email,nombre:p.nombre||email,perfil:p.perfil||''};S.perfil=p.perfil||'';
-  $('meName').textContent='Avance de '+(p.nombre||email);$('mePerfilTxt').textContent=p.perfil||(admin?'Administración':'—');$('mePerfil').value=S.perfil;F.renderRuta(S.perfil||(admin?'Jefatura':'Otro'));
-  const ref=doc(db,'progress',u.uid);
-  let mods={};try{const sn=await getDoc(ref);if(sn.exists()){const d=sn.data();mods=d.mods||{};F.mergeIn(d);F.restoreAll()}}catch(e){}
-  F.renderModulos(mods);
-  let writing=false,pending=false;
-  F.setPush(async()=>{pending=true;if(writing)return;writing=true;
-    while(pending){pending=false;F.sync('Guardando…');
-      try{await setDoc(ref,{...JSON.parse(JSON.stringify({email,nombre:S.id.nombre,perfil:S.perfil||'',les:S.les,lab:S.lab,qa:S.qa,lq:S.lq,sims:S.sims})),updatedAt:serverTimestamp()},{mergeFields:['email','nombre','perfil','les','lab','qa','lq','sims','updatedAt']});F.sync('Avance guardado en el registro del curso.')}
-      catch(e){F.sync(e&&e.code==='permission-denied'?'No tiene permiso para guardar: su inscripción no está aprobada.':'No se pudo guardar ahora; se volverá a intentar con su próximo avance.')}}
-    writing=false});
-  F.save();
-  F.sync('Conectado. Su avance se guarda automáticamente.');
-  $('admin').hidden=!admin;$('navAdmin').hidden=!admin;if(admin)startAdmin();
+  const nombre=p.nombre||email,perfil=p.perfil||'';
+  $('welcome').textContent='Hola, '+nombre.split(' ')[0]+'. Elija un módulo para empezar o continuar donde lo dejó.';
+  $('perfilTxt').textContent=perfil||(admin?'Administración':'—');
+  F.renderRuta(perfil||(admin?'Jefatura':'Otro'));
+  let d={};try{const sn=await getDoc(doc(db,'progress',u.uid));if(sn.exists())d=sn.data()}catch(e){}
+  F.renderModulos(d.mods||{},F.summary(d).pct);
+  if(admin){document.body.classList.add('is-admin');$('navAdmin').hidden=false;startAdmin()}
+  if(window.TABS)window.TABS.show();
 }
 /* ===== Panel de administración ===== */
 let started=false;
