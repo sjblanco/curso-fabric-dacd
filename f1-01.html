@@ -435,6 +435,8 @@ footer{border-top:6px solid var(--or);color:var(--soft);font-size:14px}
 
 <footer class="band"><div class="wrap">DACD · Banco Popular · Ruta de conocimiento Microsoft Fabric, fase 1, módulo F1-01. Los contenidos resumen la documentación pública de Microsoft Learn; ante cualquier diferencia, manda la fuente oficial.</div></footer>
 
+<script src="lab-f101.js?v=1"></script>
+<script src="labvis.js?v=1"></script>
 <script>
 {
 const $=id=>document.getElementById(id);
@@ -681,7 +683,7 @@ const LAB=[
 ];
 const lab=store.lab=store.lab||{};
 function drawLab(){
-  $('labList').innerHTML=LAB.map((l,i)=>`<li><label for="lab${i}"><input type="checkbox" id="lab${i}" data-i="${i}" ${lab[i]?'checked':''}><div><b>${i+1}. ${esc(l[0])}</b><span>${esc(l[1])}</span></div></label><details class="sub" style="padding:0 12px 4px 50px"><summary>Ver el paso a paso</summary><ol>${l[2].map(x=>`<li>${esc(x)}</li>`).join('')}</ol></details></li>`).join('');
+  $('labList').innerHTML=LAB.map((l,i)=>`<li><label for="lab${i}"><input type="checkbox" id="lab${i}" data-i="${i}" ${lab[i]?'checked':''}><div><b>${i+1}. ${esc(l[0])}</b><span>${esc(l[1])}</span></div></label><details class="sub" style="padding:0 12px 4px 50px"><summary>Ver el paso a paso y cómo se ve en Fabric</summary><ol>${l[2].map(x=>`<li>${esc(x)}</li>`).join('')}</ol>${window.LabVis?LabVis.step(i):''}</details></li>`).join('');
   const n=Object.values(lab).filter(Boolean).length;$('lBar').style.width=(n/LAB.length*100)+'%';$('lScore').textContent=n+' de '+LAB.length+' pasos completados';
 }
 $('labList').addEventListener('change',ev=>{const c=ev.target;if(!c.dataset)return;lab[c.dataset.i]=c.checked;store.lab=lab;save();const n=Object.values(lab).filter(Boolean).length;$('lBar').style.width=(n/LAB.length*100)+'%';$('lScore').textContent=n+' de '+LAB.length+' pasos completados'});

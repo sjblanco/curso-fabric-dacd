@@ -421,6 +421,8 @@ table.runs tr.win{background:var(--grbg)}
 </div></section>
 
 <footer class="band"><div class="wrap">DACD · Banco Popular · Ruta de conocimiento Microsoft Fabric, fase 1, módulo F1-04. Los contenidos resumen la documentación pública de Microsoft Learn; ante cualquier diferencia, manda la fuente oficial.</div></footer>
+<script src="lab-f104.js?v=1"></script>
+<script src="labvis.js?v=1"></script>
 <script>
 {
 const $=id=>document.getElementById(id);
@@ -549,6 +551,18 @@ const LES=[
   k:['Direct Lake: Power BI lee predicciones sin copias.','Semantic link: medidas de Power BI en Python.','Mismas definiciones para todos.'],
   q:['¿Qué permite semantic link (SemPy)?',['Entrenar modelos sin datos','Enviar correos automáticos','Usar desde Python los modelos semánticos y medidas de Power BI'],2,'Correcto: conecta Power BI con el trabajo en Python.']}
 ];
+const done=S.les;
+function lesProg(){const n=cnt(done);$('lesBar').style.width=(n/LES.length*100)+'%';$('lesScore').textContent=n+' de '+LES.length+' lecciones leídas';
+  $('lesIdx').innerHTML=LES.map((l,i)=>`<a href="#leccion-${i+1}" class="${done[i]?'done':''}">${done[i]?'✓ ':''}${i+1}. ${esc(l.t.split(':')[0])}</a>`).join('')}
+function drawLessons(){$('lessons').innerHTML=LES.map((l,i)=>`<article class="les" id="leccion-${i+1}"><header><div class="num">${i+1}</div><div><h3 style="font-size:clamp(19px,2.2vw,24px);font-weight:800">${esc(l.t)}</h3><p class="goal"><b>Objetivo:</b> ${esc(l.g)}</p></div></header>
+ <div class="lbody"><div>${l.p.map(x=>`<p>${x}</p>`).join('')}</div>
+ <div><div class="box an"><b>Para entenderlo</b>${esc(l.an)}</div><div class="box dacd"><b>En la DACD</b>${esc(l.dacd)}</div><div class="box err"><b>Puntos clave</b><ul class="keys">${l.k.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div></div></div>
+ <div class="mc"><p>Compruebe su comprensión: ${esc(l.q[0])}</p><div class="choices" data-l="${i}">${l.q[1].map((o,j)=>`<button data-j="${j}" class="${S.lq[i]&&j===l.q[2]?'right':''}">${esc(o)}</button>`).join('')}</div><div class="fb ${S.lq[i]?'show good':''}" id="lf${i}">${S.lq[i]?esc(l.q[3]):''}</div>
+ <label style="display:flex;gap:10px;align-items:center;margin-top:12px;cursor:pointer;min-height:44px"><input type="checkbox" data-done="${i}" ${done[i]?'checked':''} style="width:22px;height:22px;accent-color:var(--or)"> Marcar la lección como leída</label></div></article>`).join('');lesProg()}
+$('lessons').addEventListener('click',ev=>{const b=ev.target.closest('.choices button');if(!b)return;const g=b.parentElement,i=+g.dataset.l,q=LES[i].q,ok=+b.dataset.j===q[2],f=$('lf'+i);
+  if(ok){g.querySelectorAll('button').forEach(x=>{x.className=x===b?'right':''});f.className='fb show good';f.textContent=q[3];S.lq[i]=1;save()}else{bump(S.intentos.lq,i);save();b.className='wrong';f.className='fb show bad';f.textContent='No es la respuesta correcta. Vuelva a leer los párrafos de la izquierda e intente de nuevo.'}});
+$('lessons').addEventListener('change',ev=>{const c=ev.target;if(c.dataset.done===undefined)return;done[c.dataset.done]=c.checked;save();lesProg()});
+drawLessons();
 
 /* ===== Autoevaluación ===== */
 const QZ=[
@@ -563,6 +577,17 @@ const QZ=[
  ['¿Cómo lee Power BI las predicciones guardadas en OneLake sin copias ni recargas?',['Con un archivo de Excel','Con Direct Lake','Con un correo programado','Con un shortcut a CSV'],1,'Direct Lake lee las tablas Delta directamente.'],
  ['¿Qué permite semantic link (SemPy)?',['Registrar modelos','Programar pipelines','Usar desde Python los modelos semánticos y medidas de Power BI','Crear lakehouses'],2,'Conecta la lógica de negocio de Power BI con la ciencia de datos.']
 ];
+let qi=0;const qa=S.qa;
+function drawQ(){const q=QZ[qi],ans=qa[qi];
+  $('qNum').textContent='Pregunta '+(qi+1)+' de '+QZ.length;
+  const pts=Object.keys(qa).filter(k=>qa[k]===QZ[k][2]).length,dn=Object.keys(qa).length;
+  $('qPts').textContent=pts+' correctas de '+dn+' respondidas';$('qBar').style.width=(dn/QZ.length*100)+'%';
+  $('qBox').innerHTML=`<p style="font-size:18px;font-weight:600;margin-top:12px">${esc(q[0])}</p><div class="choices" id="qCh">${q[1].map((o,i)=>`<button data-i="${i}" class="${ans===undefined?'':(i===q[2]?'right':(i===ans?'wrong':''))}" ${ans===undefined?'':'disabled'}>${esc(o)}</button>`).join('')}</div><div class="fb ${ans===undefined?'':'show '+(ans===q[2]?'good':'bad')}">${ans===undefined?'':esc((ans===q[2]?'Correcto. ':'Repase este punto. ')+q[3])}</div>`+(dn===QZ.length?`<p class="fb show ${pts>=8?'good':'bad'}" style="margin-top:12px"><b>Resultado: ${pts}/10.</b> ${pts>=8?'Listo para pasar al siguiente módulo.':'Repase las lecciones antes de seguir; la meta es 8 o más.'}</p>`:'');
+  $('qPrev').disabled=qi===0;$('qNext').disabled=qi===QZ.length-1}
+$('qBox').addEventListener('click',ev=>{const b=ev.target.closest('#qCh button');if(!b||qa[qi]!==undefined)return;qa[qi]=+b.dataset.i;save();drawQ()});
+$('qPrev').onclick=()=>{if(qi>0){qi--;drawQ()}};$('qNext').onclick=()=>{if(qi<QZ.length-1){qi++;drawQ()}};
+$('qReset').onclick=()=>{const n=Object.keys(qa).length;if(n){S.intentos.qz.push({t:Date.now(),ok:Object.keys(qa).filter(k=>QZ[k]&&qa[k]===QZ[k][2]).length,resp:n,ans:JSON.parse(JSON.stringify(qa))})}for(const k in qa)delete qa[k];save();qi=0;drawQ()};
+drawQ();
 
 /* ===== Laboratorio ===== */
 const LAB=[
@@ -577,6 +602,13 @@ const LAB=[
  ['Vea las predicciones','Con SQL o Power BI.',['Abra el SQL analytics endpoint y ejecute: SELECT id_cliente, fuga, prediccion FROM fuga_predicciones;','Opcional: cree un reporte rápido sobre la tabla.','Qué observar: las predicciones están disponibles sin exportar archivos.']],
  ['Registre la evidencia','Es la evidencia del módulo F1-04.',['Complete el módulo en Microsoft Learn y obtenga el trofeo.','Pegue el enlace o la captura en la hoja Seguimiento y cambie el estado a Completado.']]
 ];
+const lab=S.lab;
+function labProg(){const n=cnt(lab);$('lBar').style.width=(n/LAB.length*100)+'%';$('lScore').textContent=n+' de '+LAB.length+' pasos completados'}
+function drawLab(){$('labList').innerHTML=LAB.map((l,i)=>`<li><label for="lab${i}"><input type="checkbox" id="lab${i}" data-i="${i}" ${lab[i]?'checked':''}><div><b>${i+1}. ${esc(l[0])}</b><span>${esc(l[1])}</span></div></label><details class="sub" style="padding:0 12px 4px 50px"><summary>Ver el paso a paso y cómo se ve en Fabric</summary><ol>${l[2].map(x=>`<li><code style="font-family:inherit">${esc(x)}</code></li>`).join('')}</ol>${window.LabVis?LabVis.step(i):''}</details></li>`).join('');labProg()}
+$('labList').addEventListener('change',ev=>{const c=ev.target;if(c.dataset.i===undefined)return;lab[c.dataset.i]=c.checked;save();labProg()});
+$('lReset').onclick=()=>{for(const k in lab)delete lab[k];save();drawLab()};
+drawLab();
+$('csvCopy').onclick=()=>{try{navigator.clipboard.writeText($('csv').textContent).then(()=>{$('csvMsg').textContent='Datos copiados. Péguelos en el Bloc de notas y guárdelos como fuga_demo.csv (UTF-8).'},()=>{$('csvMsg').textContent='Seleccione el texto y cópielo manualmente.'})}catch(e){$('csvMsg').textContent='Seleccione el texto y cópielo manualmente.'}};
 
 /* ===== Glosario ===== */
 const GL=[['Clasificación','Predecir una categoría, como fuga o no fuga.'],['Regresión','Predecir un valor numérico, como un saldo.'],['Sobreajuste','Cuando el modelo memoriza el entrenamiento y falla con datos nuevos.'],['Data Wrangler','Herramienta del notebook que prepara datos y genera código Python.'],['MLflow','Plataforma integrada en Fabric para registrar experimentos y modelos.'],['Ejecución (run)','Un entrenamiento registrado con sus parámetros, métricas y artefactos.'],['PREDICT','Función de Fabric que puntúa en lote con modelos de MLflow registrados.'],['Semantic link','Librería SemPy que conecta Power BI con el trabajo en Python.']];
